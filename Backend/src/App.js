@@ -1,6 +1,10 @@
 // External variables
 const express = require("express");
+const cors = require("cors");
 const mongoose = require('mongoose');
+const productRoute = require("./Routes/productController");
+const activityRoute = require('./Routes/activityController');
+const userRoute = require("./Routes/userController");
 mongoose.set('strictQuery', false);
 require("dotenv").config();
 const MongoURI = process.env.MONGO_URI ;
@@ -8,6 +12,7 @@ const MongoURI = process.env.MONGO_URI ;
 //App variables
 const app = express();
 const port = process.env.PORT || "8000";
+app.use(cors());
 
 // configurations
 // Mongo DB
@@ -27,4 +32,6 @@ app.get("/home", (req, res) => {
 
 
 app.use(express.json())
-
+app.use('/products' , productRoute);
+app.use('/activities', activityRoute);
+app.use('/', userRoute);
