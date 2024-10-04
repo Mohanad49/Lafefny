@@ -15,10 +15,19 @@ export const signUp = async (formData) => {
 
 // Sign in function
 export const signIn = async (email, password) => {
-  try {
-    const response = await axios.post(`${API_URL}/signin`, { email, password });
-    return response.data;
-  } catch (error) {
-    throw error.response?.data?.message || 'An error occurred during sign in';
-  }
-};
+    const response = await fetch(`${API_URL}/signin`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ email, password }),
+    });
+  
+    if (!response.ok) {
+      throw new Error('Failed to sign in');
+    }
+  
+    const data = await response.json();
+    return data; 
+  };
+  

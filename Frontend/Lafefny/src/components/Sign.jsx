@@ -7,7 +7,7 @@ import '../styles/sign.css';
 
 function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);
-  const [userType, setUserType] = useState('tourist');
+  const [userType, setUserType] = useState('Tourist');
   const [formData, setFormData] = useState({
     username: '',
     email: '',
@@ -15,7 +15,8 @@ function Sign() {
     dateOfBirth: '',
     mobileNumber: '',
     nationality: '',
-    job: ''
+    job: '',
+    role:'Tourist'
   });
 
   const navigate = useNavigate();
@@ -38,17 +39,36 @@ function Sign() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const updatedFormData = {
+        ...formData,
+        role: userType,  // Assign role based on the dropdown selection
+      };
     
     try {
         if (isSignUp) {
-          const signUpResponse = await signUp(formData);
-          console.log('User signed up successfully:', signUpResponse);
+          const signUpResponse = await signUp(updatedFormData);
           alert('Sign up successful! You can now sign in.');
           setIsSignUp(false);
         } else {
           const signInResponse = await signIn(formData.email, formData.password);
-          alert('Sign in successful!');
-          navigate('/home'); // Redirect to home page
+          const userRole = signInResponse.role;
+          
+        // Redirect based on the user role
+        if (userRole === 'Tourist') {
+            navigate('/touristHome');
+        } else if (userRole === 'Seller') {
+            navigate('/sellerHome');
+        } else if (userRole === 'TourGuide') {
+            navigate('/tourGuideHome');
+        } else if (userRole === 'Advertiser') {
+            navigate('/advertiserHome');
+        } else if (userRole === 'Admin') {
+            navigate('/adminHome');
+        } else {
+            alert('Invalid role detected');
+        }
+
         }
       } catch (error) {
         console.error('Authentication error:', error);
@@ -65,10 +85,10 @@ function Sign() {
             <div>
               <label>User Type: </label>
               <select name="userType" value={userType} onChange={(e) => setUserType(e.target.value)}>
-                <option value="tourist">Tourist</option>
-                <option value="guide">Tour Guide</option>
-                <option value="advertiser">Advertiser</option>
-                <option value="seller">Seller</option>
+                <option value="Tourist">Tourist</option>
+                <option value="TourGuide">Tour Guide</option>
+                <option value="Advertiser">Advertiser</option>
+                <option value="Seller">Seller</option>
               </select>
             </div>
 
@@ -105,7 +125,7 @@ function Sign() {
             </div>
 
             {/* Additional fields for Tourist */}
-            {userType === 'tourist' && (
+            {userType === 'Tourist' && (
               <>
                 <div>
                   <label>Date of Birth: </label>
