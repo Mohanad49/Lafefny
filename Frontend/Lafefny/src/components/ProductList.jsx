@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { getProducts } from '../services/productService';
 import { Link } from 'react-router-dom'
 import { fetchProducts as getProductsFromService } from '../services/productService';
-import '../productList.css'
+import '../styles/productList.css'
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);

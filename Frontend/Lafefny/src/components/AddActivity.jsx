@@ -28,6 +28,7 @@ const AddActivity = () => {
 
   return (
     <form onSubmit={handleSubmit}>
+      <h2>Add Activity</h2>
       <input type="text" name="name" placeholder="Name" onChange={handleChange} />
       <input type="date" name="date" onChange={handleChange} />
       <input type="time" name="time" onChange={handleChange} />

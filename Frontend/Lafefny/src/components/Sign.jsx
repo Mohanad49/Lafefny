@@ -3,7 +3,7 @@
 import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
-import '../sign.css';
+import '../styles/sign.css';
 
 function Sign() {
   const [isSignUp, setIsSignUp] = useState(false);

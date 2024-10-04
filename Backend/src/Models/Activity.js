@@ -10,6 +10,7 @@ const activitySchema = new mongoose.Schema({
   tags: { type: [String], required: true },
   specialDiscounts: { type: String }, // Could be a percentage or other details
   bookingOpen: { type: Boolean, required: true },
+  rating: {type: Number, default: 0}
 });
 
 module.exports = mongoose.model('Activity', activitySchema);

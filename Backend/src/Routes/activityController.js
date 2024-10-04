@@ -43,4 +43,111 @@ router.delete('/:id', async (req, res) => {
   }
 });
 
+// View upcoming activities including historical events and museums
+router.get('/upcomingActivities', async (req, res) => {
+  try {
+      const activities = await activityModel.find({
+          date: { $gt: new Date() } // Only fetch future activities
+      }).sort({ date: 1 }); // Sort by ascending date
+
+      res.status(200).json(activities);
+
+  } catch (error) {
+      res.status(500).json({ message: "Error fetching upcoming activities", error });
+  }
+});
+
+// Router to search activities
+router.get('/searchActivities', async (req, res) => {
+  try {
+      const { keyword } = req.query; // The keyword to search for
+      
+      // Build a query to search in 'name', 'category', and 'tags' fields
+      const query = {
+          $or: [
+              { name: { $regex: keyword, $options: 'i' } },      // Case-insensitive match in name
+              { category: { $regex: keyword, $options: 'i' } },  // Case-insensitive match in category
+              { tags: { $regex: keyword, $options: 'i' } }       // Case-insensitive match in tags
+          ]
+      };
+
+      // Search in the activities collection
+      const activities = await activityModel.find(query);
+      res.status(200).json(activities);
+
+  } catch (error) {
+      res.status(500).json({ message: "Error performing activity search", error });
+  }
+});
+
+
+// Filter Activities
+router.get('/filterActivities', async (req, res) => {
+  try {
+      const { price, date, category, rating } = req.query;
+
+      // Build the query object dynamically based on provided filters
+      const query = {
+          date: { $gt: new Date() } // Only fetch future activities by default
+      };
+
+      // Apply price filter if provided
+      if (price) {
+          query.price = { $lte: Number(price) }; // Assuming 'price' is stored as a number
+      }
+
+      // Apply date filter if provided
+      if (date) {
+          query.date = { $eq: new Date(date) }; // Matches the specific date
+      }
+
+      // Apply category filter if provided
+      if (category) {
+          query.category = category; // Matches the category exactly
+      }
+
+      // Apply rating filter if provided
+      if (rating) {
+          query.rating = { $gte: Number(rating) }; // Assuming 'rating' is stored as a number
+      }
+
+      // Fetch the filtered activities
+      const activities = await activityModel.find(query).sort({ date: 1 });
+
+      // Return the filtered activities
+      res.status(200).json(activities);
+
+  } catch (error) {
+      // Handle any errors during fetching
+      res.status(500).json({ message: "Error fetching activities based on filters", error });
+  }
+});
+
+
+// Router to sort upcoming activities
+router.get('/sortActivities', async (req, res) => {
+  try {
+      const allowedSortFields = ['price', 'rating'];
+      const { sortBy } = req.query;
+
+      // Validate the sortBy field, use 'price' as the default if not provided or invalid
+      if (!sortBy || !allowedSortFields.includes(sortBy)) {
+          return res.status(400).json({ message: `Invalid sortBy value. Allowed values: ${allowedSortFields.join(', ')}` });
+      }
+
+      // Fetch upcoming activities sorted by the chosen field in ascending order
+      const activities = await activityModel.find({
+          date: { $gt: new Date() } // Only fetch future activities
+      }).sort({ [sortBy]: 1 }); // Sort in ascending order
+
+      // Return sorted activities
+      res.status(200).json(activities);
+
+  } catch (error) {
+      // Handle any errors during fetching
+      res.status(500).json({ message: "Error sorting activities", error });
+  }
+});
+
+
 module.exports = router;

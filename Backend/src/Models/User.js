@@ -8,7 +8,7 @@ const userSchema = new mongoose.Schema({
   mobileNumber: { type: String },
   nationality: { type: String },
   job: { type: String },
-  role: { type: String, enum: ['Tourist', 'TourGuide', 'Advertiser', 'Seller'], default: 'Tourist' },
+  role: { type: String, enum: ['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'Tourism governor'], default: 'Tourist' },
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

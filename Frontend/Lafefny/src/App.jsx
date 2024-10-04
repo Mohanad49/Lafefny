@@ -10,7 +10,12 @@ import ActivityList from './components/ActivityList';
 import AddProduct from './components/AddProduct';
 import EditProduct from './components/EditProduct';
 import ProductList from './components/ProductList';
-import './styles.css'
+import AdminHome from './components/AdminHome';
+import AdvertiserHome from './components/AdvertiserHome';
+import SellerHome from './components/SellerHome';
+import TourGuideHome from './components/TourGuideHome';
+import TouristHome from './components/TouristHome';
+import './styles/styles.css'
 const App = () => {
 
   return (
@@ -19,6 +24,13 @@ const App = () => {
           <>
             <Route path="/" element={<Sign />} />
             <Route path="/home" element={<Home />} />
+
+
+            <Route path="/adminHome" element={<AdminHome />} />
+            <Route path="/advertiserHome" element={<AdvertiserHome />} />
+            <Route path="/sellerHome" element={<SellerHome />} />
+            <Route path="/TourGuideHome" element={<TourGuideHome />} />
+            <Route path="/TouristHome" element={<TouristHome />} />
 
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
