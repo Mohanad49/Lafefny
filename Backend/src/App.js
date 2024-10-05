@@ -16,12 +16,10 @@ const PreferenceTagRoute = require('./Routes/preferenceTagController');
 mongoose.set('strictQuery', false);
 require("dotenv").config();
 const MongoURI = process.env.MONGO_URI ;
-const {adminSellerAddProduct,editProduct,getProduct}= require('./Routes/Controller')
 
 //App variables
 const app = express();
 const port = process.env.PORT || "8000";
-const admin = require('./Models/Product');
 app.use(cors());
 
 // configurations
@@ -39,13 +37,6 @@ mongoose.connect(MongoURI)
 app.get("/home", (req, res) => {
     res.status(200).send("You have everything installed!");
   });
-
-
-
-app.use(express.json())
-app.post("/postProduct", adminSellerAddProduct);
-app.put('/editProduct/:id', editProduct);
-app.get('/Products', getProduct);
 
 
 app.use(express.json())
