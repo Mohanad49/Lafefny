@@ -5,6 +5,8 @@ const mongoose = require('mongoose');
 
 const productRoute = require("./Routes/productController");
 const activityRoute = require('./Routes/activityController');
+const activityCategoryRoute = require('./Routes/activityCategoryController');
+const PreferenceTagRoute = require('./Routes/preferenceTagController');
 const userRoute = require("./Routes/userController");
 const itinerariesRoute = require("./Routes/itineraryController");
 const museumsRoute = require("./Routes/museumController");
@@ -14,7 +16,6 @@ const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
 mongoose.set('strictQuery', false);
 require("dotenv").config();
 const MongoURI = process.env.MONGO_URI ;
-const {adminSellerAddProduct,editProduct,getProduct}= require('./Routes/Controller')
 
 //App variables
 const app = express();
@@ -40,15 +41,12 @@ app.get("/home", (req, res) => {
 
 
 
-app.use(express.json())
-app.post("/postProduct", adminSellerAddProduct);
-app.put('/editProduct/:id', editProduct);
-app.get('/Products', getProduct);
-
 
 app.use(express.json())
 app.use('/products' , productRoute);
 app.use('/activities', activityRoute);
+app.use('/activityCategory', activityCategoryRoute);
+app.use('/preferenceTag', PreferenceTagRoute);
 app.use('/', userRoute);
 app.use("/itineraries", itinerariesRoute);
 app.use("/museums", museumsRoute);
