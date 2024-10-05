@@ -9,10 +9,12 @@ const TouristHome = () => {
       <h1>Welcome to the Tourist HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/activities">View Activities</Link>
+        <Link to="/touristActivities">View Activities</Link> | {' '}
+        <Link to="/tourist-Itineraries">View Itineraries</Link> | {' '}
+        <Link to="/touristMuseums">View Historical Places/Museums</Link>
 
         <h2>Product Management</h2>
-        <Link to="/products">View Products</Link>
+        <Link to="/touristProducts">View Products</Link>
       </nav>
     </div>
   );

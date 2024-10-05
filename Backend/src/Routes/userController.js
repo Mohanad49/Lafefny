@@ -44,4 +44,9 @@ router.post('/signin', async (req, res) => {
   }
 });
 
+router.get('/users', async (req, res) => {
+    let users = await User.find()
+    return res.send(users).status(200)
+});
+
 module.exports = router;

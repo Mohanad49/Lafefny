@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-// src/components/Home.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
@@ -14,7 +13,7 @@ const TourGuideHome = () => {
         
         <h2>Itinerary Management</h2>
         <Link to="/itineraries">View Itineraries</Link> | {' '}
-        <Link to="/itineraries">Add Itinerary</Link>
+        <Link to="/add-itinerary">Add Itinerary</Link>
 
       </nav>
     </div>

@@ -10,6 +10,8 @@ const itinerariesRoute = require("./Routes/itineraryController");
 const museumsRoute = require("./Routes/museumController");
 const adminRoute = require("./Routes/adminController");
 const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
+const activityCategoryRoute = require('./Routes/activityCategoryController');
+const PreferenceTagRoute = require('./Routes/preferenceTagController');
 
 mongoose.set('strictQuery', false);
 require("dotenv").config();
@@ -45,3 +47,5 @@ app.use("/itineraries", itinerariesRoute);
 app.use("/museums", museumsRoute);
 app.use('/admin', adminRoute);
 app.use('/touristItinerary', touristItineraryRoute);
+app.use('/activityCategory', activityCategoryRoute);
+app.use('/preferenceTag', PreferenceTagRoute);

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 
-const TourismGovernorSchema = new mongoose.Schema({
+const AdminSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true,
@@ -12,5 +12,4 @@ const TourismGovernorSchema = new mongoose.Schema({
   }
 }, { timestamps: true });
 
-const TourismGovernor = mongoose.model('TourismGovernor', TourismGovernorSchema);
-module.exports = TourismGovernor;
+module.exports = mongoose.model('Admin', AdminSchema);

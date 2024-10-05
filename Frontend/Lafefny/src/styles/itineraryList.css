@@ -1,0 +1,103 @@
+.itinerary-list-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .add-itinerary-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .search-input,
+  .budget-input,
+  .date-input,
+  .preference-input,
+  .language-input,
+  .sort-select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .sort-select {
+    cursor: pointer;
+  }
+  
+  .itinerary-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .itinerary-item {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .itinerary-item h3 {
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .itinerary-actions {
+    margin-top: 10px;
+    text-align: center;
+  }
+  
+  .view-button,
+  .itinerary-edit-button,
+  .delete-button {
+    padding: 5px 10px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .view-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .itinerary-edit-button {
+    background-color: #FFC107;
+    color: black;
+  }
+  
+  .delete-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  @media (max-width: 600px) {
+    .controls {
+      flex-direction: column;
+    }
+  
+    .search-input,
+    .budget-input,
+    .date-input,
+    .preference-input,
+    .language-input,
+    .sort-select {
+      width: 100%;
+    }
+  }
