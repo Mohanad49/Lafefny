@@ -1,35 +1,48 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
-
-function App() {
-  const [count, setCount] = useState(0)
+/* eslint-disable no-unused-vars */
+// src/App.jsx
+import React, { useState } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import Sign from './components/Sign';
+import Home from './components/Home';
+import AddActivity from './components/AddActivity';
+import EditActivity from './components/EditActivity';
+import ActivityList from './components/ActivityList';
+import AddProduct from './components/AddProduct';
+import EditProduct from './components/EditProduct';
+import ProductList from './components/ProductList';
+import AdminHome from './components/AdminHome';
+import AdvertiserHome from './components/AdvertiserHome';
+import SellerHome from './components/SellerHome';
+import TourGuideHome from './components/TourGuideHome';
+import TouristHome from './components/TouristHome';
+import './styles/styles.css'
+const App = () => {
 
   return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <Router>
+      <Routes>
+          <>
+            <Route path="/" element={<Sign />} />
+            <Route path="/home" element={<Home />} />
 
-export default App
+
+            <Route path="/adminHome" element={<AdminHome />} />
+            <Route path="/advertiserHome" element={<AdvertiserHome />} />
+            <Route path="/sellerHome" element={<SellerHome />} />
+            <Route path="/TourGuideHome" element={<TourGuideHome />} />
+            <Route path="/TouristHome" element={<TouristHome />} />
+
+            <Route path="/activities" element={<ActivityList />} />
+            <Route path="/add-activity" element={<AddActivity />} />
+            <Route path="/edit-activity/:id" element={<EditActivity />} />
+
+            <Route path="/products" element={<ProductList />} />
+            <Route path="/add-product" element={<AddProduct />} />
+            <Route path="/edit-product/:id" element={<EditProduct />} />
+          </>
+      </Routes>
+    </Router>
+  );
+};
+
+export default App;
