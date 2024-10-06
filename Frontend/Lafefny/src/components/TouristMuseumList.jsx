@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { getMuseums } from '../services/museumService';
 import '../styles/museumList.css'
@@ -11,15 +11,15 @@ const TouristMuseumList = () => {
 
   useEffect(() => {
     fetchMuseums();
-  }, [searchTerm, filterTag, sortBy]);
+  }, []);
 
   const fetchMuseums = async () => {
     try {
-      const response = await getMuseums(searchTerm, filterTag, sortBy);
+      const response = await getMuseums();
       setMuseums(response.data);
     } catch (error) {
       console.error('Error fetching museums:', error);
-      setMuseums([]); // Set to empty array if there's an error
+      setMuseums([]);
     }
   };
 
@@ -27,9 +27,19 @@ const TouristMuseumList = () => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredMuseums = museums.filter(museum =>
-    museum.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedMuseums = museums
+    .filter(museum =>
+      museum.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (filterTag === '' || (museum.tags && museum.tags.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase()))))
+    )
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'rating') {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      return 0;
+    });
 
   return (
     <div className="museum-list-container">
@@ -60,12 +70,19 @@ const TouristMuseumList = () => {
       </div>
 
       <ul className="museum-list">
-        {filteredMuseums.map((museum) => (
+        {filteredAndSortedMuseums.map((museum) => (
           <li key={museum._id} className="museum-item">
             <h3>{museum.name}</h3>
             <p>Location: {museum.location || 'N/A'}</p>
             <p>Tags: {museum.tags && museum.tags.length > 0 ? museum.tags.join(', ') : 'No tags'}</p>
             <p>Rating: {museum.rating || 'Not rated'}</p>
+            <p>Opening Hours: {museum.openingHours || 'N/A'}</p>
+            <p>Ticket Prices:</p>
+            <ul>
+              <li>Foreigner: ${museum.ticketPrices?.foreigner || 'N/A'}</li>
+              <li>Native: ${museum.ticketPrices?.native || 'N/A'}</li>
+              <li>Student: ${museum.ticketPrices?.student || 'N/A'}</li>
+            </ul>
             <div className="museum-actions">
             </div>
           </li>

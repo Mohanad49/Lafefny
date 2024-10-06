@@ -26,7 +26,7 @@ export const fetchUsers = async () => {
   // Delete a user by ID
   export const deleteUser = async (userId) => {
     try {
-      await axios.delete(`${API_URL}/users/${userId}`);
+      await axios.delete(`${API_URL}/admin/delete-account/${userId}`);
     } catch (error) {
       console.error('Error deleting user:', error);
       throw error;

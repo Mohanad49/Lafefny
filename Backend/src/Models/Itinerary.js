@@ -15,7 +15,6 @@ const itinerarySchema = new mongoose.Schema({
   bookings: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Booking' }], // Reference to bookings
   ratings: { type: Number , default: 0},
   preferences: { type: String, default: '' },
-  language: { type: String, required: true }
 }, { timestamps: true });
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);

@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = '/touristItinerary'; // Adjust this if your API URL is different
+const API_URL = 'http://localhost:8000/touristItinerary'; // Adjust this if your API URL is different
 
 export const addTouristItinerary = async (itineraryData) => {
     const response = await axios.post(API_URL, itineraryData);

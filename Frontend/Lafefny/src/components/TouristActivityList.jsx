@@ -139,18 +139,30 @@ const ActivityList = () => {
           <option value="rating">Sort by Rating</option>
         </select>
       </div>
-      <ul className="activity-list">
-        {filteredActivities.map((activity) => (
-          <li key={activity._id} className="activity-item">
-            <h3>{activity.name}</h3>
-            <p className="yellow-text">Category: {activity.category}</p>
-            <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
-            <p className="yellow-text">Time: {activity.time}</p>
-            <p className="yellow-text">Location: {activity.location}</p>
-            <p className="yellow-text">Price: ${activity.price}</p>
-          </li>
-        ))}
-      </ul>
+      {filteredActivities.length > 0 ? (
+        <ul className="activity-list">
+          {filteredActivities.map((activity) => (
+            <li key={activity._id} className="activity-item">
+              <h3>{activity.name}</h3>
+              <p className="yellow-text">Category: {activity.category}</p>
+              <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
+              <p className="yellow-text">Time: {activity.time}</p>
+              <p className="yellow-text">Location: {activity.location}</p>
+              <p className="yellow-text">Price: ${activity.price}</p>
+              <p className="yellow-text">Rating: {activity.rating || 'Not rated'}</p>
+              <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
+              {activity.specialDiscounts && (
+                <p className="yellow-text">Special Discounts: {activity.specialDiscounts}</p>
+              )}
+              <p className="yellow-text">Booking: {activity.bookingOpen ? 'Open' : 'Closed'}</p>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="no-activities-message">
+          <p>No Activities Available</p>
+        </div>
+      )}
     </div>
   );
 };

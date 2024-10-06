@@ -7,8 +7,8 @@ const productSchema = new mongoose.Schema({
     quantity: Number, 
     description: String,
     seller: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      type: String,  
+      required: true
     },
     ratings: {
       averageRating: {type: Number , default: 0},
@@ -26,4 +26,3 @@ const productSchema = new mongoose.Schema({
   
   const Product = mongoose.model('Product', productSchema);
   module.exports = Product;
-  

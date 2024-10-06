@@ -3,7 +3,6 @@
 import React, { useState } from 'react';
 import { addProduct } from '../services/productService';
 
-
 const AddProduct = () => {
   const [product, setProduct] = useState({
     name: '',
@@ -15,18 +14,32 @@ const AddProduct = () => {
   });
 
   const handleChange = (e) => {
-    setProduct({
-      ...product,
-      [e.target.name]: e.target.value,
-    });
+    const { name, value, type } = e.target;
+    setProduct(prevProduct => ({
+      ...prevProduct,
+      [name]: type === 'number' ? Number(value) : value,
+    }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    addProduct(product)
-      .then(() => alert('Product added successfully'))
-      .catch((error) => console.error('Error adding Product:', error));
-    
+    try {
+      const response = await addProduct(product);
+      console.log('Product added successfully:', response);
+      alert('Product added successfully');
+      // Reset form after successful submission
+      setProduct({
+        name: '',
+        price: '',
+        quantity: '',
+        imageUrl: '',
+        description: '',
+        seller: '',
+      });
+    } catch (error) {
+      console.error('Error adding product:', error);
+      alert('Error adding product: ' + (error.response?.data?.message || error.message));
+    }
   };
 
   return (
@@ -90,18 +103,19 @@ const AddProduct = () => {
       </div>
 
       <div>
-        <label htmlFor="seller">Seller:</label>
+        <label htmlFor="seller">Seller Name:</label>
         <input
           type="text"
           id="seller"
           name="seller"
           value={product.seller}
           onChange={handleChange}
+          required
+          placeholder="Enter seller's name"
         />
       </div>
 
       <button type="submit">Add Product</button>
-      
     </form>
   );
 };

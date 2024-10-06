@@ -10,7 +10,9 @@ const museumSchema = new mongoose.Schema({
     foreigner: { type: Number, required: true },
     native: { type: Number, required: true },
     student: { type: Number, required: true },
-  }
+  },
+  tags: { type: [String], required: true },
+  rating: {type: Number, default: 0},
 }, { timestamps: true });
 
 const Museum = mongoose.model('Museum', museumSchema);

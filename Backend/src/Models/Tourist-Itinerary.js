@@ -9,6 +9,9 @@ const TouristItinerarySchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   price: { type: Number, required: true },
   touristName: { type: String, required: true },
+  ratings: { type: Number , default: 0},
+  preferences: { type: String, default: '' },
+  language: { type: String, default: '' }
 });
 
 const TouristItinerary = mongoose.model("TouristItinerary", TouristItinerarySchema);

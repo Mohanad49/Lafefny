@@ -13,9 +13,9 @@ const TourGuideHome = () => {
         
         <h2>Itinerary Management</h2>
         <Link to="/itineraries">View Itineraries</Link> | {' '}
-        <Link to="/add-itinerary">Add Itinerary</Link> | {''}
+        <Link to="/tourist-Itineraries">View Tourist Itineraries</Link> | {' '}
+        <Link to="/add-itinerary">Add Itinerary</Link> | {' '}
         <Link to="/add-tourist-itinerary">Add Tourist Itinerary</Link>
-
 
       </nav>
     </div>
