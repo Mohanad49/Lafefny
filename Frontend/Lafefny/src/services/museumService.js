@@ -6,7 +6,7 @@ export const getMuseums = () => {
   return axios.get(`${API_URL}/museums`);
 };
 
-export const getMuseum = (id) => {
+export const getMuseumById= (id) => {
   return axios.get(`${API_URL}/museums/${id}`);
 };
 
@@ -14,7 +14,7 @@ export const addMuseum = (museum) => {
   return axios.post(`${API_URL}/museums`, museum);
 };
 
-export const editMuseum = (id, updatedMuseum) => {
+export const updateMuseum = (id, updatedMuseum) => {
   return axios.put(`${API_URL}/museums/${id}`, updatedMuseum);
 };
 

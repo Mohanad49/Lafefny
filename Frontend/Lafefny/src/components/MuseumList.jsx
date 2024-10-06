@@ -79,7 +79,6 @@ const MuseumList = () => {
             <p>Tags: {museum.tags && museum.tags.length > 0 ? museum.tags.join(', ') : 'No tags'}</p>
             <p>Rating: {museum.rating || 'Not rated'}</p>
             <div className="museum-actions">
-              <Link to={`/view-museum/${museum._id}`} className="view-button">View</Link>
               <Link to={`/edit-museum/${museum._id}`} className="museum-edit-button">Edit</Link>
               <button className="delete-button" onClick={() => handleDelete(museum._id)}>Delete</button>
             </div>

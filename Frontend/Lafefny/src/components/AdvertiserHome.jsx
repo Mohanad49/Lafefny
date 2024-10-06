@@ -11,6 +11,8 @@ const AdvertiserHome = () => {
       <nav>
         <h2>Activity Management</h2>
         <Link to="/activities">View Activities</Link> | {' '}
+        <Link to="/guest-itineraries">View Itineraries</Link> | {' '}
+        <Link to="/museums">View Museums</Link> | {' '}
         <Link to="/add-activity">Add Activity</Link>
 
       </nav>

@@ -6,7 +6,7 @@ const router = express.Router();
 // CREATE a new itinerary
 router.post("/", async (req, res) => {
     try {
-      const { name, activities, locations, tags, startDate, endDate, price } = req.body;
+      const { name, activities, locations, tags, startDate, endDate, price, touristName } = req.body;
       
       // Check if the date range is valid
       if (new Date(startDate) > new Date(endDate)) {
@@ -20,7 +20,8 @@ router.post("/", async (req, res) => {
         tags,
         startDate,
         endDate,
-        price
+        price,
+        touristName
       });
   
       await newItinerary.save();
@@ -45,7 +46,7 @@ router.post("/", async (req, res) => {
   // UPDATE an itinerary by ID
   router.put("/:id", async (req, res) => {
     try {
-      const { name, activities, locations, tags, startDate, endDate, price } = req.body;
+      const { name, activities, locations, tags, startDate, endDate, price, touristName } = req.body;
   
       // Validate date range
       if (new Date(startDate) > new Date(endDate)) {
@@ -54,7 +55,7 @@ router.post("/", async (req, res) => {
   
       const updatedItinerary = await Itinerary.findByIdAndUpdate(
         req.params.id,
-        { name, activities, locations, tags, startDate, endDate, price },
+        { name, activities, locations, tags, startDate, endDate, price, touristName },
         { new: true }
       );
   

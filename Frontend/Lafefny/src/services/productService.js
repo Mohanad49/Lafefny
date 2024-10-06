@@ -18,7 +18,7 @@ export const getProducts = async () => {
 export const getProductById = async (id) => {
   try {
     const response = await axios.get(`${API_URL}/${id}`);
-    return response.data;
+    return response;
   } catch (error) {
     console.error('Error fetching product:', error);
     throw error;
@@ -37,7 +37,7 @@ export const addProduct = async (productData) => {
 };
 
 // Update an existing product by ID
-export const editProduct = async (id, productData) => {
+export const updateProduct = async (id, productData) => {
   try {
     const response = await axios.put(`${API_URL}/${id}`, productData);
     return response.data;

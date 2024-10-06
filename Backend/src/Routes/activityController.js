@@ -23,6 +23,19 @@ router.get('/', async (req, res) => {
   }
 });
 
+// READ activity by ID
+router.get('/:id', async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({ message: 'Activity not found' });
+    }
+    res.status(200).json(activity);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // UPDATE activity
 router.put('/:id', async (req, res) => {
   try {

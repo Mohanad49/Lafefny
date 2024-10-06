@@ -1,0 +1,167 @@
+.activity-list-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .add-activity-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .search-input,
+  .category-input,
+  .sort-select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .sort-select {
+    cursor: pointer;
+  }
+  
+  .activity-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .activity-item {
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .activity-item h3 {
+    color: #fff;
+    margin-top: 0;
+    margin-bottom: 10px;
+  }
+  
+  .yellow-text {
+    color: yellow;
+    margin: 5px 0;
+  }
+  
+  .activity-actions {
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .view-button,
+  .edit-button,
+  .delete-button {
+    padding: 5px 10px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .view-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .edit-button {
+    background-color: #FFC107;
+    color: black;
+  }
+  
+  .delete-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  /* Category Management Styles */
+  .category-management {
+    margin-top: 20px;
+    padding: 15px;
+    background-color: #f0f0f0;
+    border-radius: 5px;
+  }
+  
+  .category-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .category-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    margin-bottom: 5px;
+    border-radius: 3px;
+  }
+  
+  .add-category-form {
+    display: flex;
+    margin-top: 10px;
+  }
+  
+  .add-category-input {
+    flex-grow: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px 0 0 4px;
+  }
+  
+  .add-category-button {
+    padding: 8px 15px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 0 4px 4px 0;
+    cursor: pointer;
+  }
+  
+  .edit-category-button, .delete-category-button {
+    padding: 5px 10px;
+    margin-left: 5px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+  }
+  
+  .edit-category-button {
+    background-color: #FFC107;
+    color: black;
+  }
+  
+  .delete-category-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  @media (max-width: 600px) {
+    .controls {
+      flex-direction: column;
+    }
+  
+    .search-input,
+    .category-input,
+    .sort-select {
+      width: 100%;
+    }
+  }

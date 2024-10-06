@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import AddForm from './AddForm';
-import { createPreferenceTag } from '../services/PreferenceTagService';
+import { createPreferenceTag } from '../services/preferenceTagService';
 
 const AddPreferenceTag = () => {
   const fields = [

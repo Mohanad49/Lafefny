@@ -19,6 +19,7 @@
     width: 100%;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     position: relative;
+    color: #333; /* Add this line to set a dark text color */
   }
   
   .close-button {
@@ -43,4 +44,8 @@
   li {
     margin-bottom: 10px;
   }
-  
+
+.review-item {
+  /* Existing styles */
+  color: #333; /* Add this line to ensure review text is visible */
+}

@@ -9,11 +9,13 @@ const TourGuideHome = () => {
       <h1>Welcome to the Tour Guide HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/activities">View Activities</Link>
+        <Link to="/touristActivities">View Activities</Link>
         
         <h2>Itinerary Management</h2>
         <Link to="/itineraries">View Itineraries</Link> | {' '}
-        <Link to="/add-itinerary">Add Itinerary</Link>
+        <Link to="/add-itinerary">Add Itinerary</Link> | {''}
+        <Link to="/add-tourist-itinerary">Add Tourist Itinerary</Link>
+
 
       </nav>
     </div>

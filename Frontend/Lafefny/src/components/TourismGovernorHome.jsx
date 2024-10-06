@@ -10,15 +10,14 @@ const TourGuideHome = () => {
       <h1>Welcome to the Tourism Governor HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/activities">View Activities</Link>
+        <Link to="/touristActivities">View Activities</Link>
         
         <h2>Itinerary Management</h2>
-        <Link to="/itineraries">View Itineraries</Link>
+        <Link to="/guest-itineraries">View Itineraries</Link>
 
         <h2>Museum Management</h2>
         <Link to="/museums">View Historical Places/Museums</Link> | {' '}
         <Link to="/add-museum">Add Historical Places/Museums</Link> | {' '}
-        <Link to="/edit-museum">edit Historical Places/Museums</Link> | {' '}
         <Link to="/create-tag">Create Tag</Link>
 
         

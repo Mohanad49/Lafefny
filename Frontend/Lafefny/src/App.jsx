@@ -8,6 +8,7 @@ import AdminUserManagement from './components/AdminUserManagement';
 import AddAdmin from './components/AddAdmin';
 import AddTourismGovernor from './components/AddTourismGovernor';
 
+import EditActivityCategory from './components/EditActivityCategory';
 import ActivityCategoryList from './components/ActivityCategoryList';
 import PreferenceTagList from './components/PreferenceTagList';
 import AddActivityCategory from './components/AddActivityCategory';
@@ -20,6 +21,7 @@ import ActivityList from './components/ActivityList';
 import TouristActivityList from './components/TouristActivityList';
 import TouristItineraryList from './components/Tourist-ItineraryList';
 import TouristMuseumList from './components/TouristMuseumList';
+import AddTouristItinerary from './components/AddTouristItinerary';
 
 import  AddItinerary from './components/AddItinerary';
 import  EditItinerary from './components/EditItinerary';
@@ -43,6 +45,9 @@ import TouristHome from './components/TouristHome';
 import TourismGovernorHome from './components/TourismGovernorHome';
 
 import './styles/styles.css'
+import EditPreferenceTag from './components/EditPreferenceTag';
+import EditMuseum from './components/EditMuseum';
+
 const App = () => {
 
   return (
@@ -56,7 +61,8 @@ const App = () => {
             <Route path="/users" element={<AdminUserManagement />} />
             <Route path="/add-admin" element={<AddAdmin />} />
             <Route path="/add-tourism-governor" element={<AddTourismGovernor />} />
-
+            
+            <Route path="/edit-category/:id" element={<EditActivityCategory />} />
             <Route path="/add-activityCategory" element={<AddActivityCategory />} />
             <Route path="/add-preferenceTag" element={<AddPreferenceTag />} />
             <Route path="/activityCategories" element={<ActivityCategoryList />} />
@@ -73,7 +79,8 @@ const App = () => {
             <Route path="/tourist-Itineraries" element={<TouristItineraryList />} />
             <Route path="/touristMuseums" element={<TouristMuseumList />} />
             <Route path="/touristProducts" element={<TouristProductList />} />
-
+            <Route path="/add-tourist-itinerary" element={<AddTouristItinerary />} />
+            
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
             <Route path="/edit-activity/:id" element={<EditActivity />} />
@@ -84,10 +91,14 @@ const App = () => {
 
             <Route path="/museums" element={<MuseumList />} />
             <Route path="/add-museum" element={<AddMuseum />} />
+            <Route path="/edit-museum/:id" element={<EditMuseum />} />
 
             <Route path="/products" element={<ProductList />} />
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/edit-product/:id" element={<EditProduct />} />
+            
+            <Route path="/edit-tag/:id" element={<EditPreferenceTag />} />
+            <Route path="/edit-museum/:id" element={<EditMuseum />} />
           </>
       </Routes>
     </Router>
