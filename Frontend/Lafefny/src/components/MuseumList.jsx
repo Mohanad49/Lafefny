@@ -1,4 +1,4 @@
-// eslint-disable-next-line no-unused-vars
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getMuseums, deleteMuseum } from '../services/museumService';
@@ -12,11 +12,11 @@ const MuseumList = () => {
 
   useEffect(() => {
     fetchMuseums();
-  }, [searchTerm, filterTag, sortBy]);
+  }, []);
 
   const fetchMuseums = async () => {
     try {
-      const response = await getMuseums(searchTerm, filterTag, sortBy);
+      const response = await getMuseums();
       setMuseums(response.data);
     } catch (error) {
       console.error('Error fetching museums:', error);
@@ -37,9 +37,19 @@ const MuseumList = () => {
     setSearchTerm(event.target.value);
   };
 
-  const filteredMuseums = museums.filter(museum =>
-    museum.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const filteredAndSortedMuseums = museums
+    .filter(museum =>
+      museum.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      (filterTag === '' || museum.tags.some(tag => tag.toLowerCase().includes(filterTag.toLowerCase())))
+    )
+    .sort((a, b) => {
+      if (sortBy === 'name') {
+        return a.name.localeCompare(b.name);
+      } else if (sortBy === 'rating') {
+        return (b.rating || 0) - (a.rating || 0);
+      }
+      return 0;
+    });
 
   return (
     <div className="museum-list-container">
@@ -72,7 +82,7 @@ const MuseumList = () => {
       </div>
 
       <ul className="museum-list">
-        {filteredMuseums.map((museum) => (
+        {filteredAndSortedMuseums.map((museum) => (
           <li key={museum._id} className="museum-item">
             <h3>{museum.name}</h3>
             <p>Location: {museum.location || 'N/A'}</p>

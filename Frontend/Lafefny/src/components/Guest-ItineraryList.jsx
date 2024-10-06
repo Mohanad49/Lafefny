@@ -53,17 +53,19 @@ const ItineraryList = () => {
     .filter(itinerary => {
       if (!itinerary) return false;
       if (filterType === 'price' && filterValue && itinerary.price > Number(filterValue)) return false;
-      if (filterType === 'duration' && filterValue && itinerary.duration > Number(filterValue)) return false;
+      if (filterType === 'date' && filterValue) {
+        const filterDate = new Date(filterValue);
+        return itinerary.availableDates.some(date => new Date(date).toDateString() === filterDate.toDateString());
+      }
       if (filterType === 'language' && filterValue && itinerary.language && 
           !itinerary.language.toLowerCase().includes(filterValue.toLowerCase())) return false;
-      if (filterType === 'accessibility' && filterValue && itinerary.accessibility && 
-          !itinerary.accessibility.toLowerCase().includes(filterValue.toLowerCase())) return false;
+      if (filterType === 'preference' && filterValue && itinerary.preferences && 
+          !itinerary.preferences.toLowerCase().includes(filterValue.toLowerCase())) return false;
       return true;
     })
     .sort((a, b) => {
       if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'duration') return (a.duration || 0) - (b.duration || 0);
       if (sortBy === 'ratings') return (b.ratings || 0) - (a.ratings || 0); // Descending order
       return 0;
     });
@@ -81,23 +83,35 @@ const ItineraryList = () => {
         />
         <select
           value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
+          onChange={(e) => {
+            setFilterType(e.target.value);
+            setFilterValue('');
+          }}
           className="filter-select"
         >
           <option value="">Select Filter</option>
           <option value="price">Filter by Price</option>
-          <option value="duration">Filter by Duration</option>
+          <option value="date">Filter by Date</option>
           <option value="language">Filter by Language</option>
-          <option value="accessibility">Filter by Accessibility</option>
+          <option value="preference">Filter by Preference</option>
         </select>
         {filterType && (
-          <input
-            type={filterType === 'price' || filterType === 'duration' ? 'number' : 'text'}
-            placeholder={`Enter ${filterType}`}
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            className="filter-input"
-          />
+          filterType === 'date' ? (
+            <input
+              type="date"
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              className="filter-input"
+            />
+          ) : (
+            <input
+              type={filterType === 'price' ? 'number' : 'text'}
+              placeholder={`Enter ${filterType}`}
+              value={filterValue}
+              onChange={(e) => setFilterValue(e.target.value)}
+              className="filter-input"
+            />
+          )
         )}
         <select
           value={sortBy}
@@ -106,7 +120,6 @@ const ItineraryList = () => {
         >
           <option value="name">Sort by Name</option>
           <option value="price">Sort by Price</option>
-          <option value="duration">Sort by Duration</option>
           <option value="ratings">Sort by Ratings</option>
         </select>
       </div>
@@ -115,10 +128,8 @@ const ItineraryList = () => {
           <li key={itinerary._id} className="itinerary-item">
             <div className="itinerary-card">
               <h3>{itinerary.name}</h3>
-              <p className="yellow-text">Duration: {itinerary.duration} hours</p>
               <p className="yellow-text">Language: {itinerary.language}</p>
               <p className="yellow-text">Price: ${itinerary.price}</p>
-              <p className="yellow-text">Accessibility: {itinerary.accessibility}</p>
               <p className="yellow-text">Pick Up Location: {itinerary.pickUpLocation}</p>
               <p className="yellow-text">Drop Off Location: {itinerary.dropOffLocation}</p>
               <p className="yellow-text">Rating: {itinerary.ratings || 'Not rated'}</p>

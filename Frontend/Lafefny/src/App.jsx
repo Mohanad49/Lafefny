@@ -22,7 +22,9 @@ import TouristActivityList from './components/TouristActivityList';
 import TouristItineraryList from './components/Tourist-ItineraryList';
 import TouristMuseumList from './components/TouristMuseumList';
 import AddTouristItinerary from './components/AddTouristItinerary';
+import EditTouristItinerary from './components/EditTourist-Itinerary';
 
+import GuideTouristItineraryList from './components/TourGuideItineraries';
 import  AddItinerary from './components/AddItinerary';
 import  EditItinerary from './components/EditItinerary';
 import  ItineraryList from './components/ItineraryList';
@@ -80,7 +82,8 @@ const App = () => {
             <Route path="/touristMuseums" element={<TouristMuseumList />} />
             <Route path="/touristProducts" element={<TouristProductList />} />
             <Route path="/add-tourist-itinerary" element={<AddTouristItinerary />} />
-            
+            <Route path="/edit-tourist-itinerary/:id" element={<EditTouristItinerary />} />
+            <Route path="/guide-tourist-Itineraries" element={<GuideTouristItineraryList />} />
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
             <Route path="/edit-activity/:id" element={<EditActivity />} />

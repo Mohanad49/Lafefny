@@ -7,24 +7,61 @@ const AddMuseum = () => {
   const navigate = useNavigate();
   const [museum, setMuseum] = useState({
     name: '',
-    location: '',
     description: '',
+    pictures: [],
+    location: '',
     openingHours: '',
-    ticketPrice: '',
+    ticketPrices: {
+      foreigner: '',
+      native: '',
+      student: ''
+    },
+    tags: [],
   });
 
   const handleChange = (e) => {
-    setMuseum({ ...museum, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    if (name.startsWith('ticketPrices.')) {
+      const priceType = name.split('.')[1];
+      setMuseum(prev => ({
+        ...prev,
+        ticketPrices: {
+          ...prev.ticketPrices,
+          [priceType]: value
+        }
+      }));
+    } else {
+      setMuseum(prev => ({ ...prev, [name]: value }));
+    }
+  };
+
+  const handlePicturesChange = (e) => {
+    const pictures = e.target.value.split(',').map(url => url.trim());
+    setMuseum(prev => ({ ...prev, pictures }));
+  };
+
+  const handleTagsChange = (e) => {
+    const tags = e.target.value.split(',').map(tag => tag.trim());
+    setMuseum(prev => ({ ...prev, tags }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      await addMuseum(museum);
+      const museumData = {
+        ...museum,
+        ticketPrices: {
+          foreigner: Number(museum.ticketPrices.foreigner),
+          native: Number(museum.ticketPrices.native),
+          student: Number(museum.ticketPrices.student)
+        }
+      };
+      await addMuseum(museumData);
       alert('Museum added successfully');
       navigate('/museums');
     } catch (error) {
       console.error('Error adding museum:', error);
+      alert('Error adding museum: ' + error.message);
     }
   };
 
@@ -39,6 +76,20 @@ const AddMuseum = () => {
         onChange={handleChange}
         required
       />
+      <textarea
+        name="description"
+        placeholder="Description"
+        value={museum.description}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="pictures"
+        placeholder="Picture URLs (comma-separated)"
+        value={museum.pictures.join(', ')}
+        onChange={handlePicturesChange}
+      />
       <input
         type="text"
         name="location"
@@ -47,25 +98,45 @@ const AddMuseum = () => {
         onChange={handleChange}
         required
       />
-      <textarea
-        name="description"
-        placeholder="Description"
-        value={museum.description}
-        onChange={handleChange}
-      />
       <input
         type="text"
         name="openingHours"
         placeholder="Opening Hours"
         value={museum.openingHours}
         onChange={handleChange}
+        required
       />
       <input
         type="number"
-        name="ticketPrice"
-        placeholder="Ticket Price"
-        value={museum.ticketPrice}
+        name="ticketPrices.foreigner"
+        placeholder="Ticket Price (Foreigner)"
+        value={museum.ticketPrices.foreigner}
         onChange={handleChange}
+        required
+      />
+      <input
+        type="number"
+        name="ticketPrices.native"
+        placeholder="Ticket Price (Native)"
+        value={museum.ticketPrices.native}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="number"
+        name="ticketPrices.student"
+        placeholder="Ticket Price (Student)"
+        value={museum.ticketPrices.student}
+        onChange={handleChange}
+        required
+      />
+      <input
+        type="text"
+        name="tags"
+        placeholder="Tags (comma-separated)"
+        value={museum.tags.join(', ')}
+        onChange={handleTagsChange}
+        required
       />
       <button type="submit">Add Museum</button>
     </form>
