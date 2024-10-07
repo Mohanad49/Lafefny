@@ -49,6 +49,7 @@ import TourismGovernorHome from './components/TourismGovernorHome';
 import AddMuseumTag from './components/AddMuseumTag';
 import EditPreferenceTag from './components/EditPreferenceTag';
 import EditMuseum from './components/EditMuseum';
+import MapMarker from './components/Map';
 
 import './styles/styles.css'
 
@@ -58,6 +59,7 @@ const App = () => {
     <Router>
       <Routes>
           <>
+            <Route path="/map" element={<MapMarker />} />
             <Route path="/" element={<Sign />} />
             <Route path="/guestHome" element={<Home />} />
             <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
