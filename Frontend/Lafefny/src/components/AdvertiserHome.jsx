@@ -14,6 +14,9 @@ const AdvertiserHome = () => {
         <Link to="/guest-itineraries">View Itineraries</Link> | {' '}
         <Link to="/museums">View Museums</Link> | {' '}
         <Link to="/add-activity">Add Activity</Link>
+        <Link to="/addAdvertiserInfo">Add info</Link>
+        <Link to="/updateAdvertiserInfo">edit info</Link>
+        <Link to ="/getAdvertiserInfo">view info</Link>
 
       </nav>
     </div>

@@ -54,6 +54,7 @@ function Sign() {
           const signInResponse = await signIn(formData.email, formData.password);
           const userRole = signInResponse.role;
           localStorage.setItem('currentUserName', signInResponse.username);
+          localStorage.setItem('userID', signInResponse.id);
         // Redirect based on the user role
         if (userRole === 'Tourist') {
             navigate('/touristHome');

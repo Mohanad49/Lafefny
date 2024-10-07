@@ -12,7 +12,14 @@ const adminRoute = require("./Routes/adminController");
 const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
 const activityCategoryRoute = require('./Routes/activityCategoryController');
 const PreferenceTagRoute = require('./Routes/preferenceTagController');
-const museumTagRoute = require('./Routes/museumTagController');
+const advertiserRoutes = require('./Routes/advertiserRoutes');
+const sellerRoutes = require('./Routes/sellerRoutes');
+const tourGuideRoutes = require('./Routes/tourGuideRoutes');
+const touristRoutes = require('./Routes/touristRoutes');
+
+
+
+
 mongoose.set('strictQuery', false);
 require("dotenv").config();
 const MongoURI = process.env.MONGO_URI ;
@@ -38,6 +45,12 @@ app.get("/home", (req, res) => {
     res.status(200).send("You have everything installed!");
   });
 
+  const corsOptions = {
+    origin: 'http://localhost:5173', 
+    optionsSuccessStatus: 200 
+  };
+  
+  app.use(cors(corsOptions));
 
 app.use(express.json())
 app.use('/products' , productRoute);
@@ -45,8 +58,12 @@ app.use('/activities', activityRoute);
 app.use('/', userRoute);
 app.use("/itineraries", itinerariesRoute);
 app.use("/museums", museumsRoute);
-app.use("/museumTags", museumTagRoute);
 app.use('/admin', adminRoute);
 app.use('/touristItinerary', touristItineraryRoute);
 app.use('/activityCategory', activityCategoryRoute);
 app.use('/preferenceTag', PreferenceTagRoute);
+app.use('/advertiser', advertiserRoutes);
+app.use('/seller', sellerRoutes);
+app.use('/tourGuide', tourGuideRoutes);
+app.use('/tourist', touristRoutes);
+

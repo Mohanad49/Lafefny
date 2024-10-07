@@ -51,6 +51,17 @@ import EditPreferenceTag from './components/EditPreferenceTag';
 import EditMuseum from './components/EditMuseum';
 import MapMarker from './components/Map';
 
+import UpdateTouristInfo from './components/EditTouristInfo';
+import TouristInfo from './components/GetTouristInfo';
+import AddTourGuideInfo from './components/AddTourGuideInfo';
+import UpdateTourGuideInfo from './components/EditTourGuideInfo';
+import AddSellerInfo from './components/AddSellerInfo';
+import UpdateSellerInfo from './components/EditSellerInfo';
+import SellerInfo from './components/SellerInfo';
+import AddAdvertiserInfo from './components/AddAdvertiserInfo';
+import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
+import AdvertiserInfo from './components/AdvertiserInfo';
+
 import './styles/styles.css'
 
 const App = () => {
@@ -106,6 +117,18 @@ const App = () => {
             
             <Route path="/edit-tag/:id" element={<EditPreferenceTag />} />
             <Route path="/edit-museum/:id" element={<EditMuseum />} />
+
+            <Route path="/touristEditInfo" element={<UpdateTouristInfo></UpdateTouristInfo>}/>
+            <Route path="/viewTouristInfo" element={<TouristInfo></TouristInfo>}/>
+            <Route path='/addTourGuideInfo' element={<AddTourGuideInfo></AddTourGuideInfo>}/>
+            <Route path='/editTourGuideInfo' element={<UpdateTourGuideInfo></UpdateTourGuideInfo>}/>
+            <Route path='/getTourGuideInfo' element={<TouristInfo></TouristInfo>}/>
+            <Route path="/addSellerInfo" element={<AddSellerInfo></AddSellerInfo>}/>
+            <Route path='/editSellerInfo' element={<UpdateSellerInfo></UpdateSellerInfo>}/>
+            <Route path="/sellerinfo" element={<SellerInfo></SellerInfo>}/>
+            <Route path='/addAdvertiserInfo' element={<AddAdvertiserInfo></AddAdvertiserInfo>}/>
+            <Route path='/updateAdvertiserInfo' element={<UpdateAdvertiserInfo></UpdateAdvertiserInfo>}/>
+            <Route path="/getAdvertiserInfo" element={<AdvertiserInfo></AdvertiserInfo>}/>
           </>
       </Routes>
     </Router>

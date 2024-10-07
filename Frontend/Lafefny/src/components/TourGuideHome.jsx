@@ -10,6 +10,9 @@ const TourGuideHome = () => {
       <nav>
         <h2>Activity Management</h2>
         <Link to="/touristActivities">View Activities</Link>
+        <Link to="/addTourGuideInfo">Add info</Link>
+        <Link to="/editTourGuideInfo">Edit info</Link>
+        <Link to="/getTourGuideInfo">Get info</Link>
         
         <h2>Itinerary Management</h2>
         <Link to="/itineraries">View Itineraries</Link> | {' '}
