@@ -25,7 +25,7 @@ const UpdateAdvertiserInfo = () => {
     e.preventDefault();
     try {
       const response = await fetch(`http://localhost:8000/advertiser/updateAdvertiseInfo/${localStorage.getItem("userID")}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

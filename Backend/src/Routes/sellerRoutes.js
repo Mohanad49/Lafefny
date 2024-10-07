@@ -4,19 +4,21 @@ const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 
-router.post("/addSellerInfo/:id",async(req,res)=>{
-    const { name, description} = req.body;
-    const {userID}= req.params.id;
-    if(!mongoose.isValidObjectId(userID)){
-        res.status(400).json({error:"invalid seller"})
+router.post("/addSellerInfo/:id", async (req, res) => {
+    const { name, description } = req.body;
+    const userID = req.params.id;
+    if (!mongoose.isValidObjectId(userID)) {
+      return res.status(400).json({ error: "invalid seller" });
     }
-
-    const seller=  await Seller.create({name,description,userID})
-   if(!seller){
-    res.status(404).json({error:"advertiser is not found"});
-   }
-   res.status(200).json(seller);
-}); 
+    try {
+      const seller = await Seller.create({ name, description, userID });
+      res.status(200).json(seller);
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "An error occurred while adding seller information" });
+    }
+  });
 
 router.get("/getSeller/:id",async(req,res)=>{
     const {userID}= req.params.id;
@@ -28,17 +30,19 @@ router.get("/getSeller/:id",async(req,res)=>{
     }
 });
 
-router.put("/updateSellerInfo/:id",async(req,res)=>{
-    const updatedInfo = req.body;
-    const {userID}= req.params.id
+router.patch("/updateSellerInfo/:id",async(req,res)=>{
+    const { name, description } = req.body;
+    const userID= req.params.id
     if(!mongoose.isValidObjectId(userID)){
-        res.status(400).json({error:"invalid advertiser"})
+        res.status(400).json({error:"invalid seller"})
     }
-    const seller=  await Seller.findOneAndUpdate({userID},updatedInfo)
-   if(!advertiser){
-    res.status(404).json({error:"advertiser is not found"});
+    const seller= await Seller.findOneAndUpdate({userID},{ name, description })
+   if(!seller){
+    res.status(404).json({error:"seller is not found"});
    }
    res.status(200).json(seller);
 });
+
+
 
 module.exports= router;

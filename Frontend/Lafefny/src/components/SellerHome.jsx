@@ -13,7 +13,8 @@ const SellerHome = () => {
         <Link to="/products">View Products</Link> | {' '}
         <Link to="/add-product">Add Product</Link>
         <Link to="/sellerinfo">view info</Link>
-
+        <Link to="/addSellerInfo">add info</Link>
+        <Link to="/editSellerInfo">edit info</Link>
       </nav>
     </div>
   );

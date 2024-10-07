@@ -23,7 +23,7 @@ const UpdateSellerInfo = () => {
     e.preventDefault();
     try {
       const response = await fetch(`http://localhost:8000/seller/updateSellerInfo/${localStorage.getItem("userID")}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

@@ -36,6 +36,19 @@ router.get("/getAdvertiser/:id",async(req,res)=>{
     }
 });
 
+router.patch("/updateAdvertiser/:id",async(req,res)=>{
+    const { hotline, company, website }  = req.body;
+    const userID= req.params.id
+    if(!mongoose.isValidObjectId(userID)){
+        res.status(400).json({error:"invalid advertiser"})
+    }
+    const advertiser= await Advertiser.findOneAndUpdate({userID},{ hotline, company, website } )
+   if(!advertiser){
+    res.status(404).json({error:"advertiser is not found"});
+   }
+   res.status(200).json(advertiser);
+});
+
 
 
 module.exports= router;

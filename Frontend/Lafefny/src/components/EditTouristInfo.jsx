@@ -28,7 +28,7 @@ const UpdateTouristInfo = () => {
     e.preventDefault();
     try {
       const response = await fetch(`http://localhost:8000/tourist/updateTouristInfo/${localStorage.getItem("userID")}`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
