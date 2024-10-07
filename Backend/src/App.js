@@ -12,7 +12,7 @@ const adminRoute = require("./Routes/adminController");
 const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
 const activityCategoryRoute = require('./Routes/activityCategoryController');
 const PreferenceTagRoute = require('./Routes/preferenceTagController');
-
+const museumTagRoute = require('./Routes/museumTagController');
 mongoose.set('strictQuery', false);
 require("dotenv").config();
 const MongoURI = process.env.MONGO_URI ;
@@ -45,6 +45,7 @@ app.use('/activities', activityRoute);
 app.use('/', userRoute);
 app.use("/itineraries", itinerariesRoute);
 app.use("/museums", museumsRoute);
+app.use("/museumTags", museumTagRoute);
 app.use('/admin', adminRoute);
 app.use('/touristItinerary', touristItineraryRoute);
 app.use('/activityCategory', activityCategoryRoute);

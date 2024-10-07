@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-// src/components/Home.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
@@ -18,7 +17,7 @@ const TourGuideHome = () => {
         <h2>Museum Management</h2>
         <Link to="/museums">View Historical Places/Museums</Link> | {' '}
         <Link to="/add-museum">Add Historical Places/Museums</Link> | {' '}
-        <Link to="/create-tag">Create Tag</Link>
+        <Link to="/add-museum-tag">Add Museum Tag</Link>
 
         
 

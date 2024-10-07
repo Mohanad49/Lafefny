@@ -46,9 +46,11 @@ import TourGuideHome from './components/TourGuideHome';
 import TouristHome from './components/TouristHome';
 import TourismGovernorHome from './components/TourismGovernorHome';
 
-import './styles/styles.css'
+import AddMuseumTag from './components/AddMuseumTag';
 import EditPreferenceTag from './components/EditPreferenceTag';
 import EditMuseum from './components/EditMuseum';
+
+import './styles/styles.css'
 
 const App = () => {
 
@@ -95,7 +97,7 @@ const App = () => {
             <Route path="/museums" element={<MuseumList />} />
             <Route path="/add-museum" element={<AddMuseum />} />
             <Route path="/edit-museum/:id" element={<EditMuseum />} />
-
+            <Route path="/add-museum-tag" element={<AddMuseumTag />} />
             <Route path="/products" element={<ProductList />} />
             <Route path="/add-product" element={<AddProduct />} />
             <Route path="/edit-product/:id" element={<EditProduct />} />

@@ -13,6 +13,8 @@ const ItineraryList = () => {
   const [filterDate, setFilterDate] = useState('');
   const [filterPreferences, setFilterPreferences] = useState('');
 
+  const currentUserName = localStorage.getItem('currentUserName');
+  
   useEffect(() => {
     fetchItineraries();
   }, [searchTerm, filterType, filterValue, sortBy]);
@@ -27,8 +29,10 @@ const ItineraryList = () => {
       });
       console.log('Full response:', response);
       if (Array.isArray(response)) {
-        console.log('Fetched itineraries:', response);
-        setItineraries(response);
+        // Filter itineraries for the current user
+        const userItineraries = response.filter(itinerary => itinerary.touristName === currentUserName);
+        console.log('Fetched itineraries for current user:', userItineraries);
+        setItineraries(userItineraries);
       } else {
         console.error('Response is not an array:', response);
         setItineraries([]);
@@ -98,7 +102,7 @@ const ItineraryList = () => {
 
   return (
     <div className="itinerary-list-container">
-      <h2>Itinerary List</h2>
+      <h2>My Itineraries</h2>
       <div className="controls">
         <input
           type="text"
