@@ -39,6 +39,12 @@ const EditMuseum = () => {
           [priceType]: parseFloat(value)
         }
       }));
+    } else if (name === 'tags') {
+      const tagsArray = value.split(',').map(tag => tag.trim());
+      setMuseum(prevState => ({
+        ...prevState,
+        tags: tagsArray
+      }));
     } else {
       setMuseum(prevState => ({
         ...prevState,
@@ -163,6 +169,18 @@ const EditMuseum = () => {
           id="ticketPrices.student"
           name="ticketPrices.student"
           value={museum.ticketPrices?.student || ''}
+          onChange={handleChange}
+          required
+        />
+      </div>
+
+      <div>
+        <label htmlFor="tags">Tags (comma-separated):</label>
+        <input
+          type="text"
+          id="tags"
+          name="tags"
+          value={museum.tags ? museum.tags.join(', ') : ''}
           onChange={handleChange}
           required
         />

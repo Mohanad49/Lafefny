@@ -149,6 +149,10 @@ const ActivityList = () => {
             <p className="yellow-text">Time: {activity.time}</p>
             <p className="yellow-text">Location: {activity.location}</p>
             <p className="yellow-text">Price: ${activity.price}</p>
+            <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
+            <p className="yellow-text">Special Discounts: {activity.specialDiscounts || 'None'}</p>
+            <p className="yellow-text">Booking Open: {activity.bookingOpen ? 'Yes' : 'No'}</p>
+            <p className="yellow-text">Rating: {activity.rating.toFixed(1)}</p>
             <div className="activity-actions">
               <Link to={`/edit-activity/${activity._id}`} className="edit-button">Edit</Link>
               <button className="delete-button" onClick={() => handleDelete(activity._id)}>Delete</button>

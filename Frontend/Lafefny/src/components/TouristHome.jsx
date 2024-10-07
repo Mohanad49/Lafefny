@@ -10,7 +10,8 @@ const TouristHome = () => {
       <nav>
         <h2>Activity Management</h2>
         <Link to="/touristActivities">View Activities</Link> | {' '}
-        <Link to="/tourist-Itineraries">View Itineraries</Link> | {' '}
+        <Link to="/tourist-Itineraries">View My Itineraries</Link> | {' '}
+        <Link to="/guest-Itineraries">View All Itineraries</Link> | {' '}
         <Link to="/touristMuseums">View Historical Places/Museums</Link>
 
         <h2>Product Management</h2>

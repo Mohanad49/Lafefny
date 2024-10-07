@@ -1,3 +1,4 @@
+/* eslint-disable react/prop-types */
 /* eslint-disable no-unused-vars */
 import React, { useRef, useEffect, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
@@ -6,12 +7,13 @@ import '../styles/Map.css';
 
 mapboxgl.accessToken = 'pk.eyJ1IjoieW91c3NlZm1lZGhhdGFzbHkiLCJhIjoiY2x3MmpyZzYzMHAxbDJxbXF0dDN1MGY2NSJ9.vrWqL8FrrRzm0yAfUNpu6g';
 
-const Map = () => {
+const Map = ({ onLocationSelect, initialLocation }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
-  const [lng, setLng] = useState(-122.420679);
-  const [lat, setLat] = useState(37.774929);
+  const [lng, setLng] = useState(initialLocation ? initialLocation[0] : -122.420679);
+  const [lat, setLat] = useState(initialLocation ? initialLocation[1] : 37.774929);
   const [zoom, setZoom] = useState(12);
+  const marker = useRef(null);
 
   useEffect(() => {
     if (map.current) return; // initialize map only once
@@ -23,10 +25,15 @@ const Map = () => {
     });
 
     map.current.on('load', () => {
-      // Add a marker
-      new mapboxgl.Marker()
+      marker.current = new mapboxgl.Marker()
         .setLngLat([lng, lat])
         .addTo(map.current);
+    });
+
+    map.current.on('click', (e) => {
+      const { lng, lat } = e.lngLat;
+      marker.current.setLngLat([lng, lat]);
+      onLocationSelect(lng, lat);
     });
 
     map.current.on('move', () => {
@@ -34,7 +41,7 @@ const Map = () => {
       setLat(map.current.getCenter().lat.toFixed(4));
       setZoom(map.current.getZoom().toFixed(2));
     });
-  });
+  }, [onLocationSelect]);
 
   return (
     <div className="map-wrapper">
