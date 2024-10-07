@@ -2,6 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getActivityById, updateActivity } from '../services/activityService';
+import Map from './Map';
+import mapboxgl from 'mapbox-gl';
+
+mapboxgl.accessToken = 'pk.eyJ1IjoieW91c3NlZm1lZGhhdGFzbHkiLCJhIjoiY2x3MmpyZzYzMHAxbDJxbXF0dDN1MGY2NSJ9.vrWqL8FrrRzm0yAfUNpu6g';
 
 const EditActivity = () => {
   const { id } = useParams();
@@ -16,7 +20,13 @@ const EditActivity = () => {
         setLoading(true);
         const response = await getActivityById(id);
         console.log('Fetched activity data:', response); // For debugging
-        setActivity(response.data);
+        const activityData = response.data;
+        // Format the time properly
+        if (activityData.time) {
+          const [hours, minutes] = activityData.time.split(':');
+          activityData.time = `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
+        }
+        setActivity(activityData);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching activity:', err);
@@ -56,6 +66,18 @@ const EditActivity = () => {
     }
   };
 
+  const handleLocationSelect = async (lng, lat) => {
+    try {
+      const response = await fetch(`https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}`);
+      const data = await response.json();
+      const address = data.features[0].place_name;
+      setActivity(prevState => ({ ...prevState, location: address }));
+    } catch (error) {
+      console.error('Error fetching address:', error);
+      setActivity(prevState => ({ ...prevState, location: `${lng},${lat}` }));
+    }
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
   if (!activity) return null;
@@ -63,6 +85,7 @@ const EditActivity = () => {
   return (
     <form onSubmit={handleSubmit}>
       <h2>Edit Activity</h2>
+      
       <div>
         <label htmlFor="name">Activity Name:</label>
         <input
@@ -99,6 +122,7 @@ const EditActivity = () => {
         />
       </div>
 
+      <Map onLocationSelect={handleLocationSelect} />
       <div>
         <label htmlFor="location">Location:</label>
         <input
@@ -107,7 +131,7 @@ const EditActivity = () => {
           name="location"
           value={activity.location || ''}
           onChange={handleChange}
-          required
+          readOnly
         />
       </div>
 
