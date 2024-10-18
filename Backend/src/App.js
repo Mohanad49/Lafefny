@@ -16,8 +16,7 @@ const advertiserRoutes = require('./Routes/advertiserRoutes');
 const sellerRoutes = require('./Routes/sellerRoutes');
 const tourGuideRoutes = require('./Routes/tourGuideRoutes');
 const touristRoutes = require('./Routes/touristRoutes');
-
-
+const museumTagRoute = require('./Routes/museumTagController');
 
 
 mongoose.set('strictQuery', false);
@@ -66,4 +65,5 @@ app.use('/advertiser', advertiserRoutes);
 app.use('/seller', sellerRoutes);
 app.use('/tourGuide', tourGuideRoutes);
 app.use('/tourist', touristRoutes);
+app.use('/museumTags', museumTagRoute);
 

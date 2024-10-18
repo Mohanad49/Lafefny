@@ -1,5 +1,5 @@
 const express = require("express");
-const Itinerary = require("../Models/Itinerary"); // Correct import here
+const Itinerary = require("../Models/itinerary"); // Correct import here
 
 const router = express.Router();
 

@@ -9,9 +9,21 @@ const TouristItinerarySchema = new mongoose.Schema({
   endDate: { type: Date, required: true },
   price: { type: Number, required: true },
   touristName: { type: String, required: true },
-  ratings: { type: Number , default: 0},
+  ratings: {
+    averageRating: {type: Number , default: 0},
+    totalRatings: { type: Number, default: 0 },
+    reviews: [
+      {
+        reviewerName: {type: String, default: ''},
+        rating: {type: Number, default: 0},
+        comment: {type: String, default: ''},
+        date: {type: Date, default: Date.now}
+      } 
+    ], default: []
+  },
   preferences: { type: String, default: '' },
-  language: { type: String, default: '' }
+  language: { type: String, default: '' },
+  tourGuideName: { type: String, default: '' }
 });
 
 const TouristItinerary = mongoose.model("TouristItinerary", TouristItinerarySchema);

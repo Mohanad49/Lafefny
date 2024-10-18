@@ -68,7 +68,7 @@ const ActivityList = () => {
       // Apply sorting based on `sortBy` value
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.rating - a.rating; // Descending order
+      if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating; // Descending order
       return 0;
     });
 
@@ -152,7 +152,7 @@ const ActivityList = () => {
             <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
             <p className="yellow-text">Special Discounts: {activity.specialDiscounts || 'None'}</p>
             <p className="yellow-text">Booking Open: {activity.bookingOpen ? 'Yes' : 'No'}</p>
-            <p className="yellow-text">Rating: {activity.rating.toFixed(1)}</p>
+            <p className="yellow-text">Rating: {activity.ratings.averageRating.toFixed(1)}</p>
             <div className="activity-actions">
               <Link to={`/edit-activity/${activity._id}`} className="edit-button">Edit</Link>
               <button className="delete-button" onClick={() => handleDelete(activity._id)}>Delete</button>

@@ -66,7 +66,7 @@ const ItineraryList = () => {
     .sort((a, b) => {
       if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'ratings') return (b.ratings || 0) - (a.ratings || 0); // Descending order
+      if (sortBy === 'ratings') return (b.ratings.averageRating || 0) - (a.ratings.averageRating || 0); // Descending order
       return 0;
     });
 
@@ -132,7 +132,7 @@ const ItineraryList = () => {
               <p className="yellow-text">Price: ${itinerary.price}</p>
               <p className="yellow-text">Pick Up Location: {itinerary.pickUpLocation}</p>
               <p className="yellow-text">Drop Off Location: {itinerary.dropOffLocation}</p>
-              <p className="yellow-text">Rating: {itinerary.ratings || 'Not rated'}</p>
+              <p className="yellow-text">Rating: {itinerary.ratings.averageRating || 'Not rated'}</p>
               <p className="yellow-text">Preferences: {itinerary.preferences || 'None specified'}</p>
               
               <h4 className="yellow-text">Activities:</h4>

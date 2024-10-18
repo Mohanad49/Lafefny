@@ -10,7 +10,23 @@ const activitySchema = new mongoose.Schema({
   tags: { type: [String], required: true },
   specialDiscounts: { type: String }, // Could be a percentage or other details
   bookingOpen: { type: Boolean, required: true },
-  rating: {type: Number, default: 0}
+  inappropriateFlag: { type: Boolean, default: false },
+  ratings: {
+    averageRating: {type: Number , default: 0},
+    totalRatings: { type: Number, default: 0 },
+    reviews: [
+      {
+        reviewerName: {type: String, default: ''},
+        rating: {type: Number, default: 0},
+        comment: {type: String, default: ''},
+        date: {type: Date, default: Date.now}
+      } 
+    ], default: []
+  },
+  touristBookings: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tourist'
+  }]
 });
 
 module.exports = mongoose.model('Activity', activitySchema);

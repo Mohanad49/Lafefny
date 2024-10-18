@@ -13,7 +13,9 @@ const TouristHome = () => {
         <Link to="/tourist-Itineraries">View My Itineraries</Link> | {' '}
         <Link to="/guest-Itineraries">View All Itineraries</Link> | {' '}
         <Link to="/touristMuseums">View Historical Places/Museums</Link>
-        <Link to="/viewTouristInfo">View Info</Link>
+
+        <h2>Profile Management</h2>
+        <Link to="/viewTouristInfo">View Info</Link> | {' '}
         <Link to="/touristEditInfo">edit Info</Link>
 
         <h2>Product Management</h2>

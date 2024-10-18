@@ -6,18 +6,21 @@ const Schema = mongoose.Schema;
 const sellerSchema = new Schema({
     name:{
         type: String,
-        requried: true,
+        required: true,
         
       },  
       description: {
         type: String,
-        requried: true,
+        required: true,
         unique: true,
       }, 
       userID:{
         type:String,
-        requried: true
-      }
+        required: true
+      },
+      logo: String,
+      isAccepted: { type: Boolean, default: false },
+      termsAccepted: { type: Boolean, default: false }
 })
 
 module.exports = mongoose.model("Seller", sellerSchema);
