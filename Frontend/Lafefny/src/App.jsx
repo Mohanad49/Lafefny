@@ -18,11 +18,19 @@ import AddActivity from './components/AddActivity';
 import EditActivity from './components/EditActivity';
 import ActivityList from './components/ActivityList';
 
+import GuestActivityList from './components/GuestActivityList';
+import GuestItineraryList from './components/Guest-ItineraryList';
+import GuestMuseumList from './components/GuestMuseumList';
+
 import TouristActivityList from './components/TouristActivityList';
 import TouristItineraryList from './components/Tourist-ItineraryList';
 import TouristMuseumList from './components/TouristMuseumList';
 import AddTouristItinerary from './components/AddTouristItinerary';
 import EditTouristItinerary from './components/EditTourist-Itinerary';
+import ActivityDetail from './components/ActivityDetail';
+import ItineraryDetail from './components/ItineraryDetail';
+import MuseumDetail from './components/MuseumDetail';
+import TouristItineraryDetail from './components/tourist-ItineraryDetail';
 
 import GuideTouristItineraryList from './components/TourGuideItineraries';
 import  AddItinerary from './components/AddItinerary';
@@ -37,7 +45,8 @@ import EditProduct from './components/EditProduct';
 import ProductList from './components/ProductList';
 
 import TouristProductList from './components/TouristProductList';
-import GuestItineraryList from './components/Guest-ItineraryList';
+import TouristViewAllItineraries from './components/TouristViewAll-Itineraries';
+import TouristSelectPreferences from './components/touristSelectPreferences';
 
 import AdminHome from './components/AdminHome';
 import AdvertiserHome from './components/AdvertiserHome';
@@ -72,8 +81,11 @@ const App = () => {
           <>
             <Route path="/map" element={<MapMarker />} />
             <Route path="/" element={<Sign />} />
+
             <Route path="/guestHome" element={<Home />} />
+            <Route path="/guestActivities" element={<GuestActivityList />} />
             <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
+            <Route path="/guestMuseums" element={<GuestMuseumList />} />
             
             <Route path="/users" element={<AdminUserManagement />} />
             <Route path="/add-admin" element={<AddAdmin />} />
@@ -94,11 +106,18 @@ const App = () => {
 
             <Route path="/touristActivities" element={<TouristActivityList />} />
             <Route path="/tourist-Itineraries" element={<TouristItineraryList />} />
+            <Route path="/touristAll-Itineraries" element={<TouristViewAllItineraries />} />
             <Route path="/touristMuseums" element={<TouristMuseumList />} />
             <Route path="/touristProducts" element={<TouristProductList />} />
+            <Route path="/activities/:id" element={<ActivityDetail />} /> 
+            <Route path="/itineraries/:id" element={<ItineraryDetail />} /> 
+            <Route path="/tourist-Itineraries/:id" element={<TouristItineraryDetail />} /> 
+            <Route path="/museums/:id" element={<MuseumDetail />} /> 
+
             <Route path="/add-tourist-itinerary" element={<AddTouristItinerary />} />
             <Route path="/edit-tourist-itinerary/:id" element={<EditTouristItinerary />} />
             <Route path="/guide-tourist-Itineraries" element={<GuideTouristItineraryList />} />
+
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
             <Route path="/edit-activity/:id" element={<EditActivity />} />
@@ -120,12 +139,16 @@ const App = () => {
 
             <Route path="/touristEditInfo" element={<UpdateTouristInfo></UpdateTouristInfo>}/>
             <Route path="/viewTouristInfo" element={<TouristInfo></TouristInfo>}/>
+            <Route path="/touristSelectPreferences" element={<TouristSelectPreferences />} />
+
             <Route path='/addTourGuideInfo' element={<AddTourGuideInfo></AddTourGuideInfo>}/>
             <Route path='/editTourGuideInfo' element={<UpdateTourGuideInfo></UpdateTourGuideInfo>}/>
             <Route path='/getTourGuideInfo' element={<TouristInfo></TouristInfo>}/>
+
             <Route path="/addSellerInfo" element={<AddSellerInfo></AddSellerInfo>}/>
             <Route path='/editSellerInfo' element={<UpdateSellerInfo></UpdateSellerInfo>}/>
             <Route path="/sellerinfo" element={<SellerInfo></SellerInfo>}/>
+
             <Route path='/addAdvertiserInfo' element={<AddAdvertiserInfo></AddAdvertiserInfo>}/>
             <Route path='/updateAdvertiserInfo' element={<UpdateAdvertiserInfo></UpdateAdvertiserInfo>}/>
             <Route path="/getAdvertiserInfo" element={<AdvertiserInfo></AdvertiserInfo>}/>

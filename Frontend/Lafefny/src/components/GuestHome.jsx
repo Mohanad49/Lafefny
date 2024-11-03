@@ -10,9 +10,9 @@ const Home = () => {
       <h1>Welcome to the HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/touristActivities">View Activities</Link> | {' '}
+        <Link to="/guestActivities">View Activities</Link> | {' '}
         <Link to="/guest-Itineraries">View Itineraries</Link> | {' '}
-        <Link to="/touristMuseums">View Historical Places/Museums</Link>
+        <Link to="/guestMuseums">View Historical Places/Museums</Link>
 
       </nav>
     </div>

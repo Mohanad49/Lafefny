@@ -63,7 +63,8 @@
     text-align: center;
     margin-top: 10px;
   }
-  
+ 
+  .share-button,
   .view-button,
   .edit-button,
   .delete-button {
@@ -164,4 +165,53 @@
     .sort-select {
       width: 100%;
     }
+  }
+  
+  .share-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+  }
+  
+  .share-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 5px;
+    text-align: center;
+    width: 400px; /* Set a fixed width for the modal */
+  }
+  
+  .share-link-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Space between input and buttons */
+  }
+  
+  .share-link-input {
+    flex: 1; /* Take up available space */
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    margin-right: 10px; /* Space between input and button */
+  }
+  
+  .copy-link-button {
+    padding: 10px 15px;
+    background-color: #4CAF50; /* Green background */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+  }
+  
+  .copy-link-button:hover {
+    background-color: #45a049; /* Darker green on hover */
   }

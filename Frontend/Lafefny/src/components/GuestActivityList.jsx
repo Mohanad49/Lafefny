@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { getActivities } from '../services/activityService';
+import { Link } from 'react-router-dom';
+import { getActivities, deleteActivity } from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
 import '../styles/ActivityList.css';
 
@@ -12,16 +13,13 @@ const ActivityList = () => {
   const [filterBudget, setFilterBudget] = useState('');
   const [filterDate, setFilterDate] = useState('');
   const [filterRating, setFilterRating] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [activityCategories, setActivityCategories] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [currentActivity, setCurrentActivity] = useState(null);
-  const [currency, setCurrency] = useState('EGP');
+  const [filterType, setFilterType] = useState(''); // New state for filter type
+  const [activityCategories, setActivityCategories] = useState([]); // New state for activity categories
 
   useEffect(() => {
     fetchActivities();
     fetchActivityCategories();
-  }, [searchTerm, filterCategory, sortBy, filterBudget, filterDate, filterRating, currency]);
+  }, [searchTerm, filterCategory, sortBy, filterBudget, filterDate, filterRating]);
 
   const fetchActivities = async () => {
     try {
@@ -50,45 +48,11 @@ const ActivityList = () => {
     }
   };
 
-  const convertPrice = (price) => {
-    const conversionRates = {
-      EGP: 1,
-      USD:0.02,
-      EUR: 0.019,
-      GBP: 0.016,
-    };
-    return (price * conversionRates[currency]).toFixed(2);
-  };
-
-  const handleCurrencyChange = (event) => {
-    setCurrency(event.target.value);
-  };
-
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
   };
 
-  const openShareModal = (activity) => {
-    setCurrentActivity(activity);
-    setIsModalOpen(true);
-  };
-
-  const handleCopyLink = () => {
-    const shareableLink = `${window.location.origin}/activities/${currentActivity._id}`;
-    navigator.clipboard.writeText(shareableLink).then(() => {
-      alert('Link copied to clipboard!');
-      setIsModalOpen(false);
-    });
-  };
-
-  const handleEmailShare = () => {
-    const shareableLink = `${window.location.origin}/activities/${currentActivity._id}`;
-    const subject = 'Check out this activity!';
-    const body = `I found this activity that you might like: ${shareableLink}`;
-    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    setIsModalOpen(false);
-  };
-
+  // Filter activities locally after fetching
   const filteredActivities = activities
     .filter(activity => 
       activity.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,6 +60,7 @@ const ActivityList = () => {
       (activity.tags && activity.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase())))
     )
     .filter(activity => {
+      // Apply filters based on selected filter type
       if (filterType === 'budget' && filterBudget && activity.price > filterBudget) return false;
       if (filterType === 'date' && filterDate && new Date(activity.date) > new Date(filterDate)) return false;
       if (filterType === 'rating' && filterRating && activity.rating < filterRating) return false;
@@ -103,9 +68,10 @@ const ActivityList = () => {
       return true;
     })
     .sort((a, b) => {
+      // Apply sorting based on `sortBy` value
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating;
+      if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating; // Descending order
       return 0;
     });
 
@@ -113,12 +79,6 @@ const ActivityList = () => {
     <div className="activity-list-container">
       <h1>Activity List</h1>
       <div className="controls">
-        <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
         <input
           type="text"
           placeholder="Search by name, category, or tag..."
@@ -201,41 +161,20 @@ const ActivityList = () => {
               <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
               <p className="yellow-text">Time: {activity.time}</p>
               <p className="yellow-text">Location: {activity.location}</p>
-              <p className="yellow-text">Price: {convertPrice(activity.price)} {currency}</p>
+              <p className="yellow-text">Price: ${activity.price}</p>
               <p className="yellow-text">Rating: {activity.ratings.averageRating || 'Not rated'}</p>
               <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
               {activity.specialDiscounts && (
                 <p className="yellow-text">Special Discounts: {activity.specialDiscounts}</p>
               )}
               <p className="yellow-text">Booking: {activity.bookingOpen ? 'Open' : 'Closed'}</p>
-              <div className="activity-actions">
-                <button className="share-button" onClick={() => openShareModal(activity)}>Share</button>
-              </div>
             </li>
+            
           ))}
         </ul>
       ) : (
         <div className="no-activities-message">
           <p>No Activities Available</p>
-        </div>
-      )}
-
-      {isModalOpen && (
-        <div className="share-modal">
-          <div className="share-modal-content">
-            <h2 style={{ color: "blue" }}> Share Activity</h2>
-            <div className="share-link-container">
-              <input
-                type="text"
-                readOnly
-                value={`${window.location.origin}/activities/${currentActivity._id}`}
-                className="share-link-input"
-              />
-              <button onClick={handleCopyLink} className="copy-link-button">Copy Link</button>
-            </div>
-            <button onClick={handleEmailShare}>Send via Email</button>
-            <button onClick={() => setIsModalOpen(false)}>Close</button>
-          </div>
         </div>
       )}
     </div>

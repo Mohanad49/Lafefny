@@ -21,3 +21,7 @@ export const editItinerary = (id, updatedItinerary) => {
 export const deleteItinerary = (id) => {
   return axios.delete(`${API_URL}/itineraries/${id}`);
 };
+
+export const getItineraryById = (id) => {
+  return axios.get(`${API_URL}/itineraries/${id}`);
+};

@@ -6,7 +6,8 @@ const touristSchema = new mongoose.Schema({
     required:true
   },
   wallet:{
-    type:Number
+    type:Number,
+    default: 0
   },
   preferences: [{ type: String , default: []}],
   loyaltyPoints: { type: Number, default: 0 },
@@ -21,7 +22,8 @@ const touristSchema = new mongoose.Schema({
     arrivalAirport: { type: String, default: '' },
     seatNumber: { type: String, default: '' },
     bookingStatus: { type: String, enum: ['Confirmed', 'Pending', 'Cancelled'], default: 'Pending' },
-    price: { type: Number, default: 0 }
+    price: { type: Number, default: 0 },
+    default: []
   }],
   hotelBookings: [{
     hotelName: { type: String, default: '' },
@@ -30,7 +32,8 @@ const touristSchema = new mongoose.Schema({
     checkOutDate: { type: Date, default: Date.now },
     numberOfGuests: { type: Number, default: 0 },
     bookingStatus: { type: String, enum: ['Confirmed', 'Pending', 'Cancelled'], default: 'Pending' },
-    price: { type: Number, default: 0 }
+    price: { type: Number, default: 0 },
+    default: []
   }],
   transportationBookings: [{
     type: { type: String, enum: ['Car', 'Bus', 'Train', 'Other'] },
@@ -42,19 +45,23 @@ const touristSchema = new mongoose.Schema({
     arrivalDate: { type: Date, default: Date.now },
     numberOfPassengers: { type: Number, default: 0 },
     bookingStatus: { type: String, enum: ['Confirmed', 'Pending', 'Cancelled'], default: 'Pending' },
-    price: { type: Number, default: 0 }
+    price: { type: Number, default: 0 },
+    default: []
   }],
   bookedActivities: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Activity'
+    ref: 'Activity',
+    default: []
   }],
   bookedItineraries: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'TouristItinerary'
+    ref: 'TouristItinerary',
+    default: []
   }],
   purchasedProducts: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product'
+    ref: 'Product',
+    default: []
   }]
 }, { timestamps: true });
 
