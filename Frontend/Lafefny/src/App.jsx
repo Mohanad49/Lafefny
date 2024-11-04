@@ -70,6 +70,7 @@ import SellerInfo from './components/SellerInfo';
 import AddAdvertiserInfo from './components/AddAdvertiserInfo';
 import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
 import AdvertiserInfo from './components/AdvertiserInfo';
+import TouristHistory from './components/TouristHistory';
 
 import './styles/styles.css'
 
@@ -117,6 +118,7 @@ const App = () => {
             <Route path="/add-tourist-itinerary" element={<AddTouristItinerary />} />
             <Route path="/edit-tourist-itinerary/:id" element={<EditTouristItinerary />} />
             <Route path="/guide-tourist-Itineraries" element={<GuideTouristItineraryList />} />
+            <Route path="/touristHistory/:userID" element={<TouristHistory />} />
 
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
