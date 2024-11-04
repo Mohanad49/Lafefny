@@ -12,8 +12,6 @@ const itinerariesRoute = require("./Routes/itineraryController");
 const museumsRoute = require("./Routes/museumController");
 const adminRoute = require("./Routes/adminController");
 const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
-const activityCategoryRoute = require('./Routes/activityCategoryController');
-const PreferenceTagRoute = require('./Routes/preferenceTagController');
 const advertiserRoutes = require('./Routes/advertiserRoutes');
 const sellerRoutes = require('./Routes/sellerRoutes');
 const tourGuideRoutes = require('./Routes/tourGuideRoutes');
@@ -46,17 +44,14 @@ app.get("/home", (req, res) => {
     res.status(200).send("You have everything installed!");
   });
 
-<<<<<<< HEAD
 
 
-=======
   const corsOptions = {
     origin: 'http://localhost:5173', 
     optionsSuccessStatus: 200 
   };
   
   app.use(cors(corsOptions));
->>>>>>> e2c526a0f0008a5a30d508f1d9a993d62dd418b2
 
 app.use(express.json())
 app.use('/products' , productRoute);
