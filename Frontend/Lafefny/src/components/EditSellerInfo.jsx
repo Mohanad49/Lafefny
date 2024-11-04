@@ -35,11 +35,11 @@ const UpdateSellerInfo = () => {
         setMessage(`Error: ${errorData.error}`);
       } else {
         const data = await response.json();
-        setMessage("Tour guide information updated successfully!");
+        setMessage("Seller information updated successfully!");
         console.log("Updated data:", data);
       }
     } catch (error) {
-      setMessage("An error occurred while updating the tour guide info.");
+      setMessage("An error occurred while updating the seller info.");
     }
   };
 
@@ -68,7 +68,7 @@ const UpdateSellerInfo = () => {
             required
           />
         </div>
-        <button type="submit">Update Tour Guide Info</button>
+        <button type="submit">Update Seller Info</button>
       </form>
 
       {message && <p>{message}</p>}

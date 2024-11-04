@@ -32,7 +32,10 @@ const tourGuideSchema = new Schema({
         date: {type: Date, default: Date.now}
       } 
     ], default: []
-  }
+  },
+  filename: String,
+  contentType: String,
+  data: Buffer,
 });
 
 
