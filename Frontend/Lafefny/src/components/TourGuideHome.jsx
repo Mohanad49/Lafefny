@@ -14,7 +14,9 @@ const TourGuideHome = () => {
         <h2>Profile Management</h2>
         <Link to="/addTourGuideInfo">Add info</Link> | {' '}
         <Link to="/editTourGuideInfo">Edit info</Link> | {' '}
-        <Link to="/getTourGuideInfo">Get info</Link>
+        <Link to="/getTourGuideInfo">Get info</Link> | {' '}
+        <Link to="/editProfilePhoto">Edit Photo</Link> | {' '}
+        <Link to="/uploadTourGuideDocs">Add Docs</Link>
        
         <h2>Itinerary Management</h2>
         <Link to="/itineraries">View Itineraries</Link> | {' '}

@@ -20,7 +20,10 @@ const sellerSchema = new Schema({
       },
       logo: String,
       isAccepted: { type: Boolean, default: false },
-      termsAccepted: { type: Boolean, default: false }
+      termsAccepted: { type: Boolean, default: false },
+      filename: String,
+      contentType: String,
+      data: Buffer,
 })
 
 module.exports = mongoose.model("Seller", sellerSchema);

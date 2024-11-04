@@ -71,8 +71,15 @@ import AddAdvertiserInfo from './components/AddAdvertiserInfo';
 import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
 import AdvertiserInfo from './components/AdvertiserInfo';
 import ChangePassword from './components/ChangePassword';
+import TouristHistory from './components/TouristHistory';
 
 import './styles/styles.css'
+import UploadTourGuidePhoto from './components/EditTourGuidePhoto';
+import UploadSellerLogo from './components/EditSellerLogo';
+import UploadAdvertiserLogo from './components/EditAdvertiserLogo';
+import UploadAdvertiserDocs from './components/UploadAdvertiserDocs';
+import UploadSellerDocs from './components/UploadSellerDocs';
+import UploadTourGuideDocs from './components/UploadTourGuideDocs';
 
 const App = () => {
 
@@ -118,6 +125,7 @@ const App = () => {
             <Route path="/add-tourist-itinerary" element={<AddTouristItinerary />} />
             <Route path="/edit-tourist-itinerary/:id" element={<EditTouristItinerary />} />
             <Route path="/guide-tourist-Itineraries" element={<GuideTouristItineraryList />} />
+            <Route path="/touristHistory/:userID" element={<TouristHistory />} />
 
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />
@@ -155,6 +163,13 @@ const App = () => {
             <Route path='/addAdvertiserInfo' element={<AddAdvertiserInfo></AddAdvertiserInfo>}/>
             <Route path='/updateAdvertiserInfo' element={<UpdateAdvertiserInfo></UpdateAdvertiserInfo>}/>
             <Route path="/getAdvertiserInfo" element={<AdvertiserInfo></AdvertiserInfo>}/>
+            
+            <Route path="/editProfilePhoto" element={<UploadTourGuidePhoto></UploadTourGuidePhoto>}/>
+            <Route path="/editSellerLogo" element={<UploadSellerLogo></UploadSellerLogo>}/>
+            <Route path="/editAdvertiserPhoto" element={<UploadAdvertiserLogo></UploadAdvertiserLogo>}/>
+            <Route path="/uploadAdvertiserDocs" element={<UploadAdvertiserDocs></UploadAdvertiserDocs>}/>
+            <Route path="/uploadSellerDocs" element={<UploadSellerDocs></UploadSellerDocs>}/>
+            <Route path="/uploadTourGuideDocs" element={<UploadTourGuideDocs></UploadTourGuideDocs>}/>
           </>
       </Routes>
     </Router>

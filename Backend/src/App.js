@@ -5,13 +5,13 @@ const mongoose = require('mongoose');
 
 const productRoute = require("./Routes/productController");
 const activityRoute = require('./Routes/activityController');
+const activityCategoryRoute = require('./Routes/activityCategoryController');
+const PreferenceTagRoute = require('./Routes/preferenceTagController');
 const userRoute = require("./Routes/userController");
 const itinerariesRoute = require("./Routes/itineraryController");
 const museumsRoute = require("./Routes/museumController");
 const adminRoute = require("./Routes/adminController");
 const touristItineraryRoute  = require("./Routes/tourist-itineraryController");
-const activityCategoryRoute = require('./Routes/activityCategoryController');
-const PreferenceTagRoute = require('./Routes/preferenceTagController');
 const advertiserRoutes = require('./Routes/advertiserRoutes');
 const sellerRoutes = require('./Routes/sellerRoutes');
 const tourGuideRoutes = require('./Routes/tourGuideRoutes');
@@ -44,6 +44,8 @@ app.get("/home", (req, res) => {
     res.status(200).send("You have everything installed!");
   });
 
+
+
   const corsOptions = {
     origin: 'http://localhost:5173', 
     optionsSuccessStatus: 200 
@@ -54,6 +56,8 @@ app.get("/home", (req, res) => {
 app.use(express.json())
 app.use('/products' , productRoute);
 app.use('/activities', activityRoute);
+app.use('/activityCategory', activityCategoryRoute);
+app.use('/preferenceTag', PreferenceTagRoute);
 app.use('/', userRoute);
 app.use("/itineraries", itinerariesRoute);
 app.use("/museums", museumsRoute);

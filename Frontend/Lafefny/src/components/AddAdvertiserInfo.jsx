@@ -54,7 +54,7 @@ const AddAdvertiserInfo = () => {
             type="number"
             name="Hotline"
             value={formData.hotline}
-            onChange={handleChange}
+            onChange={(e)=>{setFormData({...formData,hotline:e.target.value})}}
             required
           />
         </div>

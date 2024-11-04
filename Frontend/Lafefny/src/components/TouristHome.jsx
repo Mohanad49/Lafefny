@@ -13,7 +13,8 @@ const TouristHome = () => {
         <Link to="/touristActivities">View Activities</Link> | {' '}
         <Link to="/tourist-Itineraries">View My Itineraries</Link> | {' '}
         <Link to="/touristAll-Itineraries">View All Itineraries</Link> | {' '}
-        <Link to="/touristMuseums">View Historical Places/Museums</Link>
+        <Link to="/touristMuseums">View Historical Places/Museums</Link> | {' '}
+        <Link to={`/touristHistory/${localStorage.getItem("userID")}`}>History</Link>
 
         <h2>Profile Management</h2>
         <Link to="/viewTouristInfo">View Info</Link> | {' '}

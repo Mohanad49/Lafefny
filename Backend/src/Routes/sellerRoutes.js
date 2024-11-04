@@ -1,5 +1,6 @@
 const express= require("express");
 const Seller= require("../Models/sellerModel");
+const {uploadPdf} = require('./uploadController');
 const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
@@ -43,6 +44,34 @@ router.patch("/updateSellerInfo/:id",async(req,res)=>{
    res.status(200).json(seller);
 });
 
+router.patch("/uploadLogo/:id", async(req,res)=>{
+  const {logo}=req.body;
+  const userID = req.params.id
+  if(!mongoose.isValidObjectId(userID)){
+      res.status(400).json({error:"invalid seller"})
+  }
+  const seller= await Seller.findOneAndUpdate({userID},{logo});
+  if(!seller){
+      res.status(404).json({error:"seller is not found"});
+  }
+  res.status(200).json(seller);
+})
+
+router.patch("/uploadPDF/:id",uploadPdf,async(req,res)=>{
+  const filename= req.file.originalname;
+  const contentType= req.file.mimetype;
+  const data= req.file.buffer;
+  const userID = req.params.id
+
+  if(!mongoose.isValidObjectId(userID)){
+      res.status(400).json({error:"invalid seller"})
+  }
+  const seller= await Seller.findOneAndUpdate({userID},{filename,contentType,data});
+  if(!seller){
+      res.status(404).json({error:"seller is not found"});
+  }
+  res.status(200).json(seller);
+})
 
 
 module.exports= router;
