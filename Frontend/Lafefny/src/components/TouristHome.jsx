@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
+import ChangePassword from './ChangePassword';
 
 const TouristHome = () => {
   return (
@@ -17,6 +18,7 @@ const TouristHome = () => {
         <h2>Profile Management</h2>
         <Link to="/viewTouristInfo">View Info</Link> | {' '}
         <Link to="/touristEditInfo">Edit Info</Link> | {' '}
+        <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to="/touristSelectPreferences">Select Preferences</Link>
 
         <h2>Product Management</h2>

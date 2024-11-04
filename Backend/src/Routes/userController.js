@@ -1,10 +1,11 @@
 const express = require('express');
+//const bcrypt = require('bcryptjs');
 const User = require('../Models/User');  // Import the User model
 const router = express.Router();
 
 // Sign Up Route
 router.post('/signup', async (req, res) => {
-  const { username, email, password, dateOfBirth, mobileNumber, nationality, job, role } = req.body;
+  const { username, email, password, dateOfBirth, mobileNumber, nationality, job, role , termsAccepted  } = req.body;
 
   try {
     // Check if user already exists
@@ -12,6 +13,8 @@ router.post('/signup', async (req, res) => {
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
     }
+
+    
 
     // Create and save new user
     const newUser = new User({ username, email, password, dateOfBirth, mobileNumber, nationality, job, role });
@@ -43,6 +46,34 @@ router.post('/signin', async (req, res) => {
     res.status(500).json({ message: 'Error signing in', error: err.message });
   }
 });
+
+
+// Change Password Route
+router.put('/change-password/:id', async (req, res) => {
+  const { currentPassword, newPassword } = req.body;
+  const userId = req.params.id; // Assuming userId is available after authentication
+  try {
+    // Find the user
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check if the current password matches
+    if (user.password !== currentPassword) {
+      return res.status(400).json({ message: 'Current password is incorrect' });
+    }
+
+    // Update password
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({ message: 'Password changed successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error changing password', error: err.message });
+  }
+});
+
 
 router.get('/users', async (req, res) => {
     let users = await User.find()

@@ -70,6 +70,7 @@ import SellerInfo from './components/SellerInfo';
 import AddAdvertiserInfo from './components/AddAdvertiserInfo';
 import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
 import AdvertiserInfo from './components/AdvertiserInfo';
+import ChangePassword from './components/ChangePassword';
 
 import './styles/styles.css'
 
@@ -139,6 +140,8 @@ const App = () => {
 
             <Route path="/touristEditInfo" element={<UpdateTouristInfo></UpdateTouristInfo>}/>
             <Route path="/viewTouristInfo" element={<TouristInfo></TouristInfo>}/>
+            <Route path="/changepassword" element={<ChangePassword></ChangePassword>}/>
+            
             <Route path="/touristSelectPreferences" element={<TouristSelectPreferences />} />
 
             <Route path='/addTourGuideInfo' element={<AddTourGuideInfo></AddTourGuideInfo>}/>

@@ -1,5 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
-/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
@@ -16,9 +14,10 @@ function Sign() {
     mobileNumber: '',
     nationality: '',
     job: '',
-    role:'Tourist'
+    role: 'Tourist',
+    termsAccepted:false,
   });
-
+  const [showTerms, setShowTerms] = useState(false); // State to control the terms modal
   const navigate = useNavigate();
 
   const handleChange = (e) => {
@@ -27,6 +26,13 @@ function Sign() {
       ...formData,
       [name]: value,
     });
+  };
+
+  const handleCheckboxChange = () => {
+    setFormData((prevData) => ({
+      ...prevData,
+      termsAccepted: !prevData.termsAccepted,
+    }));
   };
 
   const handleSignUp = () => {
@@ -40,41 +46,63 @@ function Sign() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+
     const updatedFormData = {
-        ...formData,
-        role: userType,  // Assign role based on the dropdown selection
-      };
-    
+      ...formData,
+      role: userType,
+    };
+
     try {
-        if (isSignUp) {
-          const signUpResponse = await signUp(updatedFormData);
-          alert('Sign up successful! You can now sign in.');
-          setIsSignUp(false);
-        } else {
-          const signInResponse = await signIn(formData.email, formData.password);
-          const userRole = signInResponse.role;
-          localStorage.setItem('currentUserName', signInResponse.username);
-          localStorage.setItem('userID', signInResponse.id);
+      if (isSignUp) {
+        
+    if (!formData.termsAccepted) {
+      alert("You must accept the terms and conditions to sign up.");
+      return;
+    }
+        const signUpResponse = await signUp(updatedFormData);
+        
+    if (!formData.termsAccepted) {
+      alert("You must accept the terms and conditions to sign up.");
+      return;
+    }
+        alert('Sign up successful! You can now sign in.');
+        setIsSignUp(false);
+
+      } else {
+        const signInResponse = await signIn(formData.email, formData.password);
+        const userRole = signInResponse.role;
+        localStorage.setItem('currentUserName', signInResponse.username);
+        localStorage.setItem('userID', signInResponse.id);
+        
         // Redirect based on the user role
-        if (userRole === 'Tourist') {
+        switch(userRole) {
+          case 'Tourist':
             navigate('/touristHome');
-        } else if (userRole === 'Seller') {
+            break;
+          case 'Seller':
             navigate('/sellerHome');
-        } else if (userRole === 'TourGuide') {
+            break;
+          case 'TourGuide':
             navigate('/tourGuideHome');
-        } else if (userRole === 'Advertiser') {
+            break;
+          case 'Advertiser':
             navigate('/advertiserHome');
-        } else if (userRole === 'Admin') {
+            break;
+          case 'Admin':
             navigate('/adminHome');
-        } else {
+            break;
+          default:
             alert('Invalid role detected');
         }
-
-        }
-      } catch (error) {
-        console.error('Authentication error:', error);
-        alert(error);
       }
+    } catch (error) {
+      console.error('Authentication error:', error);
+      alert(error);
+    }
+  };
+
+  const toggleTermsModal = () => {
+    setShowTerms(!showTerms);
   };
 
   return (
@@ -170,6 +198,21 @@ function Sign() {
                 </div>
               </>
             )}
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <input
+                type="checkbox"
+                checked={formData.termsAccepted}
+                onChange={(e) =>
+                  setFormData({ ...formData, termsAccepted: e.target.checked })
+                }
+              />
+              <label style={{ marginLeft: '8px' }}>
+                I accept the terms and conditions
+              </label>
+              <button type="button" onClick={toggleTermsModal} style={{ marginLeft: '10px' }}>
+                View Terms
+              </button>
+            </div>
             <button type="submit">Sign Up</button>
           </>
         ) : (
@@ -210,6 +253,26 @@ function Sign() {
           </p>
         )}
       </div>
+
+      {/* Terms and Conditions Modal */}
+      {showTerms && (
+        <div className="modal">
+          <div className="modal-content">
+            <span className="close" onClick={toggleTermsModal}>&times;</span>
+            <h2>Terms and Conditions</h2>
+            <ol>
+              <li><strong>Booking Confirmation:</strong> Your booking will be confirmed once you receive a confirmation email from us.</li>
+              <li><strong>Payment:</strong> Full payment must be made at the time of booking unless stated otherwise.</li>
+              <li><strong>Cancellation Policy:</strong> Cancellations made within 48 hours of the trip will incur a 100% cancellation fee.</li>
+              <li><strong>Changes to Bookings:</strong> Any changes to bookings must be requested via email and are subject to availability.</li>
+              <li><strong>Travel Insurance:</strong> We recommend that all travelers obtain comprehensive travel insurance.</li>
+              <li><strong>Conduct:</strong> All guests are expected to behave respectfully towards other guests and staff.</li>
+              <li><strong>Liability:</strong> Our company is not liable for any injuries, losses, or damages incurred during your trip.</li>
+              <li><strong>Governing Law:</strong> These terms are governed by the laws of [Your Country/Region].</li>
+            </ol>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
