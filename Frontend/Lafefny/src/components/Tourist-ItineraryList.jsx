@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
 import '../styles/ItineraryList.css';
@@ -12,12 +12,15 @@ const ItineraryList = () => {
   const [sortBy, setSortBy] = useState('name');
   const [filterDate, setFilterDate] = useState('');
   const [filterPreferences, setFilterPreferences] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItinerary, setCurrentItinerary] = useState(null);
+  const [currency, setCurrency] = useState('EGP');
 
   const currentUserName = localStorage.getItem('currentUserName');
   
   useEffect(() => {
     fetchItineraries();
-  }, [searchTerm, filterType, filterValue, sortBy]);
+  }, [searchTerm, filterType, filterValue, sortBy, currency]);
 
   const fetchItineraries = async () => {
     try {
@@ -27,28 +30,15 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
-      console.log('Full response:', response);
       if (Array.isArray(response)) {
-        // Filter itineraries for the current user
         const userItineraries = response.filter(itinerary => itinerary.touristName === currentUserName);
-        console.log('Fetched itineraries for current user:', userItineraries);
         setItineraries(userItineraries);
       } else {
-        console.error('Response is not an array:', response);
         setItineraries([]);
       }
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       setItineraries([]);
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await deleteTouristItinerary(id);
-      fetchItineraries();
-    } catch (error) {
-      console.error('Error deleting itinerary:', error);
     }
   };
 
@@ -100,10 +90,51 @@ const ItineraryList = () => {
       return 0;
     });
 
+  const convertPrice = (price) => {
+    const conversionRates = {
+      EGP: 1,
+      USD:0.02,
+      EUR: 0.019,
+      GBP: 0.016,
+    };
+    return (price * conversionRates[currency]).toFixed(2);
+  };
+  
+  const handleCurrencyChange = (event) => {
+    setCurrency(event.target.value);
+  };
+
+  const handleShare = useCallback((itinerary) => {
+    setCurrentItinerary(itinerary);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCopyLink = () => {
+    const shareableLink = `${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`;
+    navigator.clipboard.writeText(shareableLink).then(() => {
+      alert('Link copied to clipboard!');
+      setIsModalOpen(false);
+    });
+  };
+
+  const handleEmailShare = () => {
+    const shareableLink = `${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`;
+    const subject = 'Check out this itinerary!';
+    const body = `I found this itinerary that you might like: ${shareableLink}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setIsModalOpen(false);
+  };
+
   return (
     <div className="itinerary-list-container">
       <h2>My Itineraries</h2>
       <div className="controls">
+      <select value={currency} onChange={handleCurrencyChange} className="currency-select">
+          <option value="EGP">EGP</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
         <input
           type="text"
           placeholder="Search by name, activity, or location..."
@@ -146,7 +177,7 @@ const ItineraryList = () => {
         ) : filterType && (
           <input
             type={filterType === 'price' || filterType === 'ratings' ? 'number' : 'text'}
-            placeholder={`Enter ${filterType}`}
+            placeholder={`Enter Max Budget`}
             value={filterValue}
             onChange={(e) => setFilterValue(e.target.value)}
             className="filter-input"
@@ -169,7 +200,7 @@ const ItineraryList = () => {
             <li key={itinerary._id} className="itinerary-item">
               <div className="itinerary-card">
                 <h3>{itinerary.name}</h3>
-                <p className="yellow-text">Price: ${itinerary.price}</p>
+                <p className="yellow-text">Price: {convertPrice(itinerary.price)} {currency}</p>
                 {itinerary.touristName && <p className="yellow-text">Tourist Name: {itinerary.touristName}</p>}
                 {itinerary.startDate && <p className="yellow-text">Start Date: {formatDate(itinerary.startDate)}</p>}
                 {itinerary.endDate && <p className="yellow-text">End Date: {formatDate(itinerary.endDate)}</p>}
@@ -211,6 +242,9 @@ const ItineraryList = () => {
                     </ul>
                   </>
                 )}
+                <div className="activity-actions">
+                  <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
+                </div>
               </div>
             </li>
           ))}
@@ -218,6 +252,25 @@ const ItineraryList = () => {
       ) : (
         <div className="no-itineraries-message">
           <p>No Current Itineraries Available</p>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="share-modal">
+          <div className="share-modal-content">
+            <h2 style={{ color: "blue" }}> Share Itinerary</h2>
+            <div className="share-link-container">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`}
+                className="share-link-input"
+              />
+              <button onClick={handleCopyLink} className="copy-link-button">Copy Link</button>
+            </div>
+            <button onClick={handleEmailShare}>Send via Email</button>
+            <button onClick={() => setIsModalOpen(false)}>Close</button>
+          </div>
         </div>
       )}
     </div>

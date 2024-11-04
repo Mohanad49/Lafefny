@@ -43,6 +43,19 @@ router.get("/", async (req, res) => {
   }
 });
 
+// GET an itinerary by ID
+router.get("/:id", async (req, res) => {
+  try {
+      const itinerary = await TouristItinerary.findById(req.params.id);
+      if (!itinerary) {
+          return res.status(404).json({ error: "Itinerary not found" });
+      }
+      res.json(itinerary);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
+
 // UPDATE an itinerary by ID
 router.put("/:id", async (req, res) => {
   try {

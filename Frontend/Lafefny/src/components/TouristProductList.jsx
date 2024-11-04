@@ -12,8 +12,8 @@ const ProductList = () => {
   const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
   const [selectedReviews, setSelectedReviews] = useState([]);
+  const [currency, setCurrency] = useState('EGP');
 
-  // Add this function at the top of your component, just after the useState declarations
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -41,6 +41,20 @@ const ProductList = () => {
 
   const handleSearch = (event) => {
     setSearchTerm(event.target.value);
+  };
+
+  const convertPrice = (price) => {
+    const conversionRates = {
+      EGP: 1,
+      USD:0.02,
+      EUR: 0.019,
+      GBP: 0.016,
+    };
+    return (price * conversionRates[currency]).toFixed(2);
+};
+  
+  const handleCurrencyChange = (event) => {
+    setCurrency(event.target.value);
   };
 
   const openModal = (reviews) => {
@@ -83,6 +97,12 @@ const ProductList = () => {
     <div className="product-list-container">
       <h1>Product List</h1>
       <div className="controls">
+        <select value={currency} onChange={handleCurrencyChange} className="currency-select">
+          <option value="EGP">EGP</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
         <input
           type="text"
           placeholder="Search by name, description, or seller..."
@@ -137,7 +157,7 @@ const ProductList = () => {
             <tr key={product._id}>
               <td>{product.name}</td>
               <td><img src={product.imageUrl} alt={product.name} width="100" /></td>
-              <td>${product.price.toFixed(2)}</td>
+              <td>{convertPrice(product.price)} {currency}</td>
               <td>{product.quantity}</td>
               <td>{product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})</td>
               <td>{product.description}</td>

@@ -22,3 +22,7 @@ export const deleteTouristItinerary = async (id) => {
     const response = await axios.delete(`${API_URL}/${id}`);
     return response.data;
 };
+
+export const getTouristItineraryById = (id) => {
+    return axios.get(`${API_URL}/${id}`);
+};

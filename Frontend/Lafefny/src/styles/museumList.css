@@ -41,6 +41,7 @@
   }
   
   .museum-item {
+    background-color: rgba(0, 0, 0, 0.6);
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
@@ -48,13 +49,14 @@
   }
   
   .museum-item h3 {
+    color: #fff;
     text-align: center;
-    font-weight:bold;
+    font-weight: bold;
   }
   
   .museum-actions {
-    margin-top: 10px;
     text-align: center;
+    margin-top: 10px;
   }
   
   .view-button,
@@ -75,8 +77,8 @@
   }
   
   .museum-edit-button {
-    background-color: #2196F3;
-    color: white;
+    background-color: #FFC107;
+    color: black;
   }
   
   .delete-button {
@@ -94,4 +96,15 @@
     .sort-select {
       width: 100%;
     }
+  }
+  
+  .yellow-text {
+    color: yellow;
+  }
+  
+  .no-museums-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #666;
   }
