@@ -1,0 +1,43 @@
+.add-museum-tag {
+  max-width: 400px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.add-museum-tag form > div {
+  margin-bottom: 15px;
+}
+
+.add-museum-tag label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.add-museum-tag input,
+.add-museum-tag select {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+.add-museum-tag button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.add-museum-tag button:hover {
+  background-color: #45a049;
+}
+
+.add-museum-tag-error {
+  color: red;
+}
+
+.add-museum-tag-success {
+  color: green;
+}

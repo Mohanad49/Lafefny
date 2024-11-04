@@ -1,0 +1,133 @@
+/* ItineraryList.css */
+
+.itinerary-list-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.add-itinerary-button {
+  display: inline-block;
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  text-decoration: none;
+  border-radius: 5px;
+  margin-bottom: 20px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.search-input,
+.budget-input,
+.date-input,
+.preference-input,
+.language-input,
+.sort-select {
+  flex: 1;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  font-size: 14px;
+}
+
+.sort-select {
+  cursor: pointer;
+}
+
+.itinerary-list {
+  list-style-type: none;
+  padding: 0;
+}
+
+.itinerary-item {
+  background-color: rgba(0, 0, 0, 0.6);
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+}
+
+.itinerary-item h3, .itinerary-item h4 {
+  color: #fff;
+  margin-top: 10px;
+  margin-bottom: 5px;
+}
+
+.itinerary-item ul {
+  list-style-type: none;
+  padding-left: 20px;
+}
+
+.itinerary-actions {
+  text-align: center;
+  margin-top: 10px;
+}
+
+.view-button,
+.edit-button,
+.delete-button {
+  padding: 5px 10px;
+  margin-right: 10px;
+  border: none;
+  border-radius: 3px;
+  cursor: pointer;
+  text-decoration: none;
+  font-size: 14px;
+}
+
+.view-button {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.edit-button {
+  background-color: #FFC107;
+  color: black;
+}
+
+.delete-button {
+  background-color: #f44336;
+  color: white;
+}
+
+@media (max-width: 600px) {
+  .controls {
+    flex-direction: column;
+  }
+
+  .search-input,
+  .budget-input,
+  .date-input,
+  .preference-input,
+  .language-input,
+  .sort-select {
+    width: 100%;
+  }
+}
+
+.yellow-text {
+  color: yellow;
+}
+
+.itinerary-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  background-color: transparent;
+}
+
+/* Add any additional CSS needed for the card layout */
+
+.no-itineraries-message {
+  text-align: center;
+  padding: 20px;
+  font-size: 18px;
+  color: #666;
+}

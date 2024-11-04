@@ -1,0 +1,280 @@
+/* eslint-disable no-unused-vars */
+import React, { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
+import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
+import '../styles/ItineraryList.css';
+
+const ItineraryList = () => {
+  const [itineraries, setItineraries] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterType, setFilterType] = useState('');
+  const [filterValue, setFilterValue] = useState('');
+  const [sortBy, setSortBy] = useState('name');
+  const [filterDate, setFilterDate] = useState('');
+  const [filterPreferences, setFilterPreferences] = useState('');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [currentItinerary, setCurrentItinerary] = useState(null);
+  const [currency, setCurrency] = useState('EGP');
+
+  const currentUserName = localStorage.getItem('currentUserName');
+  
+  useEffect(() => {
+    fetchItineraries();
+  }, [searchTerm, filterType, filterValue, sortBy, currency]);
+
+  const fetchItineraries = async () => {
+    try {
+      const response = await getAllTouristItineraries({
+        search: searchTerm,
+        filterType,
+        filterValue,
+        sortBy,
+      });
+      if (Array.isArray(response)) {
+        const userItineraries = response.filter(itinerary => itinerary.touristName === currentUserName);
+        setItineraries(userItineraries);
+      } else {
+        setItineraries([]);
+      }
+    } catch (error) {
+      console.error('Error fetching itineraries:', error);
+      setItineraries([]);
+    }
+  };
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Not specified';
+    const date = new Date(dateString);
+    return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+  };
+
+  // Filter itineraries locally after fetching
+  const filteredItineraries = itineraries
+    .filter(itinerary => {
+      if (!itinerary) return false;
+      const nameMatch = itinerary.name && itinerary.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const activityMatch = itinerary.activities && itinerary.activities.some(activity => 
+        activity && activity.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      const locationMatch = itinerary.locations && itinerary.locations.some(location => 
+        location && location.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      const tagMatch = itinerary.tags && itinerary.tags.some(tag => 
+        tag && tag.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+      const preferenceMatch = itinerary.preferences && itinerary.preferences.toLowerCase().includes(searchTerm.toLowerCase());
+      const languageMatch = itinerary.language && itinerary.language.toLowerCase().includes(searchTerm.toLowerCase());
+      return nameMatch || activityMatch || locationMatch || tagMatch || preferenceMatch || languageMatch;
+    })
+    .filter(itinerary => {
+      if (!itinerary) return false;
+      if (filterType === 'price' && filterValue && itinerary.price > Number(filterValue)) return false;
+      if (filterType === 'ratings' && filterValue && itinerary.ratings < Number(filterValue)) return false;
+      if (filterType === 'language' && filterValue && itinerary.language && 
+          !itinerary.language.toLowerCase().includes(filterValue.toLowerCase())) return false;
+      if (filterType === 'date' && filterDate) {
+        const filterDateObj = new Date(filterDate);
+        const startDateObj = new Date(itinerary.startDate);
+        const endDateObj = new Date(itinerary.endDate);
+        if (filterDateObj < startDateObj || filterDateObj > endDateObj) return false;
+      }
+      if (filterType === 'preferences' && filterPreferences && itinerary.preferences &&
+          !itinerary.preferences.toLowerCase().includes(filterPreferences.toLowerCase())) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
+      if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
+      if (sortBy === 'ratings') return (b.ratings.averageRating || 0) - (a.ratings.averageRating || 0); // Descending order
+      if (sortBy === 'date') return new Date(a.startDate) - new Date(b.startDate);
+      return 0;
+    });
+
+  const convertPrice = (price) => {
+    const conversionRates = {
+      EGP: 1,
+      USD:0.02,
+      EUR: 0.019,
+      GBP: 0.016,
+    };
+    return (price * conversionRates[currency]).toFixed(2);
+  };
+  
+  const handleCurrencyChange = (event) => {
+    setCurrency(event.target.value);
+  };
+
+  const handleShare = useCallback((itinerary) => {
+    setCurrentItinerary(itinerary);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCopyLink = () => {
+    const shareableLink = `${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`;
+    navigator.clipboard.writeText(shareableLink).then(() => {
+      alert('Link copied to clipboard!');
+      setIsModalOpen(false);
+    });
+  };
+
+  const handleEmailShare = () => {
+    const shareableLink = `${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`;
+    const subject = 'Check out this itinerary!';
+    const body = `I found this itinerary that you might like: ${shareableLink}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setIsModalOpen(false);
+  };
+
+  return (
+    <div className="itinerary-list-container">
+      <h2>My Itineraries</h2>
+      <div className="controls">
+      <select value={currency} onChange={handleCurrencyChange} className="currency-select">
+          <option value="EGP">EGP</option>
+          <option value="USD">USD</option>
+          <option value="EUR">EUR</option>
+          <option value="GBP">GBP</option>
+        </select>
+        <input
+          type="text"
+          placeholder="Search by name, activity, or location..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="search-input"
+        />
+        <select
+          value={filterType}
+          onChange={(e) => {
+            setFilterType(e.target.value);
+            setFilterValue('');
+            setFilterDate('');
+            setFilterPreferences('');
+          }}
+          className="filter-select"
+        >
+          <option value="">Select Filter</option>
+          <option value="price">Filter by Price</option>
+          <option value="date">Filter by Date</option>
+          <option value="language">Filter by Language</option>
+          <option value="ratings">Filter by Ratings</option>
+          <option value="preferences">Filter by Preferences</option>
+        </select>
+        {filterType === 'date' ? (
+          <input
+            type="date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="filter-input"
+          />
+        ) : filterType === 'preferences' ? (
+          <input
+            type="text"
+            placeholder="Enter preferences"
+            value={filterPreferences}
+            onChange={(e) => setFilterPreferences(e.target.value)}
+            className="filter-input"
+          />
+        ) : filterType && (
+          <input
+            type={filterType === 'price' || filterType === 'ratings' ? 'number' : 'text'}
+            placeholder={`Enter Max Budget`}
+            value={filterValue}
+            onChange={(e) => setFilterValue(e.target.value)}
+            className="filter-input"
+          />
+        )}
+        <select
+          value={sortBy}
+          onChange={(e) => setSortBy(e.target.value)}
+          className="sort-select"
+        >
+          <option value="name">Sort by Name</option>
+          <option value="price">Sort by Price</option>
+          <option value="date">Sort by Date</option>
+          <option value="ratings">Sort by Ratings</option>
+        </select>
+      </div>
+      {filteredItineraries.length > 0 ? (
+        <ul className="itinerary-list">
+          {filteredItineraries.map((itinerary) => (
+            <li key={itinerary._id} className="itinerary-item">
+              <div className="itinerary-card">
+                <h3>{itinerary.name}</h3>
+                <p className="yellow-text">Price: {convertPrice(itinerary.price)} {currency}</p>
+                {itinerary.touristName && <p className="yellow-text">Tourist Name: {itinerary.touristName}</p>}
+                {itinerary.startDate && <p className="yellow-text">Start Date: {formatDate(itinerary.startDate)}</p>}
+                {itinerary.endDate && <p className="yellow-text">End Date: {formatDate(itinerary.endDate)}</p>}
+                
+                {/* New fields */}
+                {itinerary.ratings !== undefined && <p className="yellow-text">Ratings: {itinerary.ratings.averageRating}</p>}
+                {itinerary.preferences && <p className="yellow-text">Preferences: {itinerary.preferences}</p>}
+                {itinerary.language && <p className="yellow-text">Language: {itinerary.language}</p>}
+                
+                {itinerary.activities && itinerary.activities.length > 0 && (
+                  <>
+                    <h4 className="yellow-text">Activities:</h4>
+                    <ul>
+                      {itinerary.activities.map((activity, index) => (
+                        <li key={index} className="yellow-text">{activity}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {itinerary.locations && itinerary.locations.length > 0 && (
+                  <>
+                    <h4 className="yellow-text">Locations:</h4>
+                    <ul>
+                      {itinerary.locations.map((location, index) => (
+                        <li key={index} className="yellow-text">{location}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+
+                {itinerary.tags && itinerary.tags.length > 0 && (
+                  <>
+                    <h4 className="yellow-text">Tags:</h4>
+                    <ul>
+                      {itinerary.tags.map((tag, index) => (
+                        <li key={index} className="yellow-text">{tag}</li>
+                      ))}
+                    </ul>
+                  </>
+                )}
+                <div className="activity-actions">
+                  <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
+                </div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <div className="no-itineraries-message">
+          <p>No Current Itineraries Available</p>
+        </div>
+      )}
+
+      {isModalOpen && (
+        <div className="share-modal">
+          <div className="share-modal-content">
+            <h2 style={{ color: "blue" }}> Share Itinerary</h2>
+            <div className="share-link-container">
+              <input
+                type="text"
+                readOnly
+                value={`${window.location.origin}/tourist-Itineraries/${currentItinerary._id}`}
+                className="share-link-input"
+              />
+              <button onClick={handleCopyLink} className="copy-link-button">Copy Link</button>
+            </div>
+            <button onClick={handleEmailShare}>Send via Email</button>
+            <button onClick={() => setIsModalOpen(false)}>Close</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default ItineraryList;

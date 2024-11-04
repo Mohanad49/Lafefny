@@ -1,0 +1,43 @@
+
+.select-preferences {
+  padding: 20px;
+  
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.preference-tag {
+  margin: 10px 0;
+}
+
+.preference-label {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+.preference-checkbox {
+  margin-right: 10px; /* Space between checkbox and text */
+  width: 20px; /* Custom width */
+  height: 20px; /* Custom height */
+  accent-color: #4CAF50; /* Change checkbox color */
+}
+
+.preference-text {
+  font-size: 16px;
+  
+}
+
+.save-button {
+  margin-top: 20px;
+  padding: 10px 15px;
+  background-color: #4CAF50;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.save-button:hover {
+  background-color: #45a049; /* Darker green on hover */
+}

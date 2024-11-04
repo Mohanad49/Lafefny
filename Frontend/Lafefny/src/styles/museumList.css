@@ -1,0 +1,110 @@
+.museum-list-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .add-museum-button {
+    display: inline-block;
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+  
+  .search-input,
+  .filter-input,
+  .sort-select {
+    flex: 1;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+  }
+  
+  .sort-select {
+    cursor: pointer;
+  }
+  
+  .museum-list {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .museum-item {
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 15px;
+  }
+  
+  .museum-item h3 {
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+  }
+  
+  .museum-actions {
+    text-align: center;
+    margin-top: 10px;
+  }
+  
+  .view-button,
+  .museum-edit-button,
+  .delete-button {
+    padding: 5px 10px;
+    margin-right: 10px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 14px;
+  }
+  
+  .view-button {
+    background-color: #4CAF50;
+    color: white;
+  }
+  
+  .museum-edit-button {
+    background-color: #FFC107;
+    color: black;
+  }
+  
+  .delete-button {
+    background-color: #f44336;
+    color: white;
+  }
+  
+  @media (max-width: 600px) {
+    .controls {
+      flex-direction: column;
+    }
+  
+    .search-input,
+    .filter-input,
+    .sort-select {
+      width: 100%;
+    }
+  }
+  
+  .yellow-text {
+    color: yellow;
+  }
+  
+  .no-museums-message {
+    text-align: center;
+    padding: 20px;
+    font-size: 18px;
+    color: #666;
+  }

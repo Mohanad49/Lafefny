@@ -1,5 +1,5 @@
 const express = require("express");
-const Itinerary = require("../Models/Itinerary"); // Correct import here
+const Itinerary = require("../Models/itinerary"); // Correct import here
 
 const router = express.Router();
 
@@ -22,6 +22,17 @@ router.get('/', async (req, res) => {
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
+});
+
+// Get a specific itinerary by ID
+router.get('/:id', async (req, res) => {
+    try {
+        const itinerary = await Itinerary.findById(req.params.id);
+        if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+        res.status(200).json(itinerary);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // Update an itinerary

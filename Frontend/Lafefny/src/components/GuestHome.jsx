@@ -10,12 +10,10 @@ const Home = () => {
       <h1>Welcome to the HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/activities">View Activities</Link> |{' '}
-        <Link to="/add-activity">Add Activity</Link>
+        <Link to="/guestActivities">View Activities</Link> | {' '}
+        <Link to="/guest-Itineraries">View Itineraries</Link> | {' '}
+        <Link to="/guestMuseums">View Historical Places/Museums</Link>
 
-        <h2>Product Management</h2>
-        <Link to="/products">View Products</Link> | {' '}
-        <Link to="/add-product">Add Product</Link>
       </nav>
     </div>
   );

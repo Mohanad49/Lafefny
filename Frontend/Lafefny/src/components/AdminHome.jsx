@@ -12,13 +12,15 @@ const AdminHome = () => {
 
         <h2>User Management</h2>
         <Link to="/users">View All Users</Link> |{' '}
-        <Link to="/add-user">Add Tourism Governor</Link> | {' '}
-        <Link to="/add-user">Add Admin</Link>
+        <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
+        <Link to="/add-admin">Add Admin</Link>
 
         <h2>Activity Management</h2>
         <Link to="/activities">View Activities</Link> |{' '}
+        <Link to="/activityCategories">View Activities Categories</Link> |{' '}
+        <Link to="/preferenceTags">View Preference Tags</Link> | {' '}
         <Link to="/add-activityCategory">Add Activity Category</Link> | {' '}
-        <Link to="/add-activityTag">Add Preference Tag</Link>
+        <Link to="/add-preferenceTag">Add Preference Tag</Link>
 
         <h2>Product Management</h2>
         <Link to="/products">View Products</Link> | {' '}

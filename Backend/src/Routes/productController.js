@@ -14,7 +14,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET a single product by ID
-router.get('/', async (req, res) => {
+router.get('/:id', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
     if (!product) {

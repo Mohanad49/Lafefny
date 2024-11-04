@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../Models/User');
+const TourismGovernor = require('../Models/TourismGovernor');
+const Admin = require('../Models/Admin');
 
 // Delete Account (any user)
 router.delete('/delete-account/:userId', async (req, res) => {
@@ -22,17 +24,15 @@ router.post('/add-tourism-governor', async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await TourismGovernor.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ message: 'Username already exists' });
     }
 
-    const tourismGovernor = new User({
+    const tourismGovernor = new TourismGovernor({
       username,
       password,
-      role: 'Tourism governor'
     });
-
     await tourismGovernor.save();
     res.json({ message: 'Tourism Governor added successfully' });
   } catch (error) {
@@ -44,16 +44,19 @@ router.post('/add-tourism-governor', async (req, res) => {
 router.post('/add-admin', async (req, res) => {
   const { username, password } = req.body;
 
+  if (!username || !password) {
+    return res.status(400).json({ message: 'Username and Password are required' });
+  }
+  
   try {
-    const existingUser = await User.findOne({ username });
+    const existingUser = await Admin.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ message: 'Username already exists' });
     }
 
-    const admin = new User({
+    const admin = new Admin({
       username,
       password,
-      role: 'Admin'
     });
 
     await admin.save();

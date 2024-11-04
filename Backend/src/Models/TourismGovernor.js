@@ -1,15 +1,14 @@
 const mongoose = require('mongoose');
 
 const TourismGovernorSchema = new mongoose.Schema({
-  Username: {
+  username: {
     type: String,
     required: true,
     unique: true
   },
-  Password: {
+  password: {
     type: String,
     required: true,
-    unique: true
   }
 }, { timestamps: true });
 
