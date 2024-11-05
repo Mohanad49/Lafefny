@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getProducts } from '../services/productService';
 import '../styles/productList.css';
+import { fetchExchangeRates } from '../services/currencyService';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -13,6 +14,9 @@ const ProductList = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReviews, setSelectedReviews] = useState([]);
   const [currency, setCurrency] = useState('EGP');
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(null);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -27,6 +31,20 @@ const ProductList = () => {
 
   useEffect(() => {
     fetchProducts();
+  }, []);
+
+  useEffect(() => {
+    const getRates = async () => {
+      try {
+        const rates = await fetchExchangeRates();
+        setConversionRates(rates);
+      } catch (error) {
+        setRatesError('Failed to load currency rates');
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+    getRates();
   }, []);
 
   const fetchProducts = async () => {
@@ -44,15 +62,13 @@ const ProductList = () => {
   };
 
   const convertPrice = (price) => {
-    const conversionRates = {
-      EGP: 1,
-      USD:0.02,
-      EUR: 0.019,
-      GBP: 0.016,
-    };
-    return (price * conversionRates[currency]).toFixed(2);
-};
-  
+    if (!conversionRates || !price) return price;
+    // Convert from EGP to USD first
+    const priceInUSD = price / conversionRates.EGP;
+    // Then convert to target currency
+    return (priceInUSD * conversionRates[currency]).toFixed(2);
+  };
+
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
   };
@@ -97,12 +113,21 @@ const ProductList = () => {
     <div className="product-list-container">
       <h1>Product List</h1>
       <div className="controls">
-        <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
+        {ratesLoading ? (
+          <p>Loading currencies...</p>
+        ) : ratesError ? (
+          <p>Error loading currencies</p>
+        ) : (
+          <select 
+            value={currency} 
+            onChange={(e) => setCurrency(e.target.value)}
+            className="currency-select"
+          >
+            {Object.keys(conversionRates).map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        )}
         <input
           type="text"
           placeholder="Search by name, description, or seller..."
@@ -157,7 +182,7 @@ const ProductList = () => {
             <tr key={product._id}>
               <td>{product.name}</td>
               <td><img src={product.imageUrl} alt={product.name} width="100" /></td>
-              <td>{convertPrice(product.price)} {currency}</td>
+              <td>{!ratesLoading && convertPrice(product.price)} {currency}</td>
               <td>{product.quantity}</td>
               <td>{product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})</td>
               <td>{product.description}</td>

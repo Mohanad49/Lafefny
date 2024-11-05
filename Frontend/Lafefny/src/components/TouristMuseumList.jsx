@@ -2,6 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { getMuseums } from '../services/museumService';
 import '../styles/museumList.css'
+import { fetchExchangeRates } from '../services/currencyService';
 
 const TouristMuseumList = () => {
   const [museums, setMuseums] = useState([]);
@@ -11,9 +12,26 @@ const TouristMuseumList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentMuseum, setCurrentMuseum] = useState(null);
   const [currency, setCurrency] = useState('EGP');
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(null);
 
   useEffect(() => {
     fetchMuseums();
+  }, []);
+
+  useEffect(() => {
+    const getRates = async () => {
+      try {
+        const rates = await fetchExchangeRates();
+        setConversionRates(rates);
+      } catch (error) {
+        setRatesError('Failed to load currency rates');
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+    getRates();
   }, []);
 
   const fetchMuseums = async () => {
@@ -45,15 +63,13 @@ const TouristMuseumList = () => {
     });
 
   const convertPrice = (price) => {
-    const conversionRates = {
-      EGP: 1,
-      USD:0.02,
-      EUR: 0.019,
-      GBP: 0.016,
-    };
-    return (price * conversionRates[currency]).toFixed(2);
+    if (!conversionRates || !price) return price;
+    // Convert from EGP to USD first
+    const priceInUSD = price / conversionRates.EGP;
+    // Then convert to target currency
+    return (priceInUSD * conversionRates[currency]).toFixed(2);
   };
-  
+
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
   };
@@ -83,12 +99,21 @@ const TouristMuseumList = () => {
     <div className="museum-list-container">
       <h2>Museum List</h2>
       <div className="controls">
-      <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
+        {ratesLoading ? (
+          <p>Loading currencies...</p>
+        ) : ratesError ? (
+          <p>Error loading currencies</p>
+        ) : (
+          <select 
+            value={currency} 
+            onChange={(e) => setCurrency(e.target.value)}
+            className="currency-select"
+          >
+            {Object.keys(conversionRates).map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        )}
         <input
           type="text"
           placeholder="Search museums..."
@@ -123,9 +148,9 @@ const TouristMuseumList = () => {
             <p>Opening Hours: {museum.openingHours || 'N/A'}</p>
             <p>Ticket Prices:</p>
             <ul>
-              <li>Foreigner: {convertPrice(museum.ticketPrices?.foreigner) || 'N/A'} {currency}</li>
-              <li>Native: {convertPrice(museum.ticketPrices?.native) || 'N/A'} {currency}</li>
-              <li>Student: {convertPrice(museum.ticketPrices?.student) || 'N/A'} {currency}</li>
+              <li>Foreigner: {!ratesLoading && convertPrice(museum.ticketPrices?.foreigner)} {currency}</li>
+              <li>Native: {!ratesLoading && convertPrice(museum.ticketPrices?.native)} {currency}</li>
+              <li>Student: {!ratesLoading && convertPrice(museum.ticketPrices?.student)} {currency}</li>
             </ul>
             <div className="museum-actions">
               <button className="share-button" onClick={() => handleShare(museum)}>Share</button>

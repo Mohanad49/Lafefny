@@ -4,6 +4,8 @@ import { Link } from 'react-router-dom';
 import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
 import '../styles/ItineraryList.css';
 
+const EXCHANGE_API_KEY = 'a6ef7b85eab930c5bf44ae65'; // Store this in .env file in practice
+
 const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
@@ -15,12 +17,38 @@ const ItineraryList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState(null);
   const [currency, setCurrency] = useState('EGP');
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesError, setRatesError] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
 
   const currentUserName = localStorage.getItem('currentUserName');
   
   useEffect(() => {
     fetchItineraries();
   }, [searchTerm, filterType, filterValue, sortBy, currency]);
+
+  useEffect(() => {
+    const fetchConversionRates = async () => {
+      try {
+        const response = await fetch(
+          `https://v6.exchangerate-api.com/v6/${EXCHANGE_API_KEY}/latest/USD`
+        );
+        const data = await response.json();
+        if (data.result === "success") {
+          setConversionRates(data.conversion_rates);
+        } else {
+          setRatesError("Failed to fetch conversion rates");
+        }
+      } catch (error) {
+        setRatesError("Error fetching conversion rates");
+        console.error(error);
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+
+    fetchConversionRates();
+  }, []); // Run once on mount
 
   const fetchItineraries = async () => {
     try {
@@ -91,15 +119,17 @@ const ItineraryList = () => {
     });
 
   const convertPrice = (price) => {
-    const conversionRates = {
-      EGP: 1,
-      USD:0.02,
-      EUR: 0.019,
-      GBP: 0.016,
-    };
-    return (price * conversionRates[currency]).toFixed(2);
+    if (!conversionRates) return price; // Return original price if rates not loaded
+    
+    // First convert to USD (assuming price is in EGP)
+    const priceInUSD = price / conversionRates.EGP;
+    
+    // Then convert to target currency
+    const convertedPrice = priceInUSD * conversionRates[currency];
+    
+    return convertedPrice.toFixed(2);
   };
-  
+
   const handleCurrencyChange = (event) => {
     setCurrency(event.target.value);
   };
@@ -130,10 +160,9 @@ const ItineraryList = () => {
       <h2>My Itineraries</h2>
       <div className="controls">
       <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
+          {conversionRates && Object.keys(conversionRates).map(code => (
+            <option key={code} value={code}>{code}</option>
+          ))}
         </select>
         <input
           type="text"
@@ -194,6 +223,8 @@ const ItineraryList = () => {
           <option value="ratings">Sort by Ratings</option>
         </select>
       </div>
+      {ratesLoading && <p>Loading currency rates...</p>}
+      {ratesError && <p>Error: {ratesError}</p>}
       {filteredItineraries.length > 0 ? (
         <ul className="itinerary-list">
           {filteredItineraries.map((itinerary) => (

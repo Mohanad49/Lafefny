@@ -2,6 +2,7 @@
 import React, { useState, useEffect,  useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { getItineraries } from '../services/itineraryService';
+import { fetchExchangeRates } from '../services/currencyService';
 import '../styles/ItineraryList.css';
 
 const ItineraryList = () => {
@@ -13,10 +14,27 @@ const ItineraryList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentItinerary, setCurrentItinerary] = useState(null);
   const [currency, setCurrency] = useState('EGP');
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(null);
 
   useEffect(() => {
     fetchItineraries();
   }, [searchTerm, filterType, filterValue, sortBy, currency]);
+
+  useEffect(() => {
+    const getRates = async () => {
+      try {
+        const rates = await fetchExchangeRates();
+        setConversionRates(rates);
+      } catch (error) {
+        setRatesError('Failed to load currency rates');
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+    getRates();
+  }, []);
 
   const fetchItineraries = async () => {
     try {
@@ -73,52 +91,58 @@ const ItineraryList = () => {
       return 0;
     });
 
-    const convertPrice = (price) => {
-        const conversionRates = {
-          EGP: 1,
-          USD:0.02,
-          EUR: 0.019,
-          GBP: 0.016,
-        };
-        return (price * conversionRates[currency]).toFixed(2);
-    };
-      
-    const handleCurrencyChange = (event) => {
-        setCurrency(event.target.value);
-    };
+  const convertPrice = (price) => {
+    if (!conversionRates || !price) return price;
+    // Convert from EGP to USD first
+    const priceInUSD = price / conversionRates.EGP;
+    // Then convert to target currency
+    return (priceInUSD * conversionRates[currency]).toFixed(2);
+  };
 
-    const handleShare = useCallback((itinerary) => {
-        setCurrentItinerary(itinerary);
-        setIsModalOpen(true);
-      }, []);
-    
-      const handleCopyLink = () => {
-        const shareableLink = `${window.location.origin}/Itineraries/${currentItinerary._id}`;
-        navigator.clipboard.writeText(shareableLink).then(() => {
-          alert('Link copied to clipboard!');
-          setIsModalOpen(false);
-        });
-      };
-    
-      const handleEmailShare = () => {
-        const shareableLink = `${window.location.origin}/Itineraries/${currentItinerary._id}`;
-        const subject = 'Check out this itinerary!';
-        const body = `I found this itinerary that you might like: ${shareableLink}`;
-        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-        setIsModalOpen(false);
-      };
-    
+  const handleCurrencyChange = (event) => {
+    setCurrency(event.target.value);
+  };
+
+  const handleShare = useCallback((itinerary) => {
+    setCurrentItinerary(itinerary);
+    setIsModalOpen(true);
+  }, []);
+
+  const handleCopyLink = () => {
+    const shareableLink = `${window.location.origin}/Itineraries/${currentItinerary._id}`;
+    navigator.clipboard.writeText(shareableLink).then(() => {
+      alert('Link copied to clipboard!');
+      setIsModalOpen(false);
+    });
+  };
+
+  const handleEmailShare = () => {
+    const shareableLink = `${window.location.origin}/Itineraries/${currentItinerary._id}`;
+    const subject = 'Check out this itinerary!';
+    const body = `I found this itinerary that you might like: ${shareableLink}`;
+    window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    setIsModalOpen(false);
+  };
 
   return (
     <div className="itinerary-list-container">
       <h2>Itinerary List</h2>
       <div className="controls">
-      <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
+        {ratesLoading ? (
+          <p>Loading currencies...</p>
+        ) : ratesError ? (
+          <p>Error loading currencies</p>
+        ) : (
+          <select 
+            value={currency} 
+            onChange={handleCurrencyChange}
+            className="currency-select"
+          >
+            {Object.keys(conversionRates).map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        )}
         <input
           type="text"
           placeholder="Search by name, activity, or location..."
@@ -174,7 +198,9 @@ const ItineraryList = () => {
             <div className="itinerary-card">
               <h3>{itinerary.name}</h3>
               <p className="yellow-text">Language: {itinerary.language}</p>
-              <p className="yellow-text">Price: {convertPrice(itinerary.price)} {currency}</p>
+              <p className="yellow-text">
+                Price: {!ratesLoading && convertPrice(itinerary.price)} {currency}
+              </p>
               <p className="yellow-text">Pick Up Location: {itinerary.pickUpLocation}</p>
               <p className="yellow-text">Drop Off Location: {itinerary.dropOffLocation}</p>
               <p className="yellow-text">Rating: {itinerary.ratings.averageRating || 'Not rated'}</p>

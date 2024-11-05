@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { getActivities } from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
 import '../styles/ActivityList.css';
+import { fetchExchangeRates } from '../services/currencyService';
 
 const ActivityList = () => {
   const [activities, setActivities] = useState([]);
@@ -17,11 +18,28 @@ const ActivityList = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentActivity, setCurrentActivity] = useState(null);
   const [currency, setCurrency] = useState('EGP');
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(null);
 
   useEffect(() => {
     fetchActivities();
     fetchActivityCategories();
   }, [searchTerm, filterCategory, sortBy, filterBudget, filterDate, filterRating, currency]);
+
+  useEffect(() => {
+    const getRates = async () => {
+      try {
+        const rates = await fetchExchangeRates();
+        setConversionRates(rates);
+      } catch (error) {
+        setRatesError('Failed to load currency rates');
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+    getRates();
+  }, []);
 
   const fetchActivities = async () => {
     try {
@@ -51,13 +69,11 @@ const ActivityList = () => {
   };
 
   const convertPrice = (price) => {
-    const conversionRates = {
-      EGP: 1,
-      USD:0.02,
-      EUR: 0.019,
-      GBP: 0.016,
-    };
-    return (price * conversionRates[currency]).toFixed(2);
+    if (!conversionRates || !price) return price;
+    // Convert from EGP to USD first
+    const priceInUSD = price / conversionRates.EGP;
+    // Then convert to target currency
+    return (priceInUSD * conversionRates[currency]).toFixed(2);
   };
 
   const handleCurrencyChange = (event) => {
@@ -113,12 +129,21 @@ const ActivityList = () => {
     <div className="activity-list-container">
       <h1>Activity List</h1>
       <div className="controls">
-        <select value={currency} onChange={handleCurrencyChange} className="currency-select">
-          <option value="EGP">EGP</option>
-          <option value="USD">USD</option>
-          <option value="EUR">EUR</option>
-          <option value="GBP">GBP</option>
-        </select>
+        {ratesLoading ? (
+          <p>Loading currencies...</p>
+        ) : ratesError ? (
+          <p>Error loading currencies</p>
+        ) : (
+          <select 
+            value={currency} 
+            onChange={(e) => setCurrency(e.target.value)}
+            className="currency-select"
+          >
+            {Object.keys(conversionRates).map(code => (
+              <option key={code} value={code}>{code}</option>
+            ))}
+          </select>
+        )}
         <input
           type="text"
           placeholder="Search by name, category, or tag..."
@@ -201,7 +226,9 @@ const ActivityList = () => {
               <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
               <p className="yellow-text">Time: {activity.time}</p>
               <p className="yellow-text">Location: {activity.location}</p>
-              <p className="yellow-text">Price: {convertPrice(activity.price)} {currency}</p>
+              <p className="yellow-text">
+                Price: {!ratesLoading && convertPrice(activity.price)} {currency}
+              </p>
               <p className="yellow-text">Rating: {activity.ratings.averageRating || 'Not rated'}</p>
               <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
               {activity.specialDiscounts && (
