@@ -32,3 +32,34 @@ export const fetchUsers = async () => {
       throw error;
     }
   };
+
+
+    // Accept user
+export const acceptUser = async (userId) => {
+  await axios.put(`${API_URL}/admin/accept/${userId}`);
+};
+
+// Reject user
+export const rejectUser = async (userId) => {
+  await axios.put(`${API_URL}/admin/reject/${userId}`);
+};
+
+
+  
+export const viewadvertiser_pdf = async (userId) => {
+  const response = await axios.get(`${API_URL}/advertiser/pdf/${userId}`);
+  return response.data; // Adjust based on what your backend returns
+};
+
+
+
+export const viewseller_pdf = async (userId) => {
+  const response = await axios.get(`${API_URL}/seller/pdf/${userId}`);
+  return response.data; // Adjust based on what your backend returns
+};
+
+
+export const viewtg_pdf = async (userId) => {
+  const response = await axios.get(`${API_URL}/tourGuide/pdf/${userId}`);
+  return response.data; // Adjust based on what your backend returns
+};

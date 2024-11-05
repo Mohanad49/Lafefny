@@ -66,4 +66,29 @@ router.post('/add-admin', async (req, res) => {
   }
 });
 
+
+
+//turn accept on/////////////////////////////////////////////////////
+router.put('/accept/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { isAccepted: true }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: 'User accepted', user });
+  } catch (error) {
+    console.error(error); // Log the error to help with debugging
+    res.status(500).json({ message: 'Failed to accept user', error: error.message });
+  }
+});
+
+router.put('/reject/:id', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(req.params.id, { isAccepted: false }, { new: true });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    res.status(200).json({ message: 'User rejected', user });
+  } catch (error) {
+    console.error(error); // Log the error to help with debugging
+    res.status(500).json({ message: 'Failed to reject user', error: error.message });
+  }
+});
+
 module.exports = router;
