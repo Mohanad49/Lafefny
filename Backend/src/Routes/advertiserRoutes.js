@@ -79,32 +79,19 @@ router.patch("/uploadLogo/:id", async(req,res)=>{
     res.status(200).json(advertiser);
   })
 
-
-
-
-
-  router.get('/pdf/:id', async (req, res) => {
-    try {
-        const userID = req.params.id;
-  
-        // Attempt to find the document by userID
-        const pdf = await Advertiser.findOne({ userID });
-  
-        
-            return res.json(pdf);
-        
-  
-        // Set headers and send the PDF data if found
-        res.set({
-            'Content-Type': pdf.pdfContentType,
-            'Content-Disposition': `attachment; filename="${pdf.pdfFilename}"`,
-        });
-  
-        res.send(pdf.pdfData);
-    } catch (error) {
-        console.error("Error retrieving PDF:", error);
-        res.status(500).send('Error retrieving PDF');
+  router.get("/getPDF/:id", async(req,res)=>{
+    const userID = req.params.id;
+    if(!mongoose.isValidObjectId(userID)){
+        return res.status(400).json({error:"invalid advertiser"})
     }
-  });
+    const advertiser = await Advertiser.findOne({userID});
+    if(!advertiser || !advertiser.data){
+        return res.status(404).json({error:"PDF not found"});
+    }
+    
+    res.setHeader('Content-Type', advertiser.contentType);
+    res.setHeader('Content-Disposition', `inline; filename="${advertiser.filename}"`);
+    res.send(advertiser.data);
+});
 
 module.exports= router;

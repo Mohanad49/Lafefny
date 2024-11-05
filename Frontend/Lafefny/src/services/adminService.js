@@ -46,20 +46,14 @@ export const rejectUser = async (userId) => {
 
 
   
-export const viewadvertiser_pdf = async (userId) => {
-  const response = await axios.get(`${API_URL}/advertiser/pdf/${userId}`);
-  return response.data; // Adjust based on what your backend returns
+export const viewAdvertiser_pdf = (userId) => {
+  return (`${API_URL}/advertiser/getPDF/${userId}`);
 };
 
-
-
-export const viewseller_pdf = async (userId) => {
-  const response = await axios.get(`${API_URL}/seller/pdf/${userId}`);
-  return response.data; // Adjust based on what your backend returns
+export const viewSeller_pdf = async (userId) => {
+  return (`${API_URL}/seller/getPDF/${userId}`);
 };
 
-
-export const viewtg_pdf = async (userId) => {
-  const response = await axios.get(`${API_URL}/tourGuide/pdf/${userId}`);
-  return response.data; // Adjust based on what your backend returns
+export const viewTourGuide_pdf = async (userId) => {
+  return (`${API_URL}/tourGuide/getPDF/${userId}`);
 };

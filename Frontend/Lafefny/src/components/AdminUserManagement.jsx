@@ -1,6 +1,8 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { fetchUsers, deleteUser, acceptUser, rejectUser, viewadvertiser_pdf, viewseller_pdf, viewtg_pdf  } from '../services/adminService';
+import { fetchUsers, deleteUser,
+    acceptUser, rejectUser,
+    viewAdvertiser_pdf, viewSeller_pdf, viewTourGuide_pdf  } from '../services/adminService';
 import { useNavigate } from 'react-router-dom';
 
 function AdminUserManagement() {
@@ -65,30 +67,33 @@ function AdminUserManagement() {
     }
   };
 
-  // Function to handle viewing the PDF
-  const handleViewPdf = async (userId, userType) => {
-    if (window.confirm('Are you sure you want to view this PDF?')) {
-      try {
-        let pdfUrl;
-        switch (userType) {
-          case 'advertiser':
-            pdfUrl = await viewadvertiser_pdf(userId);
+  const handleViewDocument = async (userId, role) => {
+    try {
+      switch(role.toLowerCase()) {
+        case 'advertiser':
+          {
+            const advertiserPdfUrl = viewAdvertiser_pdf(userId);
+            window.open(advertiserPdfUrl, '_blank');
             break;
-          case 'seller':
-            pdfUrl = await viewseller_pdf(userId);
+          }
+        case 'seller':
+          {
+            const sellerPdfUrl = await viewSeller_pdf(userId);
+            window.open(sellerPdfUrl, '_blank');
             break;
-          case 'tourGuide':
-            pdfUrl = await viewtg_pdf(userId);
+          }
+        case 'tourguide':
+          { 
+            const tourGuidePdfUrl = await viewTourGuide_pdf(userId);
+            window.open(tourGuidePdfUrl, '_blank');
             break;
-          default:
-            throw new Error('Invalid user type');
-        }
-        console.log('PDF URL:', pdfUrl); // Check the PDF URL returned
-        window.open(pdfUrl, '_blank');
-      } catch (error) {
-        console.error('Error viewing PDF:', error); // Log the error for debugging
-        alert('Failed to view PDF');
+         }
+        default:
+          console.log('Invalid role for document viewing');
       }
+    } catch (error) {
+      alert('Failed to load document');
+      console.error('Error:', error);
     }
   };
 
@@ -99,11 +104,16 @@ function AdminUserManagement() {
         <td>{user.email}</td>
         <td>{user.role}</td>
         <td>
-        <button className="delete-button" onClick={() => handleDelete(user._id)}>Delete</button>
+          <button className="delete-button" onClick={() => handleDelete(user._id)}>Delete</button>
           <button onClick={() => handleAccept(user._id)}>Accept</button>
           <button className="delete-button" onClick={() => handleReject(user._id)}>Reject</button>
-          {/* Add the PDF view button */}
-          <button onClick={() => handleViewPdf(user._id, user.role)}>View PDF</button>
+          {(user.role?.toLowerCase() === 'advertiser' || 
+            user.role?.toLowerCase() === 'seller' || 
+            user.role?.toLowerCase() === 'tourguide') && (
+            <button onClick={() => handleViewDocument(user._id, user.role)}>
+              View Documents
+            </button>
+          )}
         </td>
       </tr>
     ));
