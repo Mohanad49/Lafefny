@@ -50,7 +50,10 @@ const ProductList = () => {
   const fetchProducts = async () => {
     try {
       const response = await getProducts();
-      setProducts(response);
+      // Filter out archived products
+      const activeProducts = response.filter(product => !product.isArchived);
+      console.log('Fetched active products:', activeProducts); // For debugging
+      setProducts(activeProducts);
     } catch (error) {
       console.error('Error fetching products:', error);
       setProducts([]);
@@ -85,6 +88,7 @@ const ProductList = () => {
 
   // Filter and sort products
   const filteredProducts = products
+    .filter(product => !product.isArchived)
     .filter(product => 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||

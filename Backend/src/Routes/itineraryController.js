@@ -163,4 +163,67 @@ router.get('/searchItineraries', async (req, res) => {
     }
 });
 
+// Toggle isActive status of an itinerary
+router.patch('/:id/toggleActive', async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    itinerary.isActive = !itinerary.isActive;
+    await itinerary.save();
+
+    res.json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Toggle inappropriateFlag status of an itinerary
+router.patch('/:id/toggleInappropriate', async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    itinerary.inappropriateFlag = !itinerary.inappropriateFlag;
+    await itinerary.save();
+
+    res.json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin fetch all itineraries (including inappropriate ones)
+router.get('/admin', async (req, res) => {
+  try {
+    const itineraries = await Itinerary.find();
+    res.json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Regular user fetch itineraries
+router.get('/user', async (req, res) => {
+  try {
+    const { userId } = req.query;
+    
+    // First, get all non-inappropriate itineraries
+    const itineraries = await Itinerary.find({
+      inappropriateFlag: false,
+      $or: [
+        { isActive: true },  // Get all active itineraries
+        { 
+          isActive: false,   // Get inactive itineraries only if user has booked them
+          touristBookings: userId 
+        }
+      ]
+    });
+
+    res.json(itineraries);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;

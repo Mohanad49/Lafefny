@@ -27,3 +27,17 @@ export const updateActivity = (id, updatedActivity) => {
 export const deleteActivity = (id) => {
   return axios.delete(`${API_URL}/activities/${id}`);
 };
+
+export const updateActivityInappropriateFlag = (id, inappropriateFlag) => {
+  return axios.patch(`${API_URL}/activities/${id}/toggleInappropriate`, { inappropriateFlag });
+};
+
+// For admin use
+export const getAdminActivities = () => {
+  return axios.get(`${API_URL}/activities/adminActivities`);
+};
+
+// For regular users
+export const getUserActivities = () => {
+  return axios.get(`${API_URL}/activities/userActivities`);
+};
