@@ -2,6 +2,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
+import ChangePassword from './ChangePassword';
+
 
 const TourGuideHome = () => {
   return (
@@ -19,6 +21,8 @@ const TourGuideHome = () => {
         <Link to="/add-museum">Add Historical Places/Museums</Link> | {' '}
         <Link to="/add-museum-tag">Add Museum Tag</Link>
 
+        <h2>Profile Management</h2>
+        <Link to="/changepassword">Change Password</Link> 
         
 
       </nav>

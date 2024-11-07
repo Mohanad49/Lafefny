@@ -3,6 +3,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
+import ChangePassword from './ChangePassword';
+
 
 const AdminHome = () => {
   return (
@@ -13,6 +15,7 @@ const AdminHome = () => {
         <h2>User Management</h2>
         <Link to="/users">View All Users</Link> |{' '}
         <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
+        <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to="/add-admin">Add Admin</Link>
 
         <h2>Activity Management</h2>
