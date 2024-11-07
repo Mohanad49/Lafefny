@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { getActivities } from '../services/activityService';
+import { getActivities , getUserActivities} from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
 import '../styles/ActivityList.css';
 import { fetchExchangeRates } from '../services/currencyService';
@@ -51,8 +51,12 @@ const ActivityList = () => {
         date: filterDate,
         rating: filterRating,
       });
-      console.log('Fetched activities:', response.data);
-      setActivities(response.data);
+      
+      // Filter out inappropriate activities
+      const appropriateActivities = response.data.filter(activity => !activity.inappropriateFlag);
+      console.log('Fetched appropriate activities:', appropriateActivities);
+      
+      setActivities(Array.isArray(appropriateActivities) ? appropriateActivities : []);
     } catch (error) {
       console.error('Error fetching activities:', error);
       setActivities([]);

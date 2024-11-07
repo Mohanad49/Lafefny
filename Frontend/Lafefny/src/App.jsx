@@ -85,6 +85,9 @@ import UploadAdvertiserDocs from './components/UploadAdvertiserDocs';
 import UploadSellerDocs from './components/UploadSellerDocs';
 import UploadTourGuideDocs from './components/UploadTourGuideDocs';
 
+import AdminItineraryList from './components/Admin-ItineraryList';
+import AdminActivityList from './components/Admin-ActivityList';
+
 const App = () => {
 
   return (
@@ -178,6 +181,9 @@ const App = () => {
             <Route path="/uploadAdvertiserDocs" element={<UploadAdvertiserDocs></UploadAdvertiserDocs>}/>
             <Route path="/uploadSellerDocs" element={<UploadSellerDocs></UploadSellerDocs>}/>
             <Route path="/uploadTourGuideDocs" element={<UploadTourGuideDocs></UploadTourGuideDocs>}/>
+
+            <Route path="/admin-itineraries" element={<AdminItineraryList />} />
+            <Route path="/admin-activities" element={<AdminActivityList />} />
           </>
       </Routes>
     </Router>

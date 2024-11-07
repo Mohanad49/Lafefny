@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getProducts } from '../services/productService';
+import { getProducts, updateProductArchiveStatus } from '../services/productService';
 import '../styles/productList.css';
 
 const ProductList = () => {
@@ -79,6 +79,15 @@ const ProductList = () => {
       return 0;
     });
 
+  const toggleArchiveStatus = async (id, currentStatus) => {
+    try {
+      await updateProductArchiveStatus(id);
+      await fetchProducts(); // Refresh the list after toggling
+    } catch (error) {
+      console.error('Error toggling archive status:', error);
+    }
+  };
+
   return (
     <div className="product-list-container">
       <h1>Product List</h1>
@@ -146,6 +155,12 @@ const ProductList = () => {
               <td>
                 <button onClick={() => openModal(product.ratings.reviews)}>View Reviews</button>
                 <Link to={`/edit-product/${product._id}`} className="edit-button">Edit</Link>
+                <button
+                  className="edit-button"
+                  onClick={() => toggleArchiveStatus(product._id, product.isArchived)}
+                >
+                  {product.isArchived ? 'Unarchive' : 'Archive'}
+                </button>
               </td>
             </tr>
           ))}

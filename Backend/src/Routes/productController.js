@@ -13,6 +13,21 @@ router.get('/', async (req, res) => {
   }
 });
 
+// Add this new route for toggling archive status
+router.patch('/:id/toggleArchive', async (req, res) => {
+  try {
+    const product = await Product.findById(req.params.id);
+    if (!product) return res.status(404).json({ error: "Product not found" });
+
+    product.isArchived = !product.isArchived;
+    await product.save();
+
+    res.json(product);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // GET a single product by ID
 router.get('/:id', async (req, res) => {
   try {
@@ -26,7 +41,7 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-// Route to view products with filters
+// Route to view products with filters (move this after the ID routes)
 router.get('/filter', async (req, res) => {
   const { name, minPrice, maxPrice, sortBy } = req.query;
 
@@ -95,6 +110,5 @@ router.put('/:id', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 module.exports = router;

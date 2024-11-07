@@ -162,5 +162,40 @@ router.get('/sortActivities', async (req, res) => {
   }
 });
 
+// Toggle inappropriateFlag status of an activity
+router.patch('/:id/toggleInappropriate', async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) return res.status(404).json({ error: "Activity not found" });
+
+    activity.inappropriateFlag = !activity.inappropriateFlag;
+    await activity.save();
+
+    res.json(activity);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Admin fetch all activities
+router.get('/adminActivities', async (req, res) => {
+  try {
+    const activities = await Activity.find();
+    res.status(200).json(activities);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Regular user fetch activities
+router.get('/userActivities', async (req, res) => {
+  try {
+    // Find activities where inappropriateFlag is false
+    const activities = await Activity.find({ inappropriateFlag: false });
+    res.status(200).json(activities);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 
 module.exports = router;

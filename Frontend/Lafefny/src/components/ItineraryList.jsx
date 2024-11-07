@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { getItineraries, deleteItinerary } from '../services/itineraryService';
+import { getItineraries, deleteItinerary, updateItineraryStatus } from '../services/itineraryService';
 import '../styles/ItineraryList.css';
 
 const ItineraryList = () => {
@@ -44,6 +44,15 @@ const ItineraryList = () => {
     if (!dateString) return 'Not specified';
     const date = new Date(dateString);
     return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
+  };
+
+  const toggleActiveStatus = async (id, currentStatus) => {
+    try {
+      await updateItineraryStatus(id, !currentStatus);
+      fetchItineraries();
+    } catch (error) {
+      console.error('Error toggling itinerary status:', error);
+    }
   };
 
   // Filter itineraries locally after fetching
@@ -181,6 +190,14 @@ const ItineraryList = () => {
               <div className="itinerary-actions">
                 <Link to={`/edit-itinerary/${itinerary._id}`} className="edit-button">Edit</Link>
                 <button className="delete-button" onClick={() => handleDelete(itinerary._id)}>Delete</button>
+                {itinerary.touristBookings.length > 0 && (
+                  <button
+                    className="toggle-active-button"
+                    onClick={() => toggleActiveStatus(itinerary._id, itinerary.isActive)}
+                  >
+                    {itinerary.isActive ? 'Deactivate' : 'Activate'}
+                  </button>
+                )}
               </div>
             </div>
           </li>

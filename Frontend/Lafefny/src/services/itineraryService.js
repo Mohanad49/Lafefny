@@ -25,3 +25,26 @@ export const deleteItinerary = (id) => {
 export const getItineraryById = (id) => {
   return axios.get(`${API_URL}/itineraries/${id}`);
 };
+
+export const updateItineraryStatus = (id, isActive) => {
+  return axios.patch(`${API_URL}/itineraries/${id}/toggleActive`, { isActive });
+};
+
+export const updateItineraryInappropriateFlag = (id, inappropriateFlag) => {
+  return axios.patch(`${API_URL}/itineraries/${id}/toggleInappropriate`, { inappropriateFlag });
+};
+
+// For admin use
+export const getAdminItineraries = () => {
+  return axios.get(`${API_URL}/itineraries/admin`);
+};
+
+// For regular users
+export const getUserItineraries = (userId, params = {}) => {
+  return axios.get(`${API_URL}/itineraries/user`, {
+    params: {
+      userId,
+      ...params
+    }
+  });
+};

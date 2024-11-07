@@ -67,3 +67,8 @@ export const fetchProducts = async (searchTerm, minPrice, maxPrice, sortBy) => {
     throw error;
   }
 };
+
+// Add this new function
+export const updateProductArchiveStatus = (id) => {
+  return axios.patch(`${API_URL}/${id}/toggleArchive`);
+};

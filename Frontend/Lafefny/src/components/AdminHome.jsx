@@ -19,7 +19,8 @@ const AdminHome = () => {
         <Link to="/add-admin">Add Admin</Link>
 
         <h2>Activity Management</h2>
-        <Link to="/activities">View Activities</Link> |{' '}
+        <Link to="/admin-activities">View Activities</Link> |{' '}
+        <Link to="/admin-itineraries">View All Itineraries</Link> |{' '}
         <Link to="/activityCategories">View Activities Categories</Link> |{' '}
         <Link to="/preferenceTags">View Preference Tags</Link> | {' '}
         <Link to="/add-activityCategory">Add Activity Category</Link> | {' '}

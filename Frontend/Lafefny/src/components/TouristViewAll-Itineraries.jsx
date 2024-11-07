@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect,  useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getItineraries } from '../services/itineraryService';
+import { getItineraries, getUserItineraries } from '../services/itineraryService';
 import { fetchExchangeRates } from '../services/currencyService';
 import '../styles/ItineraryList.css';
 
@@ -44,8 +44,27 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
-      console.log('Fetched itineraries:', response.data);
-      setItineraries(Array.isArray(response.data) ? response.data : []);
+
+      const userId = localStorage.getItem('userID');
+      
+      // Filter itineraries based on conditions
+      const filteredItineraries = response.data.filter(itinerary => {
+        // Remove inappropriate itineraries
+        if (itinerary.inappropriateFlag) return false;
+        
+        // Keep active itineraries
+        if (itinerary.isActive) return true;
+        
+        // For inactive itineraries, check if user has booked it
+        if (!itinerary.isActive && itinerary.touristBookings) {
+          return itinerary.touristBookings.includes(userId);
+        }
+        
+        return false;
+      });
+
+      console.log('Filtered itineraries:', filteredItineraries);
+      setItineraries(Array.isArray(filteredItineraries) ? filteredItineraries : []);
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       setItineraries([]);
