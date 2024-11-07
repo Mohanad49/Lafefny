@@ -74,6 +74,20 @@ router.put('/change-password/:id', async (req, res) => {
   }
 });
 
+// Delete Account Route for Sellers
+router.delete('/seller-delete/:id', async (req, res) => {
+  const userId = req.params.id;
+  try {
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json({ message: 'User account deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ message: 'Error deleting account', error: err.message });
+  }
+});
+
 
 router.get('/users', async (req, res) => {
     let users = await User.find()

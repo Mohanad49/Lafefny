@@ -87,6 +87,7 @@ import UploadTourGuideDocs from './components/UploadTourGuideDocs';
 
 import AdminItineraryList from './components/Admin-ItineraryList';
 import AdminActivityList from './components/Admin-ActivityList';
+import SellerDelete from './components/Sellerdelete';
 
 const App = () => {
 
@@ -170,6 +171,7 @@ const App = () => {
             <Route path="/addSellerInfo" element={<AddSellerInfo></AddSellerInfo>}/>
             <Route path='/editSellerInfo' element={<UpdateSellerInfo></UpdateSellerInfo>}/>
             <Route path="/sellerinfo" element={<SellerInfo></SellerInfo>}/>
+            <Route path="/seller-delete/:id" element={<SellerDelete />} />
 
             <Route path='/addAdvertiserInfo' element={<AddAdvertiserInfo></AddAdvertiserInfo>}/>
             <Route path='/updateAdvertiserInfo' element={<UpdateAdvertiserInfo></UpdateAdvertiserInfo>}/>
