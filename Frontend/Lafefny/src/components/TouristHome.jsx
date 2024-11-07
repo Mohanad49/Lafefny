@@ -20,7 +20,9 @@ const TouristHome = () => {
         <Link to="/viewTouristInfo">View Info</Link> | {' '}
         <Link to="/touristEditInfo">Edit Info</Link> | {' '}
         <Link to="/changepassword">Change Password</Link> | {' '}
-        <Link to="/touristSelectPreferences">Select Preferences</Link>
+        <Link to="/touristSelectPreferences">Select Preferences</Link> | {' '}
+        <Link to="/complaints">Submit Complaint</Link> | {' '}
+        <Link to="/my-complaints">View My Complaints</Link>
 
         <h2>Product Management</h2>
         <Link to="/touristProducts">View Products</Link>

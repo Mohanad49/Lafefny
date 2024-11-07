@@ -25,6 +25,10 @@ const AdminHome = () => {
         <h2>Product Management</h2>
         <Link to="/products">View Products</Link> | {' '}
         <Link to="/add-product">Add Product</Link>
+
+        <h2>Complaints Management</h2>
+        <Link to="/admin/complaints">View Complaints</Link>
+        
       </nav>
     </div>
   );

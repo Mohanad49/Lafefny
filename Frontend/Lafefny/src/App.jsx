@@ -7,6 +7,9 @@ import Home from './components/GuestHome';
 import AdminUserManagement from './components/AdminUserManagement';
 import AddAdmin from './components/AddAdmin';
 import AddTourismGovernor from './components/AddTourismGovernor';
+import AdminComplaintDetail from './components/AdminComplaintDetail';
+import AdminComplaintList from './components/AdminComplaintList';
+import ComplaintForm from './components/ComplaintForm';
 
 import EditActivityCategory from './components/EditActivityCategory';
 import ActivityCategoryList from './components/ActivityCategoryList';
@@ -72,6 +75,7 @@ import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
 import AdvertiserInfo from './components/AdvertiserInfo';
 import ChangePassword from './components/ChangePassword';
 import TouristHistory from './components/TouristHistory';
+import TouristComplaintList from './components/TouristComplaintList';
 
 import './styles/styles.css'
 import UploadTourGuidePhoto from './components/EditTourGuidePhoto';
@@ -98,6 +102,9 @@ const App = () => {
             <Route path="/users" element={<AdminUserManagement />} />
             <Route path="/add-admin" element={<AddAdmin />} />
             <Route path="/add-tourism-governor" element={<AddTourismGovernor />} />
+            <Route path="/complaints" element={<ComplaintForm />} />
+            <Route path="/admin/complaints" element={<AdminComplaintList />} />
+            <Route path="/admin/complaints/:id" element={<AdminComplaintDetail />} />
             
             <Route path="/edit-category/:id" element={<EditActivityCategory />} />
             <Route path="/add-activityCategory" element={<AddActivityCategory />} />
@@ -126,6 +133,7 @@ const App = () => {
             <Route path="/edit-tourist-itinerary/:id" element={<EditTouristItinerary />} />
             <Route path="/guide-tourist-Itineraries" element={<GuideTouristItineraryList />} />
             <Route path="/touristHistory/:userID" element={<TouristHistory />} />
+            <Route path="/my-complaints" element={<TouristComplaintList />} />
 
             <Route path="/activities" element={<ActivityList />} />
             <Route path="/add-activity" element={<AddActivity />} />

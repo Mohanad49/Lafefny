@@ -251,6 +251,78 @@ router.get("/touristHistory/:userID", async (req, res) => {
     }
   });
 
+  const calculateLoyaltyPoints = (amountPaid, level) => {
+    let points = 0;
 
+    switch (level) {
+        case 1:
+            points = amountPaid * 0.5;
+            break;
+        case 2:
+            points = amountPaid * 1;
+            break;
+        case 3:
+            points = amountPaid * 1.5;
+            break;
+        default:
+            throw new Error("Invalid level");
+    }
+
+    return points;
+};
+
+// Function to calculate level based on total loyalty points
+const calculateLevel = (totalPoints) => {
+    if (totalPoints <= 100000) {
+        return 1; // Level 1
+    } else if (totalPoints <= 500000) {
+        return 2; // Level 2
+    } else {
+        return 3; // Level 3
+    }
+};
+
+const getBadgeByLevel = (level) => {
+    switch (level) {
+        case 1:
+            return "Bronze "; // Badge for Level 1
+        case 2:
+            return "Silver "; // Badge for Level 2
+        case 3:
+            return "Gold "; // Badge for Level 3
+        default:
+            return "No Badge"; // In case of an invalid level
+    }
+};
+
+router.put("/updateLoyaltyPoints", async (req, res) => {
+    try {
+        const { touristId, amountPaid } = req.body;
+
+        const tourist = await Tourist.findOne({ userID: touristId });
+        if (!tourist) {
+            throw new Error('Tourist not found');
+        }
+
+        // Calculate loyalty points based on the amount paid
+        const pointsEarned = calculateLoyaltyPoints(amountPaid, tourist.level);
+
+        // Update loyalty points
+        tourist.loyaltyPoints += pointsEarned;
+
+        // Calculate and update the tourist's level based on the total points
+        tourist.level = calculateLevel(tourist.loyaltyPoints);
+
+        // Get the badge for the new level
+        tourist.badge = getBadgeByLevel(tourist.level);
+
+        // Save the updated tourist data
+        await tourist.save();
+
+        res.status(200).json({ message: 'Loyalty points and level updated successfully!' });
+    } catch (error) {
+        res.status(500).json({ error: 'Error updating loyalty points: ' + error.message });
+    }
+});
 
 module.exports=router
