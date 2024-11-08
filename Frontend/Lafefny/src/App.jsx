@@ -88,6 +88,7 @@ import UploadTourGuideDocs from './components/UploadTourGuideDocs';
 import AdminItineraryList from './components/Admin-ItineraryList';
 import AdminActivityList from './components/Admin-ActivityList';
 import SellerDelete from './components/Sellerdelete';
+import DeleteAccount from './components/DeleteAccount';
 
 const App = () => {
 
@@ -186,6 +187,7 @@ const App = () => {
 
             <Route path="/admin-itineraries" element={<AdminItineraryList />} />
             <Route path="/admin-activities" element={<AdminActivityList />} />
+            <Route path="/delete-account" element={<DeleteAccount />} />
           </>
       </Routes>
     </Router>

@@ -21,6 +21,10 @@ const SellerHome = () => {
         <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to={`/seller-delete/${localStorage.getItem("userID")}`}>Delete Account</Link> | {' '}
         <Link to="/uploadSellerDocs">Add docs</Link>
+        
+        <h2>Profile Management</h2>
+        <Link to="/changepassword">Change Password</Link> | {' '}
+        <Link to="/delete-account" className="delete-link">Delete Account</Link>
       </nav>
     </div>
   );

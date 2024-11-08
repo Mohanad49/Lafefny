@@ -38,8 +38,14 @@ function AdminUserManagement() {
     }
   };
 
-
   const handleAccept = async (userId) => {
+    const user = users.find(u => u._id === userId);
+    
+    if (user.isAccepted) {
+      alert('User is already accepted');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to accept this account?')) {
       try {
         await acceptUser(userId);
@@ -54,6 +60,13 @@ function AdminUserManagement() {
   };
 
   const handleReject = async (userId) => {
+    const user = users.find(u => u._id === userId);
+    
+    if (user.isAccepted === false) {
+      alert('User is already rejected');
+      return;
+    }
+
     if (window.confirm('Are you sure you want to reject this account?')) {
       try {
         await rejectUser(userId);
@@ -97,16 +110,40 @@ function AdminUserManagement() {
     }
   };
 
+  const isRoleNeedingApproval = (role) => {
+    const rolesNeedingApproval = ['tourguide', 'advertiser', 'seller'];
+    return rolesNeedingApproval.includes(role.toLowerCase());
+  };
+
   const renderUserList = () => {
     return users.map(user => (
-      <tr key={user._id}>
+      <tr key={user._id} className={user.deletionRequested ? 'deletion-requested' : ''}>
         <td>{user.username}</td>
         <td>{user.email}</td>
         <td>{user.role}</td>
         <td>
+          {user.deletionRequested ? (
+            <span className="deletion-badge">Deletion Requested</span>
+          ) : (
+            <span className="active-badge">Active</span>
+          )}
+        </td>
+        <td>
           <button className="delete-button" onClick={() => handleDelete(user._id)}>Delete</button>
-          <button onClick={() => handleAccept(user._id)}>Accept</button>
-          <button className="delete-button" onClick={() => handleReject(user._id)}>Reject</button>
+        </td>
+        <td>
+          {isRoleNeedingApproval(user.role) && (
+            <>
+              <button className="action-button accept-button" onClick={() => handleAccept(user._id)}>
+                Accept
+              </button>
+              <button className="action-button reject-button" onClick={() => handleReject(user._id)}>
+                Reject
+              </button>
+            </>
+          )}
+        </td>
+        <td>
           {(user.role?.toLowerCase() === 'advertiser' || 
             user.role?.toLowerCase() === 'seller' || 
             user.role?.toLowerCase() === 'tourguide') && (
@@ -131,13 +168,60 @@ function AdminUserManagement() {
             <th>Username</th>
             <th>Email</th>
             <th>Role</th>
-            <th>Action</th>
+            <th>Status</th>
+            <th>Delete Users</th>
+            <th>Approve Users</th>
+            <th>Documents</th>
           </tr>
         </thead>
         <tbody>
           {renderUserList()}
         </tbody>
       </table>
+      <style>
+        {`
+          .deletion-requested {
+            background-color: #fff3f3;
+          }
+          
+          .deletion-badge {
+            background-color: #ff4444;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+          }
+
+          .active-badge {
+            background-color: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            font-weight: bold;
+          }
+
+          .action-button {
+            width: 80px;
+            padding: 5px;
+            margin: 0 5px;
+            border-radius: 4px;
+            border: none;
+            cursor: pointer;
+          }
+
+          .accept-button {
+            background-color: #4CAF50;
+            color: white;
+          }
+
+          .reject-button {
+            background-color: #ff4444;
+            color: white;
+          }
+        `}
+      </style>
     </div>
   );
 }

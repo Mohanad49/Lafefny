@@ -22,7 +22,8 @@ const AdvertiserHome = () => {
         <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to ="/getAdvertiserInfo">view info</Link> | {' '}
         <Link to ="/editAdvertiserPhoto">Edit logo</Link> | {' '}
-        <Link to="/uploadAdvertiserDocs">Upload Docs</Link>
+        <Link to="/uploadAdvertiserDocs">Upload Docs</Link> | {' '}
+        <Link to="/delete-account" className="delete-link">Delete Account</Link>
 
       </nav>
     </div>

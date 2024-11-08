@@ -1,7 +1,8 @@
 const express = require('express');
-//const bcrypt = require('bcryptjs');
 const User = require('../Models/User');  // Import the User model
 const router = express.Router();
+const Activity = require('../Models/Activity');
+const TouristItinerary = require('../Models/Tourist-Itinerary');
 
 // Sign Up Route
 router.post('/signup', async (req, res) => {
@@ -88,10 +89,100 @@ router.delete('/seller-delete/:id', async (req, res) => {
   }
 });
 
+// Delete Account Route
+router.put('/request-deletion/:userId', async (req, res) => {
+  try {
+    const userId = req.params.userId;
+    const user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Check for upcoming bookings based on user role
+    const today = new Date();
+    let canDelete = true;
+    let message = '';
+
+    switch (user.role.toLowerCase()) {
+      case 'tourist':
+        const bookedActivities = await Activity.find({
+          touristBookings: userId,
+          date: { $gt: today }
+        });
+        const bookedItineraries = await TouristItinerary.find({
+          touristBookings: userId,
+          endDate: { $gt: today }
+        });
+        if (bookedActivities.length > 0 || bookedItineraries.length > 0) {
+          canDelete = false;
+          message = 'Cannot request deletion - you have upcoming bookings';
+        }
+        break;
+    }
+
+    if (!canDelete) {
+      return res.status(400).json({ message });
+    }
+
+    // Update deletionRequested flag
+    user.deletionRequested = true;
+    await user.save();
+    
+    return res.status(200).json({ 
+      message: 'Account deletion request submitted successfully' 
+    });
+
+  } catch (error) {
+    return res.status(500).json({ 
+      message: 'Error requesting account deletion', 
+      error: error.message 
+    });
+  }
+});
+
+router.put('/cancel-deletion/:userId', async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.params.userId,
+      { deletionRequested: false },
+      { new: true }
+    );
+    
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    
+    res.status(200).json({ 
+      message: 'Deletion request cancelled successfully'
+    });
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error cancelling deletion request', 
+      error: error.message 
+    });
+  }
+});
 
 router.get('/users', async (req, res) => {
     let users = await User.find()
     return res.send(users).status(200)
+});
+
+// userController.js - Add this new route
+router.get('/users/:id', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ 
+      message: 'Error fetching user', 
+      error: error.message 
+    });
+  }
 });
 
 module.exports = router;
