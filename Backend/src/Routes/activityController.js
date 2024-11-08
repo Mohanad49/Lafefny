@@ -1,5 +1,6 @@
 const express = require('express');
 const Activity = require('../Models/Activity');
+const User = require('../Models/User'); // Import User model for tourist validation
 const router = express.Router();
 
 // CREATE activity
@@ -59,7 +60,7 @@ router.delete('/:id', async (req, res) => {
 // View upcoming activities including historical events and museums
 router.get('/upcomingActivities', async (req, res) => {
   try {
-      const activities = await activityModel.find({
+      const activities = await Activity.find({
           date: { $gt: new Date() } // Only fetch future activities
       }).sort({ date: 1 }); // Sort by ascending date
 
@@ -85,7 +86,7 @@ router.get('/searchActivities', async (req, res) => {
       };
 
       // Search in the activities collection
-      const activities = await activityModel.find(query);
+      const activities = await Activity.find(query);
       res.status(200).json(activities);
 
   } catch (error) {
@@ -125,7 +126,7 @@ router.get('/filterActivities', async (req, res) => {
       }
 
       // Fetch the filtered activities
-      const activities = await activityModel.find(query).sort({ date: 1 });
+      const activities = await Activity.find(query).sort({ date: 1 });
 
       // Return the filtered activities
       res.status(200).json(activities);
@@ -149,7 +150,7 @@ router.get('/sortActivities', async (req, res) => {
       }
 
       // Fetch upcoming activities sorted by the chosen field in ascending order
-      const activities = await activityModel.find({
+      const activities = await Activity.find({
           date: { $gt: new Date() } // Only fetch future activities
       }).sort({ [sortBy]: 1 }); // Sort in ascending order
 
@@ -162,39 +163,63 @@ router.get('/sortActivities', async (req, res) => {
   }
 });
 
-// Toggle inappropriateFlag status of an activity
-router.patch('/:id/toggleInappropriate', async (req, res) => {
+// Booking route for an activity
+// Booking route for an activity
+router.post('/:activityId/book', async (req, res) => {
   try {
-    const activity = await Activity.findById(req.params.id);
-    if (!activity) return res.status(404).json({ error: "Activity not found" });
+    const { touristId } = req.body;
+    console.log("Tourist ID:", touristId); // Log touristId for debugging
 
-    activity.inappropriateFlag = !activity.inappropriateFlag;
+    const tourist = await User.findById(touristId);
+    if (!tourist || tourist.role !== 'Tourist') {
+      return res.status(400).json({ error: "Invalid tourist ID or user is not a tourist" });
+    }
+
+    const activity = await Activity.findById(req.params.activityId);
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    if (!activity.bookingOpen) {
+      return res.status(400).json({ error: "This activity is not open for booking" });
+    }
+
+    if (activity.touristBookings.includes(touristId)) {
+      return res.status(400).json({ error: "Tourist has already booked this activity" });
+    }
+
+    activity.touristBookings.push(touristId);
     await activity.save();
-
-    res.json(activity);
+    res.status(200).json({ message: "Booking successful", activity });
   } catch (error) {
+    console.error("Error in booking route:", error); // Log detailed error for debugging
     res.status(500).json({ error: error.message });
   }
 });
 
-// Admin fetch all activities
-router.get('/adminActivities', async (req, res) => {
-  try {
-    const activities = await Activity.find();
-    res.status(200).json(activities);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-});
 
-// Regular user fetch activities
-router.get('/userActivities', async (req, res) => {
+
+// Cancel booking for an activity
+router.post('/:id/cancel', async (req, res) => {
   try {
-    // Find activities where inappropriateFlag is false
-    const activities = await Activity.find({ inappropriateFlag: false });
-    res.status(200).json(activities);
-  } catch (err) {
-    res.status(500).json({ error: err.message });
+    const { touristId } = req.body;
+
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    const bookingIndex = activity.touristBookings.indexOf(touristId);
+    if (bookingIndex === -1) {
+      return res.status(400).json({ error: "Booking not found for this tourist" });
+    }
+
+    activity.touristBookings.splice(bookingIndex, 1);
+    await activity.save();
+
+    res.status(200).json({ message: "Booking canceled successfully", activity });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
   }
 });
 

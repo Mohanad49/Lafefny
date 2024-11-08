@@ -13,7 +13,6 @@ const ProductList = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedReviews, setSelectedReviews] = useState([]);
 
-  // Add this function at the top of your component, just after the useState declarations
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
     const date = new Date(dateString);
@@ -53,7 +52,6 @@ const ProductList = () => {
     setSelectedReviews([]);
   };
 
-  // Filter and sort products
   const filteredProducts = products
     .filter(product => 
       product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -82,7 +80,7 @@ const ProductList = () => {
   const toggleArchiveStatus = async (id, currentStatus) => {
     try {
       await updateProductArchiveStatus(id);
-      await fetchProducts(); // Refresh the list after toggling
+      await fetchProducts();
     } catch (error) {
       console.error('Error toggling archive status:', error);
     }
@@ -136,6 +134,7 @@ const ProductList = () => {
             <th>Image</th>
             <th>Price</th>
             <th>Quantity</th>
+            <th>Sales</th> {/* Added Sales column */}
             <th>Average Rating</th>
             <th>Description</th>
             <th>Seller</th>
@@ -149,6 +148,7 @@ const ProductList = () => {
               <td><img src={product.imageUrl} alt={product.name} width="100" /></td>
               <td>${product.price.toFixed(2)}</td>
               <td>{product.quantity}</td>
+              <td>{product.sales}</td> {/* Display Sales data */}
               <td>{product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})</td>
               <td>{product.description}</td>
               <td>{product.seller}</td>

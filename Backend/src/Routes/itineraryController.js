@@ -62,7 +62,7 @@ router.delete('/:id', async (req, res) => {
 // Router to fetch upcoming itineraries
 router.get('/upcomingItineraries', async (req, res) => {
     try {
-        const itineraries = await itineraryModel.find({
+        const itineraries = await Itinerary.find({
             date: { $gt: new Date() } // Only fetch future itineraries
         }).sort({ date: 1 }); // Sort by ascending date
 
@@ -85,7 +85,7 @@ router.get('/sortItineraries', async (req, res) => {
         }
 
         // Fetch upcoming itineraries sorted by the chosen field in ascending order
-        const itineraries = await itineraryModel.find({
+        const itineraries = await Itinerary.find({
             date: { $gt: new Date() } // Only fetch future itineraries
         }).sort({ [sortBy]: 1 }); // Sort in ascending order
 
@@ -129,7 +129,7 @@ router.get('/filterItineraries', async (req, res) => {
         }
 
         // Fetch the filtered itineraries
-        const itineraries = await itineraryModel.find(query).sort({ date: 1 });
+        const itineraries = await Itinerary.find(query).sort({ date: 1 });
 
         // Return the filtered itineraries
         res.status(200).json(itineraries);
@@ -155,7 +155,7 @@ router.get('/searchItineraries', async (req, res) => {
         };
 
         // Search in the itineraries collection
-        const itineraries = await itineraryModel.find(query);
+        const itineraries = await Itinerary.find(query);
         res.status(200).json(itineraries);
 
     } catch (error) {
@@ -163,64 +163,53 @@ router.get('/searchItineraries', async (req, res) => {
     }
 });
 
-// Toggle isActive status of an itinerary
-router.patch('/:id/toggleActive', async (req, res) => {
+// Booking route for an itinerary
+router.post('/:id/book', async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id);
-    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+    const { userId } = req.body; // Expecting userId in the request body
 
-    itinerary.isActive = !itinerary.isActive;
+    // Find the itinerary to be booked
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
+    }
+
+    // Check if user has already booked this itinerary
+    if (itinerary.touristBookings.includes(userId)) {
+      return res.status(400).json({ error: "User has already booked this itinerary" });
+    }
+
+    // Add user to bookings
+    itinerary.touristBookings.push(userId);
     await itinerary.save();
 
-    res.json(itinerary);
+    res.status(200).json({ message: "Booking successful", itinerary });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
-// Toggle inappropriateFlag status of an itinerary
-router.patch('/:id/toggleInappropriate', async (req, res) => {
+// Cancel booking for an itinerary
+router.post('/:id/cancel', async (req, res) => {
   try {
-    const itinerary = await Itinerary.findById(req.params.id);
-    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+    const { userId } = req.body; // Expecting userId in the request body
 
-    itinerary.inappropriateFlag = !itinerary.inappropriateFlag;
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) {
+      return res.status(404).json({ error: "Itinerary not found" });
+    }
+
+    // Check if user has booked this itinerary
+    const bookingIndex = itinerary.touristBookings.indexOf(userId);
+    if (bookingIndex === -1) {
+      return res.status(400).json({ error: "Booking not found for this user" });
+    }
+
+    // Remove user from bookings
+    itinerary.touristBookings.splice(bookingIndex, 1);
     await itinerary.save();
 
-    res.json(itinerary);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Admin fetch all itineraries (including inappropriate ones)
-router.get('/admin', async (req, res) => {
-  try {
-    const itineraries = await Itinerary.find();
-    res.json(itineraries);
-  } catch (error) {
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// Regular user fetch itineraries
-router.get('/user', async (req, res) => {
-  try {
-    const { userId } = req.query;
-    
-    // First, get all non-inappropriate itineraries
-    const itineraries = await Itinerary.find({
-      inappropriateFlag: false,
-      $or: [
-        { isActive: true },  // Get all active itineraries
-        { 
-          isActive: false,   // Get inactive itineraries only if user has booked them
-          touristBookings: userId 
-        }
-      ]
-    });
-
-    res.json(itineraries);
+    res.status(200).json({ message: "Booking canceled successfully", itinerary });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

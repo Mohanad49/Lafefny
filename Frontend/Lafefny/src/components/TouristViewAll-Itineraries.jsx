@@ -1,8 +1,9 @@
 /* eslint-disable no-unused-vars */
-import React, { useState, useEffect,  useCallback } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getItineraries, getUserItineraries } from '../services/itineraryService';
+import { getItineraries } from '../services/itineraryService';
 import { fetchExchangeRates } from '../services/currencyService';
+import axios from 'axios';
 import '../styles/ItineraryList.css';
 
 const ItineraryList = () => {
@@ -44,27 +45,16 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
-
-      const userId = localStorage.getItem('userID');
       
-      // Filter itineraries based on conditions
-      const filteredItineraries = response.data.filter(itinerary => {
-        // Remove inappropriate itineraries
-        if (itinerary.inappropriateFlag) return false;
-        
-        // Keep active itineraries
-        if (itinerary.isActive) return true;
-        
-        // For inactive itineraries, check if user has booked it
-        if (!itinerary.isActive && itinerary.touristBookings) {
-          return itinerary.touristBookings.includes(userId);
-        }
-        
-        return false;
-      });
+      const userId = localStorage.getItem('userID');
+      const updatedItineraries = Array.isArray(response.data)
+        ? response.data.map((itinerary) => ({
+            ...itinerary,
+            booked: itinerary.touristBookings.includes(userId),
+          }))
+        : [];
 
-      console.log('Filtered itineraries:', filteredItineraries);
-      setItineraries(Array.isArray(filteredItineraries) ? filteredItineraries : []);
+      setItineraries(updatedItineraries);
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       setItineraries([]);
@@ -77,7 +67,38 @@ const ItineraryList = () => {
     return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
   };
 
-  // Filter itineraries locally after fetching
+  const handleBookItinerary = async (itineraryId) => {
+    try {
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        alert("User ID not found. Please log in.");
+        return;
+      }
+      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/book`, { userId });
+      alert("Itinerary booked successfully!");
+      fetchItineraries();
+    } catch (error) {
+      console.error("Error booking itinerary:", error);
+      alert("Failed to book the itinerary.");
+    }
+  };
+
+  const handleCancelBooking = async (itineraryId) => {
+    try {
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        alert("User ID not found. Please log in.");
+        return;
+      }
+      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { userId });
+      alert("Booking canceled successfully!");
+      fetchItineraries();
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert("Failed to cancel the booking.");
+    }
+  };
+
   const filteredItineraries = itineraries
     .filter(itinerary => {
       if (!itinerary) return false;
@@ -112,9 +133,7 @@ const ItineraryList = () => {
 
   const convertPrice = (price) => {
     if (!conversionRates || !price) return price;
-    // Convert from EGP to USD first
     const priceInUSD = price / conversionRates.EGP;
-    // Then convert to target currency
     return (priceInUSD * conversionRates[currency]).toFixed(2);
   };
 
@@ -254,9 +273,17 @@ const ItineraryList = () => {
               </ul>
 
               <div className="activity-actions">
-                  <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
-                </div>
-
+                <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
+                {!itinerary.booked ? (
+                  <button className="book-button" onClick={() => handleBookItinerary(itinerary._id)}>
+                    Book Itinerary
+                  </button>
+                ) : (
+                  <button className="cancel-button" onClick={() => handleCancelBooking(itinerary._id)}>
+                    Cancel Booking
+                  </button>
+                )}
+              </div>
             </div>
           </li>
         ))}

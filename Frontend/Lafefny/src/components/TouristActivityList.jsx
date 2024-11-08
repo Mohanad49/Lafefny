@@ -1,9 +1,10 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { getActivities , getUserActivities} from '../services/activityService';
+import { getActivities } from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
 import '../styles/ActivityList.css';
 import { fetchExchangeRates } from '../services/currencyService';
+import axios from 'axios';
 
 const ActivityList = () => {
   const [activities, setActivities] = useState([]);
@@ -40,7 +41,15 @@ const ActivityList = () => {
     };
     getRates();
   }, []);
-
+  const fetchActivityCategories = async () => {
+    try {
+      const categories = await getAllActivityCategories();
+      setActivityCategories(categories);
+    } catch (error) {
+      console.error('Error fetching activity categories:', error);
+    }
+  };
+  
   const fetchActivities = async () => {
     try {
       const response = await getActivities({
@@ -51,32 +60,48 @@ const ActivityList = () => {
         date: filterDate,
         rating: filterRating,
       });
-      
-      // Filter out inappropriate activities
-      const appropriateActivities = response.data.filter(activity => !activity.inappropriateFlag);
-      console.log('Fetched appropriate activities:', appropriateActivities);
-      
-      setActivities(Array.isArray(appropriateActivities) ? appropriateActivities : []);
+      console.log("Activities fetched:", response.data);
+
+      const touristId = localStorage.getItem('touristId'); 
+      const updatedActivities = response.data.map((activity) => ({
+        ...activity,
+        booked: activity.touristBookings?.includes(touristId),
+      }));
+      setActivities(updatedActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
       setActivities([]);
     }
   };
 
-  const fetchActivityCategories = async () => {
+  const handleBookActivity = async (activityId) => {
     try {
-      const categories = await getAllActivityCategories();
-      setActivityCategories(categories);
+      const touristId = localStorage.getItem('touristId');
+      console.log("Tourist ID:", touristId);
+      await axios.post(`http://localhost:8000/activities/${activityId}/book`, { touristId });
+      alert("Activity booked successfully!");
+      fetchActivities(); 
     } catch (error) {
-      console.error('Error fetching activity categories:', error);
+      console.error("Error booking activity:", error);
+      alert("Failed to book the activity.");
+    }
+  };
+
+  const handleCancelBooking = async (activityId) => {
+    try {
+      const touristId = localStorage.getItem('touristId');
+      await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
+      alert("Booking canceled successfully!");
+      fetchActivities(); 
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert("Failed to cancel the booking.");
     }
   };
 
   const convertPrice = (price) => {
     if (!conversionRates || !price) return price;
-    // Convert from EGP to USD first
     const priceInUSD = price / conversionRates.EGP;
-    // Then convert to target currency
     return (priceInUSD * conversionRates[currency]).toFixed(2);
   };
 
@@ -125,7 +150,7 @@ const ActivityList = () => {
     .sort((a, b) => {
       if (sortBy === 'name') return a.name.localeCompare(b.name);
       if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating;
+      if (sortBy === 'rating') return b.rating - a.rating;
       return 0;
     });
 
@@ -230,10 +255,8 @@ const ActivityList = () => {
               <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
               <p className="yellow-text">Time: {activity.time}</p>
               <p className="yellow-text">Location: {activity.location}</p>
-              <p className="yellow-text">
-                Price: {!ratesLoading && convertPrice(activity.price)} {currency}
-              </p>
-              <p className="yellow-text">Rating: {activity.ratings.averageRating || 'Not rated'}</p>
+              <p className="yellow-text">Price: ${activity.price}</p>
+              <p className="yellow-text">Rating: {activity.rating || 'Not rated'}</p>
               <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
               {activity.specialDiscounts && (
                 <p className="yellow-text">Special Discounts: {activity.specialDiscounts}</p>
@@ -241,6 +264,21 @@ const ActivityList = () => {
               <p className="yellow-text">Booking: {activity.bookingOpen ? 'Open' : 'Closed'}</p>
               <div className="activity-actions">
                 <button className="share-button" onClick={() => openShareModal(activity)}>Share</button>
+                {!activity.booked ? (
+                  <button 
+                    className="book-button" 
+                    onClick={() => handleBookActivity(activity._id)}
+                  >
+                    Book Activity
+                  </button>
+                ) : (
+                  <button 
+                    className="cancel-button" 
+                    onClick={() => handleCancelBooking(activity._id)}
+                  >
+                    Cancel Booking
+                  </button>
+                )}
               </div>
             </li>
           ))}
@@ -250,7 +288,6 @@ const ActivityList = () => {
           <p>No Activities Available</p>
         </div>
       )}
-
       {isModalOpen && (
         <div className="share-modal">
           <div className="share-modal-content">

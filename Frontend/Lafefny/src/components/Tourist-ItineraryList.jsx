@@ -1,6 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios';
 import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
 import '../styles/ItineraryList.css';
 
@@ -22,7 +23,8 @@ const ItineraryList = () => {
   const [ratesLoading, setRatesLoading] = useState(true);
 
   const currentUserName = localStorage.getItem('currentUserName');
-  
+  const userId = localStorage.getItem('userId'); // Assuming userId is stored in local storage after login
+
   useEffect(() => {
     fetchItineraries();
   }, [searchTerm, filterType, filterValue, sortBy, currency]);
@@ -70,13 +72,41 @@ const ItineraryList = () => {
     }
   };
 
+  const handleBookItinerary = async (itineraryId) => {
+    console.log("Booking User ID:", userId); // Debug: check if userId is defined
+    
+    if (!userId) {
+      alert("User ID not found. Please log in.");
+      return;
+    }
+    
+    try {
+      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/book`, { userId });
+      alert("Itinerary booked successfully!");
+      fetchItineraries(); // Refresh the list to reflect the booking
+    } catch (error) {
+      console.error("Error booking itinerary:", error);
+      alert("Failed to book the itinerary.");
+    }
+  };
+
+  const handleCancelBooking = async (itineraryId) => {
+    try {
+      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { userId });
+      alert("Booking canceled successfully!");
+      fetchItineraries();
+    } catch (error) {
+      console.error("Error canceling booking:", error);
+      alert("Failed to cancel the booking.");
+    }
+  };
+
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
     const date = new Date(dateString);
     return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
   };
 
-  // Filter itineraries locally after fetching
   const filteredItineraries = itineraries
     .filter(itinerary => {
       if (!itinerary) return false;
@@ -119,14 +149,9 @@ const ItineraryList = () => {
     });
 
   const convertPrice = (price) => {
-    if (!conversionRates) return price; // Return original price if rates not loaded
-    
-    // First convert to USD (assuming price is in EGP)
+    if (!conversionRates) return price;
     const priceInUSD = price / conversionRates.EGP;
-    
-    // Then convert to target currency
     const convertedPrice = priceInUSD * conversionRates[currency];
-    
     return convertedPrice.toFixed(2);
   };
 
@@ -236,7 +261,6 @@ const ItineraryList = () => {
                 {itinerary.startDate && <p className="yellow-text">Start Date: {formatDate(itinerary.startDate)}</p>}
                 {itinerary.endDate && <p className="yellow-text">End Date: {formatDate(itinerary.endDate)}</p>}
                 
-                {/* New fields */}
                 {itinerary.ratings !== undefined && <p className="yellow-text">Ratings: {itinerary.ratings.averageRating}</p>}
                 {itinerary.preferences && <p className="yellow-text">Preferences: {itinerary.preferences}</p>}
                 {itinerary.language && <p className="yellow-text">Language: {itinerary.language}</p>}
@@ -275,6 +299,11 @@ const ItineraryList = () => {
                 )}
                 <div className="activity-actions">
                   <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
+                  {itinerary.booked ? (
+                    <button className="cancel-button" onClick={() => handleCancelBooking(itinerary._id)}>Cancel Booking</button>
+                  ) : (
+                    <button className="book-button" onClick={() => handleBookItinerary(itinerary._id)}>Book Itinerary</button>
+                  )}
                 </div>
               </div>
             </li>
