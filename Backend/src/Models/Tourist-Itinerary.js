@@ -23,7 +23,12 @@ const TouristItinerarySchema = new mongoose.Schema({
   },
   preferences: { type: String, default: '' },
   language: { type: String, default: '' },
-  tourGuideName: { type: String, default: '' }
+  tourGuideName: { type: String, default: '' },
+  touristBookings: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tourist',
+    default: []
+  }]
 });
 
 const TouristItinerary = mongoose.model("TouristItinerary", TouristItinerarySchema);

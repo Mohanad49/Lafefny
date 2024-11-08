@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
@@ -204,7 +205,7 @@ function Sign() {
                 checked={formData.termsAccepted}
                 onChange={(e) =>
                   setFormData({ ...formData, termsAccepted: e.target.checked })
-                }
+                }
               />
               <label style={{ marginLeft: '8px' }}>
                 I accept the terms and conditions

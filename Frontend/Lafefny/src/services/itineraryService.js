@@ -48,3 +48,17 @@ export const getUserItineraries = (userId, params = {}) => {
     }
   });
 };
+
+export const bookItinerary = (itineraryId, userId, selectedDate) => {
+  return axios.post(`${API_URL}/itineraries/${itineraryId}/book`, {
+    userId,
+    selectedDate: new Date(selectedDate).toISOString()
+  });
+};
+
+// In ItineraryService.js - Add cancel booking function
+export const cancelBooking = (itineraryId, userId) => {
+  return axios.post(`${API_URL}/itineraries/${itineraryId}/cancel`, { 
+    userId: userId 
+  });
+};

@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
+import { getAllTouristItineraries } from '../services/touristItineraryService';
 import '../styles/ItineraryList.css';
 
 const EXCHANGE_API_KEY = 'a6ef7b85eab930c5bf44ae65'; // Store this in .env file in practice
@@ -23,7 +23,7 @@ const ItineraryList = () => {
   const [ratesLoading, setRatesLoading] = useState(true);
 
   const currentUserName = localStorage.getItem('currentUserName');
-  const userId = localStorage.getItem('userId'); // Assuming userId is stored in local storage after login
+  const userId = localStorage.getItem('userID');
 
   useEffect(() => {
     fetchItineraries();
@@ -72,16 +72,14 @@ const ItineraryList = () => {
     }
   };
 
-  const handleBookItinerary = async (itineraryId) => {
-    console.log("Booking User ID:", userId); // Debug: check if userId is defined
-    
+  const handleBookItinerary = async (itineraryId) => {   
     if (!userId) {
       alert("User ID not found. Please log in.");
       return;
     }
     
     try {
-      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/book`, { userId });
+      await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/book`, { userId });
       alert("Itinerary booked successfully!");
       fetchItineraries(); // Refresh the list to reflect the booking
     } catch (error) {
@@ -92,7 +90,7 @@ const ItineraryList = () => {
 
   const handleCancelBooking = async (itineraryId) => {
     try {
-      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { userId });
+      await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/cancel`, { userId });
       alert("Booking canceled successfully!");
       fetchItineraries();
     } catch (error) {
@@ -299,8 +297,8 @@ const ItineraryList = () => {
                 )}
                 <div className="activity-actions">
                   <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
-                  {itinerary.booked ? (
-                    <button className="cancel-button" onClick={() => handleCancelBooking(itinerary._id)}>Cancel Booking</button>
+                  {itinerary.touristBookings[0] ? (
+                    <button className="cancel-booking-btn" onClick={() => handleCancelBooking(itinerary._id)}>Cancel Booking</button>
                   ) : (
                     <button className="book-button" onClick={() => handleBookItinerary(itinerary._id)}>Book Itinerary</button>
                   )}

@@ -60,9 +60,8 @@ const ActivityList = () => {
         date: filterDate,
         rating: filterRating,
       });
-      console.log("Activities fetched:", response.data);
 
-      const touristId = localStorage.getItem('touristId'); 
+      const touristId = localStorage.getItem('userID'); // Changed from 'touristId' to 'userID'
       const updatedActivities = response.data.map((activity) => ({
         ...activity,
         booked: activity.touristBookings?.includes(touristId),
@@ -76,26 +75,45 @@ const ActivityList = () => {
 
   const handleBookActivity = async (activityId) => {
     try {
-      const touristId = localStorage.getItem('touristId');
-      console.log("Tourist ID:", touristId);
+      const touristId = localStorage.getItem('userID'); // Changed from 'touristId' to 'userID'
+      
+      if (!touristId) {
+        alert("Please log in to book activities");
+        return;
+      }
+
       await axios.post(`http://localhost:8000/activities/${activityId}/book`, { touristId });
       alert("Activity booked successfully!");
       fetchActivities(); 
     } catch (error) {
       console.error("Error booking activity:", error);
-      alert("Failed to book the activity.");
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert("Failed to book the activity.");
+      }
     }
   };
 
   const handleCancelBooking = async (activityId) => {
     try {
-      const touristId = localStorage.getItem('touristId');
+      const touristId = localStorage.getItem('userID'); // Changed from 'touristId' to 'userID'
+      
+      if (!touristId) {
+        alert("Please log in to cancel bookings");
+        return;
+      }
+
       await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
       alert("Booking canceled successfully!");
       fetchActivities(); 
     } catch (error) {
       console.error("Error canceling booking:", error);
-      alert("Failed to cancel the booking.");
+      if (error.response?.data?.error) {
+        alert(error.response.data.error);
+      } else {
+        alert("Failed to cancel the booking.");
+      }
     }
   };
 
@@ -255,7 +273,7 @@ const ActivityList = () => {
               <p className="yellow-text">Date: {new Date(activity.date).toLocaleDateString()}</p>
               <p className="yellow-text">Time: {activity.time}</p>
               <p className="yellow-text">Location: {activity.location}</p>
-              <p className="yellow-text">Price: ${activity.price}</p>
+              <p className="yellow-text">Price: {convertPrice(activity.price)} {currency}</p>
               <p className="yellow-text">Rating: {activity.rating || 'Not rated'}</p>
               <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
               {activity.specialDiscounts && (

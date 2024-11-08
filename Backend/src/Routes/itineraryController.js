@@ -166,25 +166,47 @@ router.get('/searchItineraries', async (req, res) => {
 // Booking route for an itinerary
 router.post('/:id/book', async (req, res) => {
   try {
-    const { userId } = req.body; // Expecting userId in the request body
+    const { userId, selectedDate } = req.body;
+    
+    if (!userId || !selectedDate) {
+      return res.status(400).json({ error: "Missing required booking information" });
+    }
 
-    // Find the itinerary to be booked
     const itinerary = await Itinerary.findById(req.params.id);
     if (!itinerary) {
       return res.status(404).json({ error: "Itinerary not found" });
     }
 
-    // Check if user has already booked this itinerary
-    if (itinerary.touristBookings.includes(userId)) {
-      return res.status(400).json({ error: "User has already booked this itinerary" });
+    // Convert dates to compare them properly
+    const bookingDate = new Date(selectedDate);
+    const isDateAvailable = itinerary.availableDates.some(date => 
+      date.toISOString().split('T')[0] === bookingDate.toISOString().split('T')[0]
+    );
+
+    if (!isDateAvailable) {
+      return res.status(400).json({ error: "Selected date is not available" });
     }
 
-    // Add user to bookings
-    itinerary.touristBookings.push(userId);
-    await itinerary.save();
+    // Check for existing booking
+    const existingBooking = itinerary.touristBookings.find(booking => 
+      booking.tourist.toString() === userId &&
+      new Date(booking.bookedDate).toISOString().split('T')[0] === bookingDate.toISOString().split('T')[0]
+    );
 
+    if (existingBooking) {
+      return res.status(400).json({ error: "You already have a booking for this date" });
+    }
+
+    // Add new booking
+    itinerary.touristBookings.push({
+      tourist: userId,
+      bookedDate: bookingDate
+    });
+
+    await itinerary.save();
     res.status(200).json({ message: "Booking successful", itinerary });
   } catch (error) {
+    console.error('Booking error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -192,25 +214,35 @@ router.post('/:id/book', async (req, res) => {
 // Cancel booking for an itinerary
 router.post('/:id/cancel', async (req, res) => {
   try {
-    const { userId } = req.body; // Expecting userId in the request body
+    const { userId } = req.body;
+    if (!userId) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
 
     const itinerary = await Itinerary.findById(req.params.id);
     if (!itinerary) {
       return res.status(404).json({ error: "Itinerary not found" });
     }
 
-    // Check if user has booked this itinerary
-    const bookingIndex = itinerary.touristBookings.indexOf(userId);
+    // Find booking index where tourist matches userId
+    const bookingIndex = itinerary.touristBookings.findIndex(
+      booking => booking.tourist.toString() === userId.toString()
+    );
+
     if (bookingIndex === -1) {
-      return res.status(400).json({ error: "Booking not found for this user" });
+      return res.status(400).json({ error: "No booking found for this user" });
     }
 
-    // Remove user from bookings
+    // Remove the booking
     itinerary.touristBookings.splice(bookingIndex, 1);
     await itinerary.save();
 
-    res.status(200).json({ message: "Booking canceled successfully", itinerary });
+    res.status(200).json({ 
+      message: "Booking cancelled successfully",
+      itinerary 
+    });
   } catch (error) {
+    console.error('Cancel booking error:', error);
     res.status(500).json({ error: error.message });
   }
 });

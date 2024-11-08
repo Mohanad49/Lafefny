@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { getItineraries } from '../services/itineraryService';
+import { getItineraries, bookItinerary, cancelBooking } from '../services/itineraryService';
 import { fetchExchangeRates } from '../services/currencyService';
 import axios from 'axios';
 import '../styles/ItineraryList.css';
@@ -18,6 +18,12 @@ const ItineraryList = () => {
   const [conversionRates, setConversionRates] = useState(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(null);
+  const [isDateModalOpen, setIsDateModalOpen] = useState(false);
+  const [selectedItinerary, setSelectedItinerary] = useState(null);
+  const [selectedDate, setSelectedDate] = useState('');
+  const [bookedItineraries, setBookedItineraries] = useState(new Set());
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     fetchItineraries();
@@ -37,6 +43,38 @@ const ItineraryList = () => {
     getRates();
   }, []);
 
+  useEffect(() => {
+    const loadBookings = async () => {
+      setIsLoading(true);
+      try {
+        const fetchedItineraries = await fetchItineraries();
+        if (!Array.isArray(fetchedItineraries)) {
+          throw new Error('Invalid itineraries data');
+        }
+        
+        const userId = localStorage.getItem('userID');
+        if (!userId) {
+          throw new Error('User not logged in');
+        }
+
+        const booked = new Set(
+          fetchedItineraries
+            .filter(it => it && checkIfBooked(it))
+            .map(it => it._id)
+        );
+        setBookedItineraries(booked);
+      } catch (error) {
+        console.error('Error loading bookings:', error);
+        setError(error.message);
+        setBookedItineraries(new Set());
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadBookings();
+  }, []);
+
   const fetchItineraries = async () => {
     try {
       const response = await getItineraries({
@@ -45,6 +83,10 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
+      
+      if (!response?.data) {
+        throw new Error('No data received from server');
+      }
       
       const userId = localStorage.getItem('userID');
       const updatedItineraries = Array.isArray(response.data)
@@ -55,9 +97,12 @@ const ItineraryList = () => {
         : [];
 
       setItineraries(updatedItineraries);
+      return response.data;
     } catch (error) {
       console.error('Error fetching itineraries:', error);
+      setError(error.message);
       setItineraries([]);
+      return [];
     }
   };
 
@@ -67,19 +112,21 @@ const ItineraryList = () => {
     return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
   };
 
-  const handleBookItinerary = async (itineraryId) => {
+  const handleBookItinerary = async (itineraryId, selectedDate) => {
     try {
-      const userId = localStorage.getItem('userID');
-      if (!userId) {
-        alert("User ID not found. Please log in.");
-        return;
+      const userId = localStorage.getItem('userID'); // Implement this to get logged-in user's ID
+      const response = await bookItinerary(itineraryId, userId, selectedDate);
+      
+      if (response.data.message === "Booking successful") {
+        // Show success message
+        alert("Booking successful!");
+        // Refresh itineraries list
+        fetchItineraries();
       }
-      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/book`, { userId });
-      alert("Itinerary booked successfully!");
-      fetchItineraries();
     } catch (error) {
-      console.error("Error booking itinerary:", error);
-      alert("Failed to book the itinerary.");
+      console.error('Error booking itinerary:', error);
+      const errorMessage = error.response?.data?.error || "Failed to book itinerary";
+      alert(errorMessage);
     }
   };
 
@@ -90,13 +137,31 @@ const ItineraryList = () => {
         alert("User ID not found. Please log in.");
         return;
       }
-      await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { userId });
-      alert("Booking canceled successfully!");
-      fetchItineraries();
+
+      const response = await cancelBooking(itineraryId, userId);
+      
+      if (response.data.message === "Booking cancelled successfully") {
+        setBookedItineraries(prev => {
+          const updated = new Set(prev);
+          updated.delete(itineraryId);
+          return updated;
+        });
+        alert("Booking cancelled successfully!");
+        await fetchItineraries(); // Refresh the list
+      }
     } catch (error) {
-      console.error("Error canceling booking:", error);
-      alert("Failed to cancel the booking.");
+      console.error('Error canceling booking:', error);
+      const errorMessage = error.response?.data?.error || "Failed to cancel booking";
+      alert(errorMessage);
     }
+  };
+
+  const checkIfBooked = (itinerary) => {
+    if (!itinerary?.touristBookings) return false;
+    const userId = localStorage.getItem('userID');
+    return itinerary.touristBookings?.some(booking => 
+      booking.tourist === userId
+    ) || false;
   };
 
   const filteredItineraries = itineraries
@@ -160,6 +225,27 @@ const ItineraryList = () => {
     const body = `I found this itinerary that you might like: ${shareableLink}`;
     window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     setIsModalOpen(false);
+  };
+
+  const handleBookClick = (itinerary) => {
+    setSelectedItinerary(itinerary);
+    setIsDateModalOpen(true);
+  };
+
+  const handleBookConfirm = async () => {
+    if (!selectedDate) {
+      alert("Please select a date");
+      return;
+    }
+
+    try {
+      await handleBookItinerary(selectedItinerary._id, selectedDate);
+      setIsDateModalOpen(false);
+      setSelectedItinerary(null);
+      setSelectedDate('');
+    } catch (error) {
+      console.error('Booking failed:', error);
+    }
   };
 
   return (
@@ -274,13 +360,19 @@ const ItineraryList = () => {
 
               <div className="activity-actions">
                 <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
-                {!itinerary.booked ? (
-                  <button className="book-button" onClick={() => handleBookItinerary(itinerary._id)}>
-                    Book Itinerary
+                {checkIfBooked(itinerary) ? (
+                  <button 
+                    className="cancel-booking-btn"
+                    onClick={() => handleCancelBooking(itinerary._id)}
+                  >
+                    Cancel Booking
                   </button>
                 ) : (
-                  <button className="cancel-button" onClick={() => handleCancelBooking(itinerary._id)}>
-                    Cancel Booking
+                  <button 
+                    className="book-btn"
+                    onClick={() => handleBookClick(itinerary)}
+                  >
+                    Book Itinerary
                   </button>
                 )}
               </div>
@@ -307,6 +399,38 @@ const ItineraryList = () => {
           </div>
         </div>
       )}
+
+      {isDateModalOpen && (
+        <div className="date-modal">
+          <div className="date-modal-content">
+            <h2>Select Booking Date</h2>
+            <select 
+              value={selectedDate} 
+              onChange={(e) => setSelectedDate(e.target.value)}
+            >
+              <option value="">Choose a date</option>
+              {selectedItinerary?.availableDates.map((date, index) => (
+                <option key={index} value={date}>
+                  {formatDate(date)}
+                </option>
+              ))}
+            </select>
+            <div className="modal-buttons">
+              <button 
+                onClick={handleBookConfirm}
+                disabled={!selectedDate}
+              >
+                Confirm Booking
+              </button>
+              <button onClick={() => setIsDateModalOpen(false)}>
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {isLoading && <div>Loading...</div>}
+      {error && <div className="error-message">{error}</div>}
     </div>
   );
 };

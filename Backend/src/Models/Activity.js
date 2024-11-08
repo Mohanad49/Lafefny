@@ -25,7 +25,8 @@ const activitySchema = new mongoose.Schema({
   },
   touristBookings: [{
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Tourist'
+    ref: 'Tourist',
+    default: []
   }]
 });
 

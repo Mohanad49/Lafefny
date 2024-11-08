@@ -28,8 +28,14 @@ const itinerarySchema = new mongoose.Schema({
     ], default: []
   },
   touristBookings: [{
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Tourist'
+    tourist: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Tourist'
+    },
+    bookedDate: {
+      type: Date,
+    },
+    default: []
   }]
 }, { timestamps: true });
 
