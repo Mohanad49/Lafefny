@@ -291,7 +291,7 @@ const ActivityList = () => {
                   </button>
                 ) : (
                   <button 
-                    className="cancel-button" 
+                    className="cancel-booking-btn" 
                     onClick={() => handleCancelBooking(activity._id)}
                   >
                     Cancel Booking

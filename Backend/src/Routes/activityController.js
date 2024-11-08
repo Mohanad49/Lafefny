@@ -1,6 +1,7 @@
 const express = require('express');
 const Activity = require('../Models/Activity');
-const User = require('../Models/User'); // Import User model for tourist validation
+const User = require('../Models/User');
+const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
 const router = express.Router();
 
 // CREATE activity
@@ -190,6 +191,7 @@ router.post('/:activityId/book', async (req, res) => {
 
     activity.touristBookings.push(touristId);
     await activity.save();
+    updateLoyaltyPoints(touristId, activity.price); // Update loyalty points for the tourist
     res.status(200).json({ message: "Booking successful", activity });
   } catch (error) {
     console.error("Error in booking route:", error); // Log detailed error for debugging
@@ -216,7 +218,7 @@ router.post('/:id/cancel', async (req, res) => {
 
     activity.touristBookings.splice(bookingIndex, 1);
     await activity.save();
-
+    decreaseLoyaltyPoints(touristId, activity.price); // Decrease loyalty points for the tourist
     res.status(200).json({ message: "Booking canceled successfully", activity });
   } catch (error) {
     res.status(500).json({ error: error.message });

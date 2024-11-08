@@ -1,6 +1,6 @@
 const express = require("express");
-const Itinerary = require("../Models/Itinerary"); // Correct import here
-
+const Itinerary = require("../Models/Itinerary");
+const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints'); 
 const router = express.Router();
 
 // POST route for creating a new itinerary
@@ -204,6 +204,7 @@ router.post('/:id/book', async (req, res) => {
     });
 
     await itinerary.save();
+    updateLoyaltyPoints(userId, itinerary.price); // Update loyalty points for the tourist
     res.status(200).json({ message: "Booking successful", itinerary });
   } catch (error) {
     console.error('Booking error:', error);
@@ -236,7 +237,7 @@ router.post('/:id/cancel', async (req, res) => {
     // Remove the booking
     itinerary.touristBookings.splice(bookingIndex, 1);
     await itinerary.save();
-
+    decreaseLoyaltyPoints(userId, itinerary.price); // Decrease loyalty points for the tourist
     res.status(200).json({ 
       message: "Booking cancelled successfully",
       itinerary 

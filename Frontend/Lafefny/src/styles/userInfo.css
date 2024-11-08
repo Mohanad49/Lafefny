@@ -1,0 +1,45 @@
+/* Add these styles to your CSS file */
+.tourist-info-container {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.loyalty-points {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #666;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+}
+
+.points-value {
+  font-size: 24px;
+  color: #0de414;
+  font-weight: bold;
+}
+
+.bonus-message {
+  color: #48bb78;
+  margin-top: 10px;
+}
+
+.redeem-button {
+  background-color: #4CAF50;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-top: 10px;
+  font-weight: bold;
+}
+
+.redeem-button:hover {
+  background-color: #45a049;
+}
+
+.redeem-button:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
