@@ -225,4 +225,19 @@ router.post('/:id/cancel', async (req, res) => {
   }
 });
 
+router.patch('/:id/toggleInappropriate', async (req, res) => {
+  try {
+    const activity = await Activity.findById(req.params.id);
+    if (!activity) return res.status(404).json({ error: "Activity not found" });
+
+    activity.inappropriateFlag = !activity.inappropriateFlag;
+    await activity.save();
+
+    res.json(activity);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+
 module.exports = router;
