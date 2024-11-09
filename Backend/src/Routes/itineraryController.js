@@ -248,4 +248,33 @@ router.post('/:id/cancel', async (req, res) => {
   }
 });
 
+router.patch('/:id/toggleActive', async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    itinerary.isActive = !itinerary.isActive;
+    await itinerary.save();
+
+    res.json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Toggle inappropriateFlag status of an itinerary
+router.patch('/:id/toggleInappropriate', async (req, res) => {
+  try {
+    const itinerary = await Itinerary.findById(req.params.id);
+    if (!itinerary) return res.status(404).json({ error: "Itinerary not found" });
+
+    itinerary.inappropriateFlag = !itinerary.inappropriateFlag;
+    await itinerary.save();
+
+    res.json(itinerary);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports = router;
