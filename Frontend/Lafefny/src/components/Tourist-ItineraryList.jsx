@@ -60,8 +60,20 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
+
       if (Array.isArray(response)) {
-        const userItineraries = response.filter(itinerary => itinerary.touristName === currentUserName);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+
+        const userItineraries = response
+          .filter(itinerary => {
+            // Check if the end date is in the future
+            const endDate = new Date(itinerary.endDate);
+            endDate.setHours(0, 0, 0, 0);
+            return endDate >= today;
+          })
+          .filter(itinerary => itinerary.touristName === currentUserName);
+
         setItineraries(userItineraries);
       } else {
         setItineraries([]);

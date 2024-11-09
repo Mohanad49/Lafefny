@@ -89,11 +89,23 @@ const ItineraryList = () => {
       }
       
       const userId = localStorage.getItem('userID');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+
       const updatedItineraries = Array.isArray(response.data)
-        ? response.data.map((itinerary) => ({
-            ...itinerary,
-            booked: itinerary.touristBookings.includes(userId),
-          }))
+        ? response.data
+            .filter(itinerary => {
+              // Check if any available dates are in the future
+              return itinerary.availableDates.some(date => {
+                const availableDate = new Date(date);
+                availableDate.setHours(0, 0, 0, 0);
+                return availableDate >= today;
+              });
+            })
+            .map((itinerary) => ({
+              ...itinerary,
+              booked: itinerary.touristBookings.includes(userId),
+            }))
         : [];
 
       setItineraries(updatedItineraries);
@@ -130,7 +142,35 @@ const ItineraryList = () => {
     }
   };
 
-  const handleCancelBooking = async (itineraryId) => {
+  const checkIfCanCancel = (itinerary) => {
+    if (!itinerary?.touristBookings) {
+      return false;
+    }
+    
+    const userId = localStorage.getItem('userID');
+    const userBooking = itinerary.touristBookings.find(booking => 
+      booking.tourist === userId
+    );
+    
+    if (!userBooking || !userBooking.bookedDate) {
+      return false;
+    }
+
+    const bookedDate = new Date(userBooking.bookedDate);
+    const today = new Date();
+    
+    // Set both dates to start of day for fair comparison
+    bookedDate.setHours(0, 0, 0, 0);
+    today.setHours(0, 0, 0, 0);
+    
+    // Calculate the difference in days
+    const diffTime = bookedDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays >= 2;
+  };
+
+  const handleCancelBooking = async (itinerary) => {
     try {
       const userId = localStorage.getItem('userID');
       if (!userId) {
@@ -138,16 +178,21 @@ const ItineraryList = () => {
         return;
       }
 
-      const response = await cancelBooking(itineraryId, userId);
+      if (!checkIfCanCancel(itinerary)) {
+        alert("Cancellation is not allowed less than 2 days before the booked date.");
+        return;
+      }
+      
+      const response = await cancelBooking(itinerary._id, userId);
       
       if (response.data.message === "Booking cancelled successfully") {
         setBookedItineraries(prev => {
           const updated = new Set(prev);
-          updated.delete(itineraryId);
+          updated.delete(itinerary._id);
           return updated;
         });
         alert("Booking cancelled successfully!");
-        await fetchItineraries(); // Refresh the list
+        await fetchItineraries();
       }
     } catch (error) {
       console.error('Error canceling booking:', error);
@@ -360,14 +405,17 @@ const ItineraryList = () => {
 
               <div className="activity-actions">
                 <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
-                {checkIfBooked(itinerary) ? (
+                {checkIfBooked(itinerary) && (
                   <button 
                     className="cancel-booking-btn"
-                    onClick={() => handleCancelBooking(itinerary._id)}
+                    onClick={() => handleCancelBooking(itinerary)}
+                    disabled={!checkIfCanCancel(itinerary)}
+                    title={!checkIfCanCancel(itinerary) ? "Cancellation not allowed less than 2 days before booked date" : ""}
                   >
                     Cancel Booking
                   </button>
-                ) : (
+                )}
+                {!checkIfBooked(itinerary) && (
                   <button 
                     className="book-btn"
                     onClick={() => handleBookClick(itinerary)}
@@ -409,11 +457,20 @@ const ItineraryList = () => {
               onChange={(e) => setSelectedDate(e.target.value)}
             >
               <option value="">Choose a date</option>
-              {selectedItinerary?.availableDates.map((date, index) => (
-                <option key={index} value={date}>
-                  {formatDate(date)}
-                </option>
-              ))}
+              {selectedItinerary?.availableDates
+                .filter(date => {
+                  const availableDate = new Date(date);
+                  const today = new Date();
+                  // Set both dates to start of day for fair comparison
+                  availableDate.setHours(0, 0, 0, 0);
+                  today.setHours(0, 0, 0, 0);
+                  return availableDate >= today;
+                })
+                .map((date, index) => (
+                  <option key={index} value={date}>
+                    {formatDate(date)}
+                  </option>
+                ))}
             </select>
             <div className="modal-buttons">
               <button 

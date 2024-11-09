@@ -61,11 +61,21 @@ const ActivityList = () => {
         rating: filterRating,
       });
 
-      const touristId = localStorage.getItem('userID'); // Changed from 'touristId' to 'userID'
-      const updatedActivities = response.data.map((activity) => ({
-        ...activity,
-        booked: activity.touristBookings?.includes(touristId),
-      }));
+      const touristId = localStorage.getItem('userID');
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+
+      const updatedActivities = response.data
+        .filter(activity => {
+          const activityDate = new Date(activity.date);
+          activityDate.setHours(0, 0, 0, 0);
+          return activityDate >= today;
+        })
+        .map((activity) => ({
+          ...activity,
+          booked: activity.touristBookings?.includes(touristId),
+        }));
+
       setActivities(updatedActivities);
     } catch (error) {
       console.error('Error fetching activities:', error);
@@ -95,18 +105,36 @@ const ActivityList = () => {
     }
   };
 
-  const handleCancelBooking = async (activityId) => {
+  const checkIfCanCancel = (activityDate) => {
+    const today = new Date();
+    const activityDateTime = new Date(activityDate);
+    
+    // Set both dates to start of day for fair comparison
+    today.setHours(0, 0, 0, 0);
+    activityDateTime.setHours(0, 0, 0, 0);
+    
+    // Calculate the difference in days
+    const diffTime = activityDateTime.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays >= 2;
+  };
+
+  const handleCancelBooking = async (activityId, activityDate) => {
     try {
-      const touristId = localStorage.getItem('userID'); // Changed from 'touristId' to 'userID'
+      const touristId = localStorage.getItem('userID');
       
       if (!touristId) {
         alert("Please log in to cancel bookings");
         return;
       }
-
+      if (!checkIfCanCancel(activityDate)) {
+        alert("Cancellation is not allowed less than 2 days before the booked date.");
+        return;
+      }
       await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
       alert("Booking canceled successfully!");
-      fetchActivities(); 
+      fetchActivities();
     } catch (error) {
       console.error("Error canceling booking:", error);
       if (error.response?.data?.error) {
@@ -282,19 +310,20 @@ const ActivityList = () => {
               <p className="yellow-text">Booking: {activity.bookingOpen ? 'Open' : 'Closed'}</p>
               <div className="activity-actions">
                 <button className="share-button" onClick={() => openShareModal(activity)}>Share</button>
-                {!activity.booked ? (
+                {activity.booked ? (
+                  <button 
+                    className="cancel-booking-btn" 
+                    onClick={() => handleCancelBooking(activity._id, activity.date)}
+                    disabled={!checkIfCanCancel(activity.date)}
+                  >
+                    Cancel Booking
+                  </button>
+                ) : (
                   <button 
                     className="book-button" 
                     onClick={() => handleBookActivity(activity._id)}
                   >
                     Book Activity
-                  </button>
-                ) : (
-                  <button 
-                    className="cancel-booking-btn" 
-                    onClick={() => handleCancelBooking(activity._id)}
-                  >
-                    Cancel Booking
                   </button>
                 )}
               </div>
