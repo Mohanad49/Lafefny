@@ -4,6 +4,9 @@ import { Link } from 'react-router-dom';
 import { getProducts } from '../services/productService';
 import '../styles/productList.css';
 import { fetchExchangeRates } from '../services/currencyService';
+import axios from 'axios';
+import { addProductReview, checkProductPurchase } from '../services/productService';
+import ReviewForm from './ReviewForm';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -17,6 +20,9 @@ const ProductList = () => {
   const [conversionRates, setConversionRates] = useState(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(null);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [touristName, setTouristName] = useState('');
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -45,6 +51,12 @@ const ProductList = () => {
       }
     };
     getRates();
+  }, []);
+
+  useEffect(() => {
+    const userID = localStorage.getItem('userID');
+    
+    
   }, []);
 
   const fetchProducts = async () => {
@@ -112,6 +124,80 @@ const ProductList = () => {
       if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating;
       return 0;
     });
+
+  const handleReviewClick = async (product) => {
+    try {
+      const userID = localStorage.getItem('userID');
+      if (!userID) {
+        alert('Please log in to submit a review');
+        return;
+      }
+
+      console.log('Attempting to check purchase with:', {
+        userID,
+        productId: product._id
+      });
+
+      const response = await checkProductPurchase(userID, product._id);
+      console.log('Response from checkProductPurchase:', response);
+      
+      if (!response.hasPurchased) {
+        alert('You can only review products you have purchased.');
+        return;
+      }
+
+      setTouristName(response.touristName);
+      setSelectedProduct(product);
+      setShowReviewModal(true);
+    } catch (error) {
+      console.error('Error in handleReviewClick:', error);
+      if (error.response) {
+        console.error('Error response data:', error.response.data);
+        alert(`Error checking purchase history: ${error.response.data.message}`);
+      } else {
+        console.error('No response in error:', error.message);
+        alert('Error checking purchase history');
+      }
+    }
+  };
+
+  const closeReviewModal = () => {
+    setShowReviewModal(false);
+    setSelectedProduct(null);
+  };
+
+  const handleReviewSubmit = async ({ rating, comment }) => {
+    if (!rating || !comment) {
+      alert('Please provide both rating and comment');
+      return;
+    }
+
+    const review = {
+      reviewerName: touristName,
+      rating: parseInt(rating),
+      comment,
+      date: new Date()
+    };
+
+    try {
+      const response = await addProductReview(selectedProduct._id, review);
+      
+      // Update the products list with the new review
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product._id === selectedProduct._id 
+            ? { ...product, ratings: response.data.ratings }
+            : product
+        )
+      );
+
+      alert('Review submitted successfully!');
+      closeReviewModal();
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      alert(`Failed to submit review: ${error.response?.data?.message || error.message}`);
+    }
+  };
 
   return (
     <div className="product-list-container">
@@ -193,6 +279,7 @@ const ProductList = () => {
               <td>{product.seller}</td>
               <td>
                 <button onClick={() => openModal(product.ratings.reviews)}>View Reviews</button>
+                <button onClick={() => handleReviewClick(product)}>Add Review</button>
               </td>
             </tr>
           ))}
@@ -220,6 +307,14 @@ const ProductList = () => {
             )}
           </div>
         </div>
+      )}
+
+      {showReviewModal && (
+        <ReviewForm
+          title={`Review Product: ${selectedProduct.name}`}
+          onClose={closeReviewModal}
+          onSubmit={handleReviewSubmit}
+        />
       )}
     </div>
   );

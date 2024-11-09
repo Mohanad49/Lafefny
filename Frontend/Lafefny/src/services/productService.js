@@ -72,3 +72,27 @@ export const fetchProducts = async (searchTerm, minPrice, maxPrice, sortBy) => {
 export const updateProductArchiveStatus = (id) => {
   return axios.patch(`${API_URL}/${id}/toggleArchive`);
 };
+
+// Add a review to a product
+export const addProductReview = async (productId, review) => {
+  try {
+    const response = await axios.post(`${API_URL}/${productId}/reviews`, review);
+    return response;
+  } catch (error) {
+    console.error('Error adding review:', error);
+    throw error;
+  }
+};
+
+// Check if user has purchased product
+export const checkProductPurchase = async (userID, productId) => {
+  try {
+    console.log('Making request to:', `${API_URL}/check-purchase/${userID}/${productId}`);
+    const response = await axios.get(`${API_URL}/check-purchase/${userID}/${productId}`);
+    console.log('Response received:', response.data);
+    return response.data;
+  } catch (error) {
+    console.error('Full error object:', error);
+    throw error;
+  }
+};
