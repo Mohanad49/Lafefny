@@ -19,8 +19,6 @@ const AdvertiserSchema = new Schema({
     required: true
   },
   logo: String,
-  isAccepted: { type: Boolean, default: false },
-  termsAccepted: { type: Boolean, default: false },
   filename: String,
   contentType: String,
   data: Buffer,

@@ -1,3 +1,4 @@
+/* eslint-disable no-useless-catch */
 // src/services/signService.js
 import axios from 'axios';
 
@@ -15,6 +16,7 @@ export const signUp = async (formData) => {
 
 // Sign in function
 export const signIn = async (email, password) => {
+  try{
     const response = await fetch(`${API_URL}/signin`, {
       method: 'POST',
       headers: {
@@ -22,12 +24,19 @@ export const signIn = async (email, password) => {
       },
       body: JSON.stringify({ email, password }),
     });
-  
-    if (!response.ok) {
-      throw new Error('Failed to sign in');
-    }
-  
     const data = await response.json();
+
+    if (!response.ok) {
+      throw {
+        response: {
+          status: response.status,
+          data: data
+        }
+      };
+    }
     return data; 
+  }
+  catch (error) {
+    throw error;
   };
-  
+};

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const UpdateTourGuideInfo = () => {
   const [formData, setFormData] = useState({
@@ -9,6 +9,36 @@ const UpdateTourGuideInfo = () => {
   });
 
   const [message, setMessage] = useState(""); // For success or error messages
+
+  // Fetch existing tour guide info
+  useEffect(() => {
+    const fetchTourGuideInfo = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/tourGuide/getTourGuide/${localStorage.getItem("userID")}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Since getTourGuide returns an array, we take the first item
+          const tourGuideInfo = data[0];
+          
+          setFormData({
+            mobile: tourGuideInfo.mobile || "",
+            yearsOfExperience: tourGuideInfo.yearsOfExperience || "",
+            previousWork: tourGuideInfo.previousWork || "",
+          });
+        } else {
+          setMessage("Error fetching tour guide information");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setMessage("Error connecting to server");
+      }
+    };
+
+    fetchTourGuideInfo();
+  }, []); // Empty dependency array means this runs once on mount
 
   // Handle input changes
   const handleChange = (e) => {

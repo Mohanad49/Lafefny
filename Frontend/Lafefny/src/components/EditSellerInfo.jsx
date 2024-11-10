@@ -1,15 +1,45 @@
 /* eslint-disable no-unused-vars */
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 const UpdateSellerInfo = () => {
   const [formData, setFormData] = useState({
-    name:"",
-    description:""
+    name: "",
+    description: ""
   });
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
 
-  const [message, setMessage] = useState(""); // For success or error messages
+  // Fetch existing seller info
+  useEffect(() => {
+    const fetchSellerInfo = async () => {
+      try {
+        const response = await fetch(
+          `http://localhost:8000/seller/getSeller/${localStorage.getItem("userID")}`
+        );
+        
+        if (response.ok) {
+          const data = await response.json();
+          // Since getSeller returns an array, take the first item
+          const sellerInfo = data[0];
+          
+          setFormData({
+            name: sellerInfo.name || "",
+            description: sellerInfo.description || ""
+          });
+        } else {
+          setMessage("Error fetching seller information");
+        }
+      } catch (error) {
+        console.error("Error:", error);
+        setMessage("Error connecting to server");
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Handle input changes
+    fetchSellerInfo();
+  }, []); // Empty dependency array means this runs once on mount
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
@@ -18,7 +48,6 @@ const UpdateSellerInfo = () => {
     });
   };
 
-  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -43,12 +72,16 @@ const UpdateSellerInfo = () => {
     }
   };
 
+  if (loading) {
+    return <div>Loading seller information...</div>;
+  }
+
   return (
     <div>
       <h2>Update Seller Info</h2>
       <form onSubmit={handleSubmit}>
         <div>
-          <label>name:</label>
+          <label>Name:</label>
           <input
             type="text"
             name="name"
@@ -57,18 +90,16 @@ const UpdateSellerInfo = () => {
             required
           />
         </div>
-
         <div>
-          <label>description:</label>
-          <input
-            type="text"
+          <label>Description:</label>
+          <textarea
             name="description"
             value={formData.description}
             onChange={handleChange}
             required
           />
         </div>
-        <button type="submit">Update Seller Info</button>
+        <button type="submit">Update Information</button>
       </form>
 
       {message && <p>{message}</p>}

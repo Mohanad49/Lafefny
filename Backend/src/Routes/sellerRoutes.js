@@ -8,26 +8,38 @@ const router = express.Router();
 router.post("/addSellerInfo/:id", async (req, res) => {
     const { name, description } = req.body;
     const userID = req.params.id;
+    
     if (!mongoose.isValidObjectId(userID)) {
-      return res.status(400).json({ error: "invalid seller" });
+        return res.status(400).json({ error: "Invalid seller ID" });
     }
+    
     try {
-      const seller = await Seller.create({ name, description, userID });
-      res.status(200).json(seller);
+        const seller = await Seller.create({
+            name: name || 'New Seller',
+            description: description || 'New Seller Description',
+            userID
+        });
+        
+        return res.status(200).json(seller);
     } catch (error) {
-      return res
-        .status(500)
-        .json({ error: "An error occurred while adding seller information" });
+        console.error('Error creating seller:', error);
+        return res.status(500).json({ 
+            error: "An error occurred while adding seller information",
+            details: error.message 
+        });
     }
-  });
+});
 
-router.get("/getSeller/:id",async(req,res)=>{
-    const {userID}= req.params.id;
-    try{
+router.get("/getSeller/:id", async(req,res) => {
+    const userID = req.params.id;
+    try {
         const seller = await Seller.find({userID});
-        res.status(200).json(seller)
-    }catch(error){
-        res.status(400).json({error:"not found"})
+        if (!seller || seller.length === 0) {
+            return res.status(404).json({error: "Seller not found"});
+        }
+        res.status(200).json(seller);
+    } catch(error) {
+        res.status(400).json({error: "not found"});
     }
 });
 

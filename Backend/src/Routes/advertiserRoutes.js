@@ -27,13 +27,16 @@ router.post("/addAdvertiserInfo/:id", async (req, res) => {
 });
 
 
-router.get("/getAdvertiser/:id",async(req,res)=>{
-    const {userID}= req.params.id;
-    try{
+router.get("/getAdvertiser/:id", async(req, res) => {
+    const userID = req.params.id;  // Fix parameter extraction
+    try {
         const advertiser = await Advertiser.find({userID});
-        res.status(200).json(advertiser)
-    }catch(error){
-        res.status(400).json({error:"not found"})
+        if (!advertiser || advertiser.length === 0) {
+            return res.status(404).json({error: "Advertiser not found"});
+        }
+        res.status(200).json(advertiser);
+    } catch(error) {
+        res.status(400).json({error: "not found"});
     }
 });
 

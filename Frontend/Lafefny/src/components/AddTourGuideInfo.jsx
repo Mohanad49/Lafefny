@@ -23,8 +23,8 @@ const AddTourGuideInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/tourGuide/addTourGuideInfo/${localStorage.getItem("userID")}`, {
-        method: "POST",
+      const response = await fetch(`http://localhost:8000/tourGuide/updateTourGuideInfo/${localStorage.getItem("userID")}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
