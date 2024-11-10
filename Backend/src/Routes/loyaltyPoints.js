@@ -54,10 +54,7 @@ const updateLoyaltyPoints = async (touristId, amountPaid) => {
 
         // Calculate loyalty points based on the amount paid
         const pointsEarned = calculateLoyaltyPoints(amountPaid, tourist.level);
-
-        // Find the tourist by ID
         
-
         // Update loyalty points
         tourist.loyaltyPoints += pointsEarned;
 
@@ -86,7 +83,7 @@ const decreaseLoyaltyPoints = async (touristId, amountRefunded) => {
 
         // Calculate points to decrease based on refund amount
         const pointsToDecrease = calculateLoyaltyPoints(amountRefunded, tourist.level);
-
+        
         // Decrease loyalty points (ensure it doesn't go below 0)
         tourist.loyaltyPoints = Math.max(0, tourist.loyaltyPoints - pointsToDecrease);
 

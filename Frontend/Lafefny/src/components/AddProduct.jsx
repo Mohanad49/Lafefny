@@ -21,6 +21,12 @@ const AddProduct = () => {
     }));
   };
 
+  const handleChange2 = async (e) => {
+    const file = e.target.files[0];
+    const base64 = await convertToBase64(file);
+    setProduct({...product, imageUrl: base64});
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
@@ -44,7 +50,7 @@ const AddProduct = () => {
 
   return (
     <form onSubmit={handleSubmit}>
-      <h2>Add Product</h2>
+      <h2>Add New Product</h2>
       <div>
         <label htmlFor="name">Product Name:</label>
         <input
@@ -84,11 +90,11 @@ const AddProduct = () => {
       <div>
         <label htmlFor="imageUrl">Picture URL:</label>
         <input
-          type="url"
+          type="file"
           id="imageUrl"
           name="imageUrl"
-          value={product.imageUrl}
-          onChange={handleChange}
+          accept=".png .jpeg .jpg"
+          onChange={(e) => handleChange2(e)}
         />
       </div>
 
@@ -103,15 +109,13 @@ const AddProduct = () => {
       </div>
 
       <div>
-        <label htmlFor="seller">Seller Name:</label>
+        <label htmlFor="seller">Seller:</label>
         <input
           type="text"
           id="seller"
           name="seller"
           value={product.seller}
           onChange={handleChange}
-          required
-          placeholder="Enter seller's name"
         />
       </div>
 
@@ -119,5 +123,18 @@ const AddProduct = () => {
     </form>
   );
 };
+
+function convertToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const fileReader = new FileReader();
+    fileReader.readAsDataURL(file);
+    fileReader.onload = () => {
+      resolve(fileReader.result);
+    };
+    fileReader.onerror = (error) => {
+      reject(error);
+    };
+  });
+}
 
 export default AddProduct;
