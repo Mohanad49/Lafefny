@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   }],
   picture: String,
   isAccepted: { type: Boolean, default: false },
-  termsAccepted: { type: Boolean, default: false },
+  termsAccepted: { type: Boolean, default: true },
   deletionRequested: { type: Boolean, default: false }
 }, { timestamps: true });
 
