@@ -4,10 +4,16 @@ const User= require("../Models/User");
 const TouristItinerary = require("../Models/Tourist-Itinerary"); // Adjust the path to your Itinerary model
 const Activity = require("../Models/Activity");
 const TourGuide = require("../Models/tourGuideModel");
+const Advertiser = require("../Models/advertiserModel");
 
 const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
+
+// Add a test route
+router.get('/test', (req, res) => {
+  res.json({ message: 'Tourist routes are working' });
+});
 
 router.get("/getTouristInfo/:id", async(req,res) => {
     const _id = req.params.id;
@@ -299,6 +305,56 @@ router.post("/redeemPoints/:id", async (req, res) => {
         console.error("Error redeeming points:", error);
         res.status(500).json({ error: "Failed to redeem points" });
     }
+});
+
+// Update the transportation booking route
+router.post("/:userId/transportation-booking", async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const bookingData = req.body;
+
+    // Find the tourist
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Find the advertiser by company name
+    const advertiser = await Advertiser.findOne({ company: bookingData.providerName });
+    if (!advertiser) {
+      return res.status(404).json({ error: "Advertiser not found" });
+    }
+
+    // Add booking to tourist
+    tourist.transportationBookings.push({
+      ...bookingData,
+      bookingStatus: 'Pending'
+    });
+
+    // Add tourist to advertiser's bookings
+    advertiser.touristBookings.push(userId);
+
+    // Save both documents
+    await Promise.all([
+      tourist.save(),
+      advertiser.save()
+    ]);
+
+    res.status(201).json({ message: "Transportation booked successfully" });
+  } catch (error) {
+    console.error("Error booking transportation:", error);
+    res.status(500).json({ error: "Failed to book transportation" });
+  }
+});
+
+// Get accepted advertisers
+router.get("/advertisers", async (req, res) => {
+  try {
+    const advertisers = await Advertiser.find();
+    res.status(200).json(advertisers);
+  } catch (error) {
+    res.status(500).json({ error: 'Failed to fetch advertisers' });
+  }
 });
 
 module.exports=router

@@ -38,7 +38,6 @@ const touristSchema = new mongoose.Schema({
   transportationBookings: [{
     type: { type: String, enum: ['Car', 'Bus', 'Train', 'Other'] },
     providerName: { type: String, default: '' },
-    bookingNumber: { type: String, default: '' },
     departureLocation: { type: String, default: '' },
     arrivalLocation: { type: String, default: '' },
     departureDate: { type: Date, default: Date.now },

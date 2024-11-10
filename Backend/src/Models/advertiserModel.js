@@ -24,6 +24,11 @@ const AdvertiserSchema = new Schema({
   filename: String,
   contentType: String,
   data: Buffer,
+  touristBookings: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tourist',
+    default: []
+  }]
 });
 
 

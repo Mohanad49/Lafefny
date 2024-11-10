@@ -90,6 +90,8 @@ import AdminActivityList from './components/Admin-ActivityList';
 import SellerDelete from './components/Sellerdelete';
 import DeleteAccount from './components/DeleteAccount';
 
+import TransportationBooking from './components/TransportationBooking';
+
 const App = () => {
 
   return (
@@ -188,6 +190,8 @@ const App = () => {
             <Route path="/admin-itineraries" element={<AdminItineraryList />} />
             <Route path="/admin-activities" element={<AdminActivityList />} />
             <Route path="/delete-account" element={<DeleteAccount />} />
+
+            <Route path="/transportation-booking" element={<TransportationBooking />} />
           </>
       </Routes>
     </Router>
