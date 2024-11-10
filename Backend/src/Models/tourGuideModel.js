@@ -19,8 +19,6 @@ const tourGuideSchema = new Schema({
     required: true
   },
   picture: String,
-  isAccepted: { type: Boolean, default: false },
-  termsAccepted: { type: Boolean, default: false },
   ratings: {
     averageRating: {type: Number , default: 0},
     totalRatings: { type: Number, default: 0 },
@@ -37,8 +35,5 @@ const tourGuideSchema = new Schema({
   contentType: String,
   data: Buffer,
 });
-
-
-  
 
 module.exports = mongoose.model("TourGuide", tourGuideSchema);

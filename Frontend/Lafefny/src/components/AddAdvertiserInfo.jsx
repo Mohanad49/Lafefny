@@ -23,8 +23,8 @@ const AddAdvertiserInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/advertiser/addAdvertiserInfo/${localStorage.getItem("userID")}`, {
-        method: "POST",
+      const response = await fetch(`http://localhost:8000/advertiser/updateAdvertiser/${localStorage.getItem("userID")}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

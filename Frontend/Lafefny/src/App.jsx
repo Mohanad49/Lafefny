@@ -90,6 +90,8 @@ import AdminActivityList from './components/Admin-ActivityList';
 import SellerDelete from './components/Sellerdelete';
 import DeleteAccount from './components/DeleteAccount';
 
+import TourGuideInfo from './components/TourGuideInfo';
+
 const App = () => {
 
   return (
@@ -167,7 +169,7 @@ const App = () => {
 
             <Route path='/addTourGuideInfo' element={<AddTourGuideInfo></AddTourGuideInfo>}/>
             <Route path='/editTourGuideInfo' element={<UpdateTourGuideInfo></UpdateTourGuideInfo>}/>
-            <Route path='/getTourGuideInfo' element={<TouristInfo></TouristInfo>}/>
+            <Route path='/getTourGuideInfo' element={<TourGuideInfo></TourGuideInfo>}/>
 
             <Route path="/addSellerInfo" element={<AddSellerInfo></AddSellerInfo>}/>
             <Route path='/editSellerInfo' element={<UpdateSellerInfo></UpdateSellerInfo>}/>

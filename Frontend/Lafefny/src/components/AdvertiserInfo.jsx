@@ -14,14 +14,15 @@ const AdvertiserInfo = () => {
           throw new Error("Advertiser not found");
         }
         const data = await response.json();
-        setAdvertiserData(data);
+        // Take first item since API returns array
+        setAdvertiserData(data[0]);
       } catch (error) {
         setError(error.message);
       }
     };
 
     fetchAdvertiser();
-  }, [localStorage.getItem("userID")]);
+  }, []); // Remove dependency that causes re-renders
 
   if (error) {
     return <p>Error: {error}</p>;
@@ -34,9 +35,17 @@ const AdvertiserInfo = () => {
   return (
     <div>
       <h2>Advertiser Information</h2>
-      <p><strong>Hotline:</strong> {advertiserData.hotline}</p>
-      <p><strong>Company:</strong> {advertiserData.company}</p>
-      <p><strong>Website:</strong> {advertiserData.website}</p>
+      <div>
+        <p><strong>Company:</strong> {advertiserData.company || 'Not provided'}</p>
+        <p><strong>Hotline:</strong> {advertiserData.hotline || 'Not provided'}</p>
+        <p><strong>Website:</strong> {advertiserData.website || 'Not provided'}</p>
+        {advertiserData.logo && (
+          <div>
+            <strong>Logo:</strong>
+            <img src={advertiserData.logo} alt="Company Logo" style={{maxWidth: '200px'}} />
+          </div>
+        )}
+      </div>
     </div>
   );
 };

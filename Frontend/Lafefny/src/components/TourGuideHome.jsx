@@ -10,7 +10,7 @@ const TourGuideHome = () => {
       <h1>Welcome to the Tour Guide HomePage</h1>
       <nav>
         <h2>Activity Management</h2>
-        <Link to="/touristActivities">View Activities</Link>
+        <Link to="/guestActivities">View Activities</Link>
 
         <h2>Profile Management</h2>
         <Link to="/addTourGuideInfo">Add info</Link> | {' '}
@@ -18,7 +18,6 @@ const TourGuideHome = () => {
         <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to="/getTourGuideInfo">Get info</Link> | {' '}
         <Link to="/editProfilePhoto">Edit Photo</Link> | {' '}
-        <Link to="/uploadTourGuideDocs">Add Docs</Link> | {' '}
         <Link to="/delete-account" className="delete-link">Delete Account</Link>
        
         <h2>Itinerary Management</h2>

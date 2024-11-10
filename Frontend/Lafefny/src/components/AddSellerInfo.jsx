@@ -22,8 +22,8 @@ const AddSellerInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/seller/addSellerInfo/${localStorage.getItem("userID")}`, {
-        method: "POST",
+      const response = await fetch(`http://localhost:8000/seller/updateSellerInfo/${localStorage.getItem("userID")}`, {
+        method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },

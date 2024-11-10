@@ -162,7 +162,7 @@ const ActivityList = () => {
               <p className="yellow-text">Time: {activity.time}</p>
               <p className="yellow-text">Location: {activity.location}</p>
               <p className="yellow-text">Price: ${activity.price}</p>
-              <p className="yellow-text">Rating: {activity.ratings.averageRating || 'Not rated'}</p>
+              <p className="yellow-text">Rating: {activity.ratings.averageRating.toFixed(2) || 'Not rated'}</p>
               <p className="yellow-text">Tags: {activity.tags.join(', ')}</p>
               {activity.specialDiscounts && (
                 <p className="yellow-text">Special Discounts: {activity.specialDiscounts}</p>

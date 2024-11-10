@@ -13,7 +13,7 @@ const AdvertiserHome = () => {
         <h2>Activity Management</h2>
         <Link to="/activities">View Activities</Link> | {' '}
         <Link to="/guest-itineraries">View Itineraries</Link> | {' '}
-        <Link to="/museums">View Museums</Link> | {' '}
+        <Link to="/guestMuseums">View Museums</Link> | {' '}
         <Link to="/add-activity">Add Activity</Link>
 
         <h2>Profile Management</h2>
@@ -22,7 +22,6 @@ const AdvertiserHome = () => {
         <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to ="/getAdvertiserInfo">view info</Link> | {' '}
         <Link to ="/editAdvertiserPhoto">Edit logo</Link> | {' '}
-        <Link to="/uploadAdvertiserDocs">Upload Docs</Link> | {' '}
         <Link to="/delete-account" className="delete-link">Delete Account</Link>
 
       </nav>
