@@ -1,6 +1,7 @@
+/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/TransportationBooking.css';
+import '../styles/transportationBooking.css';
 
 const TransportationBooking = () => {
   const [formData, setFormData] = useState({
@@ -63,13 +64,13 @@ const TransportationBooking = () => {
   };
 
   return (
-    <div className="transportation-booking">
+    <div className="transportation-booking-container">
       <h2>Book Transportation</h2>
       {error && <div className="error-message">{error}</div>}
       {success && <div className="success-message">{success}</div>}
       
-      <form onSubmit={handleSubmit}>
-        <div className="form-group">
+      <form onSubmit={handleSubmit} className="transportation-booking-form">
+        <div className="transportation-form-group">
           <label>Transportation Type:</label>
           <select 
             name="type" 
@@ -84,7 +85,7 @@ const TransportationBooking = () => {
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Provider:</label>
           <select 
             name="providerName" 
@@ -101,7 +102,7 @@ const TransportationBooking = () => {
           </select>
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Departure Location:</label>
           <input
             type="text"
@@ -112,7 +113,7 @@ const TransportationBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Arrival Location:</label>
           <input
             type="text"
@@ -123,7 +124,7 @@ const TransportationBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Departure Date:</label>
           <input
             type="datetime-local"
@@ -134,7 +135,7 @@ const TransportationBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Arrival Date:</label>
           <input
             type="datetime-local"
@@ -145,7 +146,7 @@ const TransportationBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Number of Passengers:</label>
           <input
             type="number"
@@ -157,7 +158,7 @@ const TransportationBooking = () => {
           />
         </div>
 
-        <div className="form-group">
+        <div className="transportation-form-group">
           <label>Price (EGP):</label>
           <input
             type="number"

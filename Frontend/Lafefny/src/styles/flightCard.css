@@ -1,0 +1,99 @@
+/* New styles/FlightCard.css */
+.flight-card {
+    background-color: white;
+    border-radius: 8px;
+    padding: 16px;
+    margin: 12px 0;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    color: #333; /* Add default text color */
+}
+
+.flight-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.flight-card.selected {
+    border: 2px solid #4CAF50;
+}
+
+.flight-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+}
+
+.airline {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333; /* Add explicit color */
+}
+
+/* Keep existing price color */
+.price {
+    font-size: 1.3em;
+    color: #4CAF50;
+    font-weight: bold;
+}
+
+.itinerary-section {
+    margin: 16px 0;
+    padding: 12px;
+    border-radius: 4px;
+    color: #333; /* Add explicit color */
+}
+
+.itinerary-section h4 {
+    color: #333; /* Add color for headings */
+}
+
+.segment {
+    margin: 12px 0;
+    color: #333; /* Add explicit color */
+}
+
+/* Keep existing styles for other elements */
+.segment-header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.segment-details {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 0;
+}
+
+.flight-line {
+    color: #666; /* Already has color */
+    flex: 1;
+    text-align: center;
+    margin: 0 12px;
+}
+
+.departure, .arrival {
+    text-align: center;
+    color: #333; /* Add explicit color */
+}
+
+.flight-footer {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #eee;
+}
+
+/* Keep existing color specifications */
+.cabin-class {
+    color: #666;
+}
+
+.seats {
+    color: #f44336;
+}

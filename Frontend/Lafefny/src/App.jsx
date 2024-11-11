@@ -91,7 +91,11 @@ import SellerDelete from './components/Sellerdelete';
 import DeleteAccount from './components/DeleteAccount';
 
 import TourGuideInfo from './components/TourGuideInfo';
+
 import TransportationBooking from './components/TransportationBooking';
+import BookHotels from './components/BookHotels';
+import RoomDetails from './components/RoomDetails';
+import BookFlights from './components/BookFlights';
 
 const App = () => {
 
@@ -193,6 +197,9 @@ const App = () => {
             <Route path="/delete-account" element={<DeleteAccount />} />
 
             <Route path="/transportation-booking" element={<TransportationBooking />} />
+            <Route path="/book-flights" element={<BookFlights />} />
+            <Route path="/book-hotels" element={<BookHotels />} />
+            <Route path="/room-details/:hotelId" element={<RoomDetails />} />
           </>
       </Routes>
     </Router>

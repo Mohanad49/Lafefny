@@ -2,6 +2,7 @@
 const express = require("express");
 const cors = require("cors");
 const mongoose = require('mongoose');
+const bodyParser = require('body-parser');
 
 const productRoute = require("./Routes/productController");
 const activityRoute = require('./Routes/activityController');
@@ -18,6 +19,7 @@ const tourGuideRoutes = require('./Routes/tourGuideRoutes');
 const touristRoutes = require('./Routes/touristRoutes');
 const museumTagRoute = require('./Routes/museumTagController');
 const complaintRoute = require('./Routes/complaintRoutes');
+const amadeusRoute = require('./Routes/amadeusRoute');
 
 
 mongoose.set('strictQuery', false);
@@ -28,6 +30,7 @@ const MongoURI = process.env.MONGO_URI ;
 const app = express();
 const port = process.env.PORT || "8000";
 app.use(cors());
+app.use(bodyParser.json());
 
 // configurations
 // Mongo DB
@@ -72,3 +75,4 @@ app.use('/tourGuide', tourGuideRoutes);
 app.use('/tourist', touristRoutes);
 app.use('/museumTags', museumTagRoute);
 app.use('/complaints', complaintRoute);
+app.use('/amadeus', amadeusRoute);
