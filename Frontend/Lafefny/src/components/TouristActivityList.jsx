@@ -63,9 +63,10 @@ const ActivityList = () => {
 
       const touristId = localStorage.getItem('userID');
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+      today.setHours(0, 0, 0, 0);
 
       const updatedActivities = response.data
+        .filter(activity => !activity.inappropriateFlag)
         .filter(activity => {
           const activityDate = new Date(activity.date);
           activityDate.setHours(0, 0, 0, 0);
@@ -80,8 +81,8 @@ const ActivityList = () => {
     } catch (error) {
       console.error('Error fetching activities:', error);
       setActivities([]);
-    }
-  };
+    }
+  };
 
   const handleBookActivity = async (activityId) => {
     try {

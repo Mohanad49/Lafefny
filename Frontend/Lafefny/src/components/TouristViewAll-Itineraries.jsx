@@ -83,32 +83,46 @@ const ItineraryList = () => {
         filterValue,
         sortBy,
       });
-      
+
       if (!response?.data) {
         throw new Error('No data received from server');
       }
-      
+
       const userId = localStorage.getItem('userID');
       const today = new Date();
       today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
 
-      const updatedItineraries = Array.isArray(response.data)
-        ? response.data
-            .filter(itinerary => {
-              // Check if any available dates are in the future
-              return itinerary.availableDates.some(date => {
-                const availableDate = new Date(date);
-                availableDate.setHours(0, 0, 0, 0);
-                return availableDate >= today;
-              });
-            })
-            .map((itinerary) => ({
-              ...itinerary,
-              booked: itinerary.touristBookings.includes(userId),
-            }))
-        : [];
+      // Filter itineraries based on conditions
+      const filteredItineraries = response.data
+        .filter(itinerary => {
+          // Remove inappropriate itineraries
+          if (itinerary.inappropriateFlag) return false;
 
-      setItineraries(updatedItineraries);
+          // Keep active itineraries
+          if (itinerary.isActive) return true;
+
+          // For inactive itineraries, check if user has booked it
+          if (!itinerary.isActive && itinerary.touristBookings) {
+            return itinerary.touristBookings.includes(userId);
+          }
+
+          return false;
+        })
+        .filter(itinerary => {
+          // Check if any available dates are in the future
+          return itinerary.availableDates.some(date => {
+            const availableDate = new Date(date);
+            availableDate.setHours(0, 0, 0, 0);
+            return availableDate >= today;
+          });
+        })
+        .map((itinerary) => ({
+          ...itinerary,
+          booked: itinerary.touristBookings.includes(userId),
+        }));
+
+
+      setItineraries(Array.isArray(filteredItineraries) ? filteredItineraries : []);
       return response.data;
     } catch (error) {
       console.error('Error fetching itineraries:', error);
