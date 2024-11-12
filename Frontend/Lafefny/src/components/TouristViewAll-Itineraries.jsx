@@ -90,22 +90,24 @@ const ItineraryList = () => {
 
       const userId = localStorage.getItem('userID');
       const today = new Date();
-      today.setHours(0, 0, 0, 0); // Set to start of day for fair comparison
+      today.setHours(0, 0, 0, 0);
 
       // Filter itineraries based on conditions
       const filteredItineraries = response.data
         .filter(itinerary => {
           // Remove inappropriate itineraries
           if (itinerary.inappropriateFlag) return false;
-
+          
           // Keep active itineraries
           if (itinerary.isActive) return true;
-
+          
           // For inactive itineraries, check if user has booked it
-          if (!itinerary.isActive && itinerary.touristBookings) {
-            return itinerary.touristBookings.includes(userId);
+          if (!itinerary.isActive) {
+            return itinerary.touristBookings?.some(booking => 
+              booking.tourist === userId || booking === userId
+            );
           }
-
+          
           return false;
         })
         .filter(itinerary => {
@@ -118,9 +120,10 @@ const ItineraryList = () => {
         })
         .map((itinerary) => ({
           ...itinerary,
-          booked: itinerary.touristBookings.includes(userId),
+          booked: itinerary.touristBookings?.some(booking => 
+            booking.tourist === userId || booking === userId
+          ) || false
         }));
-
 
       setItineraries(Array.isArray(filteredItineraries) ? filteredItineraries : []);
       return response.data;

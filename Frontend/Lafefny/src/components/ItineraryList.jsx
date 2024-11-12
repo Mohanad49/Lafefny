@@ -190,14 +190,14 @@ const ItineraryList = () => {
               <div className="itinerary-actions">
                 <Link to={`/edit-itinerary/${itinerary._id}`} className="edit-button">Edit</Link>
                 <button className="delete-button" onClick={() => handleDelete(itinerary._id)}>Delete</button>
-                {itinerary.touristBookings.length > 0 && (
+               
                   <button
                     className="toggle-active-button"
                     onClick={() => toggleActiveStatus(itinerary._id, itinerary.isActive)}
                   >
                     {itinerary.isActive ? 'Deactivate' : 'Activate'}
                   </button>
-                )}
+                
               </div>
             </div>
           </li>

@@ -78,7 +78,8 @@ const ItineraryList = () => {
     .filter(itinerary => {
       if (!itinerary) return false;
       if (filterType === 'price' && filterValue && itinerary.price > Number(filterValue)) return false;
-      if (filterType === 'ratings' && filterValue && itinerary.ratings < Number(filterValue)) return false;
+      if (filterType === 'ratings' && filterValue && 
+          (itinerary.ratings?.averageRating || 0) < Number(filterValue)) return false;
       if (filterType === 'language' && filterValue && itinerary.language && 
           !itinerary.language.toLowerCase().includes(filterValue.toLowerCase())) return false;
       if (filterType === 'date' && filterDate) {
@@ -94,7 +95,9 @@ const ItineraryList = () => {
     .sort((a, b) => {
       if (sortBy === 'name') return (a.name || '').localeCompare(b.name || '');
       if (sortBy === 'price') return (a.price || 0) - (b.price || 0);
-      if (sortBy === 'ratings') return (b.ratings || 0) - (a.ratings || 0); // Descending order
+      if (sortBy === 'ratings') {
+        return (b.ratings?.averageRating || 0) - (a.ratings?.averageRating || 0); // Descending order
+      }
       if (sortBy === 'date') return new Date(a.startDate) - new Date(b.startDate);
       return 0;
     });
@@ -174,7 +177,12 @@ const ItineraryList = () => {
                 {itinerary.endDate && <p className="yellow-text">End Date: {formatDate(itinerary.endDate)}</p>}
                 
                 {/* New fields */}
-                {itinerary.ratings !== undefined && <p className="yellow-text">Ratings: {itinerary.ratings}</p>}
+                {itinerary.ratings && (
+                  <p className="yellow-text">
+                    Ratings: {itinerary.ratings.averageRating?.toFixed(1) || 'No ratings'} 
+                    ({itinerary.ratings.totalRatings || 0} reviews)
+                  </p>
+                )}
                 {itinerary.preferences && <p className="yellow-text">Preferences: {itinerary.preferences}</p>}
                 {itinerary.language && <p className="yellow-text">Language: {itinerary.language}</p>}
                 
