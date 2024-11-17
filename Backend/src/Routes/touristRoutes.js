@@ -5,6 +5,7 @@ const TouristItinerary = require("../Models/Tourist-Itinerary"); // Adjust the p
 const Activity = require("../Models/Activity");
 const TourGuide = require("../Models/tourGuideModel");
 const Advertiser = require("../Models/advertiserModel");
+const Product = require('../Models/Product'); // Import Product model
 
 const { default: mongoose } = require("mongoose");
 
@@ -354,6 +355,115 @@ router.get("/advertisers", async (req, res) => {
     res.status(200).json(advertisers);
   } catch (error) {
     res.status(500).json({ error: 'Failed to fetch advertisers' });
+  }
+});
+
+// Get wishlist items
+router.get('/:userId/wishlist', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Populate the wishlist with product details
+    const populatedTourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate('wishlist');
+
+    res.json(populatedTourist.wishlist);
+  } catch (error) {
+    console.error('Error fetching wishlist:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Remove from wishlist
+router.delete('/:userId/wishlist/:productId', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    tourist.wishlist = tourist.wishlist.filter(
+      id => id.toString() !== req.params.productId
+    );
+
+    await tourist.save();
+    res.json({ message: "Item removed from wishlist" });
+  } catch (error) {
+    console.error('Error removing from wishlist:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Get cart items
+router.get('/:userId/cart', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    // Populate the cart with product details
+    const populatedTourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate('cart.productId');
+
+    // Format the response to include both product details and quantity
+    const cartItems = populatedTourist.cart.map(item => ({
+      ...item.productId.toObject(),
+      quantity: item.quantity
+    }));
+
+    res.json(cartItems);
+  } catch (error) {
+    console.error('Error fetching cart:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Update cart item quantity
+router.put('/:userId/cart/:productId', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const cartItem = tourist.cart.find(
+      item => item.productId.toString() === req.params.productId
+    );
+
+    if (!cartItem) {
+      return res.status(404).json({ message: "Product not found in cart" });
+    }
+
+    cartItem.quantity = req.body.quantity;
+    await tourist.save();
+    res.json({ message: "Cart updated successfully" });
+  } catch (error) {
+    console.error('Error updating cart:', error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Remove from cart
+router.delete('/:userId/cart/:productId', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    tourist.cart = tourist.cart.filter(
+      item => item.productId.toString() !== req.params.productId
+    );
+
+    await tourist.save();
+    res.json({ message: "Item removed from cart" });
+  } catch (error) {
+    console.error('Error removing from cart:', error);
+    res.status(500).json({ message: error.message });
   }
 });
 

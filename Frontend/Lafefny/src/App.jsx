@@ -97,6 +97,9 @@ import BookHotels from './components/BookHotels';
 import RoomDetails from './components/RoomDetails';
 import BookFlights from './components/BookFlights';
 
+import TouristWishlist from './components/TouristWishlist';
+import TouristCart from './components/TouristCart';
+
 const App = () => {
 
   return (
@@ -200,6 +203,9 @@ const App = () => {
             <Route path="/book-flights" element={<BookFlights />} />
             <Route path="/book-hotels" element={<BookHotels />} />
             <Route path="/room-details/:hotelId" element={<RoomDetails />} />
+
+            <Route path="/tourist/wishlist" element={<TouristWishlist />} />
+            <Route path="/tourist/cart" element={<TouristCart />} />
           </>
       </Routes>
     </Router>

@@ -5,7 +5,7 @@ import { getProducts } from '../services/productService';
 import '../styles/productList.css';
 import { fetchExchangeRates } from '../services/currencyService';
 import axios from 'axios';
-import { addProductReview, checkProductPurchase } from '../services/productService';
+import { addProductReview, checkProductPurchase, addToWishlist, addToCart } from '../services/productService';
 import ReviewForm from './ReviewForm';
 
 const ProductList = () => {
@@ -23,6 +23,8 @@ const ProductList = () => {
   const [showReviewModal, setShowReviewModal] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [touristName, setTouristName] = useState('');
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -199,9 +201,55 @@ const ProductList = () => {
     }
   };
 
+  const handleAddToWishlist = async (productId) => {
+    try {
+      setIsAddingToWishlist(true);
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        alert('Please log in to add items to your wishlist');
+        return;
+      }
+      await addToWishlist(userId, productId);
+      alert('Added to wishlist successfully!');
+    } catch (error) {
+      console.error('Error adding to wishlist:', error);
+      alert('Failed to add to wishlist');
+    } finally {
+      setIsAddingToWishlist(false);
+    }
+  };
+
+  const handleAddToCart = async (productId) => {
+    try {
+      setIsAddingToCart(true);
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        alert('Please log in to add items to your cart');
+        return;
+      }
+      await addToCart(userId, productId, 1);
+      alert('Added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add to cart');
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
+
   return (
     <div className="product-list-container">
-      <h1>Product List</h1>
+      <div className="header-container">
+        <h1>Product List</h1>
+        <div className="nav-buttons">
+          <Link to="/tourist/wishlist" className="nav-button">
+            Wishlist   |
+          </Link>
+          <Link to="/tourist/cart" className="nav-button">
+                Cart
+          </Link>
+        </div>
+      </div>
       <div className="controls">
         {ratesLoading ? (
           <p>Loading currencies...</p>
@@ -280,6 +328,18 @@ const ProductList = () => {
               <td>
                 <button onClick={() => openModal(product.ratings.reviews)}>View Reviews</button>
                 <button onClick={() => handleReviewClick(product)}>Add Review</button>
+                <button 
+                  onClick={() => handleAddToWishlist(product._id)}
+                  disabled={isAddingToWishlist}
+                >
+                  {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
+                </button>
+                <button 
+                  onClick={() => handleAddToCart(product._id)}
+                  disabled={isAddingToCart}
+                >
+                  {isAddingToCart ? 'Adding...' : 'Add to Cart'}
+                </button>
               </td>
             </tr>
           ))}

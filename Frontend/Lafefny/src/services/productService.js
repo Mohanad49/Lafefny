@@ -96,3 +96,25 @@ export const checkProductPurchase = async (userID, productId) => {
     throw error;
   }
 };
+
+// Add to wishlist
+export const addToWishlist = async (userID, productId) => {
+  try {
+    const response = await axios.post(`${API_URL}/wishlist/${userID}`, { productId });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to wishlist:', error);
+    throw error;
+  }
+};
+
+// Add to cart
+export const addToCart = async (userID, productId, quantity = 1) => {
+  try {
+    const response = await axios.post(`${API_URL}/cart/${userID}`, { productId, quantity });
+    return response.data;
+  } catch (error) {
+    console.error('Error adding to cart:', error);
+    throw error;
+  }
+};

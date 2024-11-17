@@ -162,4 +162,54 @@ router.post('/:id/reviews', async (req, res) => {
   }
 });
 
+// Add to wishlist
+router.post('/wishlist/:userID', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userID });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const { productId } = req.body;
+    
+    // Check if product already in wishlist
+    if (!tourist.wishlist.includes(productId)) {
+      tourist.wishlist.push(productId);
+      await tourist.save();
+    }
+
+    res.json({ message: "Added to wishlist successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+// Add to cart
+router.post('/cart/:userID', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userID });
+    if (!tourist) {
+      return res.status(404).json({ message: "Tourist not found" });
+    }
+
+    const { productId, quantity } = req.body;
+    
+    // Check if product already in cart
+    const existingCartItem = tourist.cart.find(item => 
+      item.productId.toString() === productId
+    );
+
+    if (existingCartItem) {
+      existingCartItem.quantity += quantity;
+    } else {
+      tourist.cart.push({ productId, quantity });
+    }
+
+    await tourist.save();
+    res.json({ message: "Added to cart successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
 module.exports = router;

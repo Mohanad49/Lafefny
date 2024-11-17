@@ -13,6 +13,21 @@ const touristSchema = new mongoose.Schema({
   loyaltyPoints: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   badge: { type: String, default: 'Bronze' },
+  wishlist: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Product',
+    default: []
+  }],
+  cart: [{
+    productId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Product'
+    },
+    quantity: {
+      type: Number,
+      default: 1
+    }
+  }],
   flightBookings: [{
     airline: { type: String,  default: '' },
     flightNumber: { type: String, default: '' },
