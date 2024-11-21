@@ -23,6 +23,12 @@ function Sign() {
   const [pdf, setPdf] = useState(null);
   const navigate = useNavigate();
 
+  React.useEffect(() => {
+    // Clear any existing auth data when the sign page is loaded
+    localStorage.removeItem('userID');
+    localStorage.removeItem('currentUserName');
+  }, []);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({
