@@ -100,6 +100,9 @@ import BookFlights from './components/BookFlights';
 import TouristWishlist from './components/TouristWishlist';
 import TouristCart from './components/TouristCart';
 import ProtectedRoute from './components/ProtectedRoute';
+import AdminNumberOfUsers from './components/AdminNumberOfUsers';
+import ItineraryReport from './components/ItineraryReport';
+import ActivityReport from './components/ActivityReport';
 
 const App = () => {
 
@@ -246,6 +249,10 @@ const App = () => {
             <AddMuseumTag />
           </ProtectedRoute>
         } />
+
+        <Route path="/numberOfUsers" element={<ProtectedRoute><AdminNumberOfUsers/></ProtectedRoute>} />
+        <Route path="/viewItinerariesReport" element={<ProtectedRoute><ItineraryReport></ItineraryReport></ProtectedRoute>}/>
+        <Route path="/ActivityReport" element={<ProtectedRoute><ActivityReport></ActivityReport></ProtectedRoute>}/>
       </Routes>
     </Router>
   );
