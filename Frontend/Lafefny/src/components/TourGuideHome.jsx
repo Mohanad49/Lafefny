@@ -21,6 +21,17 @@ const TourGuideHome = () => {
           <Link to="/guestActivities">View Activities</Link>
           </div>
         </section>
+       
+        <section>
+        <h2>Itinerary Management</h2>
+        <div className="link-group">
+        <Link to="/itineraries">View Itineraries</Link> | {' '}
+        <Link to="/guide-tourist-Itineraries">View Tourist Itineraries</Link> | {' '}
+        <Link to="/add-itinerary">Add Itinerary</Link> | {' '}
+        <Link to="/add-tourist-itinerary">Add Tourist Itinerary</Link> | {' '}
+        <Link to="/viewItinerariesReport">View Itineraries Report</Link>
+        </div>
+        </section>
 
         <section>
           <h2>Profile Management</h2>

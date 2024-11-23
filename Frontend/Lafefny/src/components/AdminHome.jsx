@@ -20,6 +20,9 @@ const AdminHome = () => {
         <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
         <Link to="/changePassword">Change Password</Link> | {' '}
         <Link to="/add-admin">Add Admin</Link>
+        <Link to="/changepassword">Change Password</Link> | {' '}
+        <Link to="/add-admin">Add Admin</Link> | {' '}
+        <Link to="/numberOfUsers">Number of Users</Link> | {' '}
 
         <h2>Activity Management</h2>
         <Link to="/admin-activities">View Activities</Link> |{' '}
