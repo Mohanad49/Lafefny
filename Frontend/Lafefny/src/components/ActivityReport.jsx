@@ -1,11 +1,9 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
 
 export default function ActivityReport() {
     const [activities, setActivities] = useState([]);
-    const [touristBookings, setTouristBookings] = useState({});
-    const [loading, setLoading] = useState({});
+    const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState('');
     const [isFiltered, setIsFiltered] = useState(false);
 
@@ -15,45 +13,25 @@ export default function ActivityReport() {
 
     const fetchActivities = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/activities');
+            const response = await axios.get(`http://localhost:8000/activities/advertiser/${localStorage.getItem('userID')}`);
             setActivities(response.data);
-            response.data.forEach(activity => getTouristBookings(activity._id));
-        } catch (error) {
-            console.error(error);
-        }
-    };
-
-    const getTouristBookings = async (activityId) => {
-        setLoading(prev => ({ ...prev, [activityId]: true }));
-        try {
-            const response = await axios.get(`http://localhost:8000/advertiser/numberOfTourists/${activityId}`);
-            setTouristBookings(prev => ({
-                ...prev,
-                [activityId]: response.data
-            }));
+            console.log(response.data);
         } catch (error) {
             console.error(error);
         } finally {
-            setLoading(prev => ({ ...prev, [activityId]: false }));
+            setLoading(false);
         }
     };
 
     const getFilteredTouristCount = (activity) => {
-        const activityId = activity._id;
-        if (!touristBookings[activityId]) return 0;
+        if (!activity.touristBookings) return 0;
         
-        // If not filtered, return total bookings
-        if (!isFiltered) return touristBookings[activityId].length;
+        if (!isFiltered) return activity.touristBookings.length;
 
-        // Check if activity date matches selected month
         const activityDate = new Date(activity.date);
         const activityMonth = `${activityDate.getFullYear()}-${String(activityDate.getMonth() + 1).padStart(2, '0')}`;
         
-        // Only count bookings if activity is in selected month
-        if (activityMonth === selectedMonth) {
-            return touristBookings[activityId].length;
-        }
-        return 0;
+        return activityMonth === selectedMonth ? activity.touristBookings.length : 0;
     };
 
     return (
@@ -87,43 +65,47 @@ export default function ActivityReport() {
                 )}
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="border p-2">Activity Name</th>
-                            <th className="border p-2">Date</th>
-                            <th className="border p-2">Duration</th>
-                            <th className="border p-2">Price ($)</th>
-                            <th className="border p-2">Number of Tourists</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {activities.map((activity) => (
-                            <tr key={activity._id}>
-                                <td className="border p-2">{activity.name}</td>
-                                <td className="border p-2">
-                                    {new Date(activity.date).toLocaleDateString()}
-                                </td>
-                                <td className="border p-2">{activity.duration}</td>
-                                <td className="border p-2">{activity.price}</td>
-                                <td className="border p-2">
-                                    <div className="flex flex-col items-center gap-2">
-                                        {loading[activity._id] ? (
-                                            <span>Loading...</span>
-                                        ) : (
-                                            <span className="font-medium">
-                                                {getFilteredTouristCount(activity)} tourists
-                                                {isFiltered && ` in ${selectedMonth}`}
-                                            </span>
-                                        )}
-                                    </div>
-                                </td>
+            {loading ? (
+                <div>Loading...</div>
+            ) : (
+                <div className="overflow-x-auto">
+                    <table className="min-w-full border-collapse border border-gray-300">
+                        <thead>
+                            <tr className="bg-gray-100">
+                                <th className="border p-2">Activity Name</th>
+                                <th className="border p-2">Date</th>
+                                <th className="border p-2">Time</th>
+                                <th className="border p-2">Location</th>
+                                <th className="border p-2">Price ($)</th>
+                                <th className="border p-2">Category</th>
+                                <th className="border p-2">Rating</th>
+                                <th className="border p-2">Number of Tourists</th>
                             </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+                        </thead>
+                        <tbody>
+                            {activities.map((activity) => (
+                                <tr key={activity._id}>
+                                    <td className="border p-2">{activity.name}</td>
+                                    <td className="border p-2">
+                                        {new Date(activity.date).toLocaleDateString()}
+                                    </td>
+                                    <td className="border p-2">{activity.time}</td>
+                                    <td className="border p-2">{activity.location}</td>
+                                    <td className="border p-2">{activity.price}</td>
+                                    <td className="border p-2">{activity.category}</td>
+                                    <td className="border p-2">{activity.ratings?.averageRating || 0}</td>
+                                    <td className="border p-2">
+                                        <span className="font-medium">
+                                            {getFilteredTouristCount(activity)} tourists
+                                            {isFiltered && ` in ${selectedMonth}`}
+                                        </span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
         </div>
     );
 }

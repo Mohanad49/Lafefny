@@ -15,7 +15,7 @@ export default function ItineraryReport() {
 
     const fetchItineraries = async () => {
         try {
-            const response = await axios.get('http://localhost:8000/itineraries');
+            const response = await axios.get(`http://localhost:8000/itineraries/tourGuide/${localStorage.getItem('userID')}`);
             setItineraries(response.data);
             response.data.forEach(itinerary => getTouristBookings(itinerary._id));
         } catch (error) {

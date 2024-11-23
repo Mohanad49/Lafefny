@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Itinerary = require("../Models/Itinerary");
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints'); 
 const Notification = require('../Models/notificationModel');
@@ -294,6 +295,29 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
     res.json(itinerary);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/tourGuide/:id', async (req, res) => {
+  const tourGuideId = req.params.id;
+  
+  if (!mongoose.isValidObjectId(tourGuideId)) {
+    return res.status(400).json({ error: "Invalid tourGuide ID" });
+  }
+
+  try {
+    const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
+    
+    if (!itineraries.length) {
+      return res.status(404).json({ message: "No itineraries found for this tour guide" });
+    }
+
+    res.status(200).json(itineraries);
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Error fetching itineraries",
+      details: error.message 
+    });
   }
 });
 

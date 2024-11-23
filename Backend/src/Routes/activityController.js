@@ -1,4 +1,5 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Activity = require('../Models/Activity');
 const User = require('../Models/User');
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
@@ -258,5 +259,28 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
   }
 });
 
+router.get('/advertiser/:id', async (req, res) => {
+  const advertiserId = req.params.id;
+  
+  // Validate advertiser ID
+  if (!mongoose.isValidObjectId(advertiserId)) {
+      return res.status(400).json({ error: "Invalid advertiser ID" });
+  }
+
+  try {
+      const activities = await Activity.find({ advertiser: advertiserId });
+      
+      if (!activities.length) {
+          return res.status(404).json({ message: "No activities found for this advertiser" });
+      }
+
+      res.status(200).json(activities);
+  } catch (error) {
+      res.status(500).json({ 
+          error: "Error fetching activities",
+          details: error.message 
+      });
+  }
+});
 
 module.exports = router;
