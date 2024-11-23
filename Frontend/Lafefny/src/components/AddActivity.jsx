@@ -17,6 +17,7 @@ const AddActivity = () => {
     tags: '',
     specialDiscounts: '',
     bookingOpen: false,
+    advertiser: localStorage.getItem('userID'),
   });
 
   const handleChange = (e) => {

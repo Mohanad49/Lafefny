@@ -2,11 +2,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
+import NotificationBell from './NotificationBell';
 
 const TouristHome = () => {
   return (
-    <div>
-      <h1>Welcome to the Tourist HomePage</h1>
+      <div className="home">
+      <div className="header">
+        <h1>Welcome to the Tourist HomePage</h1>
+        <div className="notification-container">
+          <NotificationBell />
+        </div>
+      </div>
       <nav>
         <h2>Activity Management</h2>
         <Link to="/touristActivities">View Activities</Link> | {' '}

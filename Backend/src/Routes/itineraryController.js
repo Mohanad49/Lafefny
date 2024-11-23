@@ -1,6 +1,9 @@
 const express = require("express");
 const Itinerary = require("../Models/Itinerary");
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints'); 
+const Notification = require('../Models/notificationModel');
+const { sendInappropriateContentEmail } = require('../Services/emailService');
+const User = require('../Models/User');
 const router = express.Router();
 
 // POST route for creating a new itinerary
@@ -270,6 +273,23 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
 
     itinerary.inappropriateFlag = !itinerary.inappropriateFlag;
     await itinerary.save();
+
+    if (itinerary.inappropriateFlag) {
+      // Create notification for owner
+      await Notification.create({
+        recipient: itinerary.tourGuide,
+        recipientModel: 'TourGuide', 
+        message: `Your itinerary "${itinerary.name}" has been flagged as inappropriate`,
+        type: 'INAPPROPRIATE_FLAG'
+      });
+      const user = await User.findById(itinerary.tourGuide);
+      // Send email
+      await sendInappropriateContentEmail(
+        user.email,
+        'itinerary',
+        itinerary.name
+      );
+    }
 
     res.json(itinerary);
   } catch (error) {

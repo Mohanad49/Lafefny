@@ -20,6 +20,9 @@ const touristRoutes = require('./Routes/touristRoutes');
 const museumTagRoute = require('./Routes/museumTagController');
 const complaintRoute = require('./Routes/complaintRoutes');
 const amadeusRoute = require('./Routes/amadeusRoute');
+const notificationRoute = require('./Routes/notificationRoutes');
+
+require('./Services/reminderService');
 
 
 mongoose.set('strictQuery', false);
@@ -49,7 +52,6 @@ app.get("/home", (req, res) => {
   });
 
 
-
   const corsOptions = {
     origin: 'http://localhost:5173', 
     optionsSuccessStatus: 200 
@@ -76,3 +78,4 @@ app.use('/tourist', touristRoutes);
 app.use('/museumTags', museumTagRoute);
 app.use('/complaints', complaintRoute);
 app.use('/amadeus', amadeusRoute);
+app.use('/notifications', notificationRoute);

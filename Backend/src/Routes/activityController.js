@@ -2,6 +2,8 @@ const express = require('express');
 const Activity = require('../Models/Activity');
 const User = require('../Models/User');
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
+const Notification = require('../Models/notificationModel');
+const { sendInappropriateContentEmail } = require('../Services/emailService');
 const router = express.Router();
 
 // CREATE activity
@@ -232,6 +234,23 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
 
     activity.inappropriateFlag = !activity.inappropriateFlag;
     await activity.save();
+
+    if (activity.inappropriateFlag) {
+      // Create notification for owner
+      await Notification.create({
+        recipient: activity.advertiser,
+        recipientModel: 'Advertiser',
+        message: `Your activity "${activity.name}" has been flagged as inappropriate`,
+        type: 'INAPPROPRIATE_FLAG'
+      });
+      const user = await User.findById(activity.advertiser);
+      // Send email
+      await sendInappropriateContentEmail(
+        user.email,
+        'activity',
+        activity.name
+      );
+    }
 
     res.json(activity);
   } catch (error) {

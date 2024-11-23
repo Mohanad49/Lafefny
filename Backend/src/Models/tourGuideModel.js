@@ -6,7 +6,6 @@ const Schema = mongoose.Schema;
 const tourGuideSchema = new Schema({
   mobile:{
     type: Number,
-    unique: true,
   },
   yearsOfExperience:{
     type: Number,

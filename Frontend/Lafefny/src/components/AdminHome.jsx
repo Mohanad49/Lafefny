@@ -3,19 +3,22 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
-import ChangePassword from './ChangePassword';
-
+import NotificationBell from './NotificationBell';
 
 const AdminHome = () => {
   return (
-    <div>
-      <h1>Welcome to the Admin HomePage</h1>
-      <nav>
-
+    <div className="home">
+      <div className="header">
+        <h1>Welcome to the Admin HomePage</h1>
+        <div className="notification-container">
+          <NotificationBell />
+        </div>
+      </div>
+      <nav className="navigation">
         <h2>User Management</h2>
         <Link to="/users">View All Users</Link> |{' '}
         <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
-        <Link to="/changepassword">Change Password</Link> | {' '}
+        <Link to="/changePassword">Change Password</Link> | {' '}
         <Link to="/add-admin">Add Admin</Link>
 
         <h2>Activity Management</h2>
