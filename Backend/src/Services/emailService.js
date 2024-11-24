@@ -1,5 +1,8 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config();
+const express = require('express');
+const crypto = require('crypto');
+
 
 const transporter = nodemailer.createTransport({
   service: 'gmail',
@@ -84,8 +87,9 @@ transporter.verify(function(error, success) {
   }
 });
 
+
 module.exports = { 
   sendInappropriateContentEmail,
   sendOutOfStockEmail,
-  sendEventReminderEmail
+  sendEventReminderEmail,
 };

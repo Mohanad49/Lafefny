@@ -103,6 +103,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import AdminNumberOfUsers from './components/AdminNumberOfUsers';
 import ItineraryReport from './components/ItineraryReport';
 import ActivityReport from './components/ActivityReport';
+import ForgotPassword from './components/ForgetPassword';
 
 const App = () => {
 
@@ -112,6 +113,7 @@ const App = () => {
         {/* Public Routes */}
         <Route path="/" element={<Sign />} />
         <Route path="/guestHome" element={<Home />} />
+        <Route path="/forgotPassword" element={<ForgotPassword />} />
         <Route path="/guestActivities" element={<GuestActivityList />} />
         <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
         <Route path="/guestMuseums" element={<GuestMuseumList />} />
