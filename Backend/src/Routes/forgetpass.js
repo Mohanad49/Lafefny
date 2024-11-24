@@ -1,6 +1,3 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 const express = require('express');
