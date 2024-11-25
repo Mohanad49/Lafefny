@@ -344,6 +344,15 @@ function Sign() {
                 required
               />
             </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <button
+        type="button"
+        onClick={() => navigate('/forgotPassword')}
+        style={{ textDecoration: 'underline', border: 'none', background: 'none', color: '#007bff', cursor: 'pointer' }}
+      >
+        Forgot Password?
+      </button>
+    </div>
             <button type="submit">Sign In</button>
           </>
         )}
