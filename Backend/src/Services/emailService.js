@@ -87,9 +87,25 @@ transporter.verify(function(error, success) {
   }
 });
 
+const sendReceiptEmail = async (to, subject, text) => {
+  const mailOptions = {
+    from: `Lafefny <${process.env.EMAIL_USER}>`,
+    to: to,
+    subject: subject,
+    text: text,
+  };
+
+  try {
+    await transporter.sendMail(mailOptions);
+    console.log('Receipt email sent successfully');
+  } catch (error) {
+    console.error('Error sending receipt email:', error);
+  }
+};
 
 module.exports = { 
   sendInappropriateContentEmail,
   sendOutOfStockEmail,
   sendEventReminderEmail,
+  sendReceiptEmail
 };

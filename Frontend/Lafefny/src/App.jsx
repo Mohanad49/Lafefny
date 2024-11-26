@@ -104,6 +104,10 @@ import AdminNumberOfUsers from './components/AdminNumberOfUsers';
 import ItineraryReport from './components/ItineraryReport';
 import ActivityReport from './components/ActivityReport';
 import ForgotPassword from './components/ForgetPassword';
+import TouristPayment from './components/TouristPayment';
+import TouristITpay from './components/TouristItineraryPay';
+
+
 
 const App = () => {
 
@@ -145,6 +149,9 @@ const App = () => {
         <Route path="/touristEditInfo" element={<ProtectedRoute><UpdateTouristInfo /></ProtectedRoute>} />
         <Route path="/viewTouristInfo" element={<ProtectedRoute><TouristInfo /></ProtectedRoute>} />
         <Route path="/touristSelectPreferences" element={<ProtectedRoute><TouristSelectPreferences /></ProtectedRoute>} />
+        <Route path="/tourist/payment" element={<ProtectedRoute><TouristPayment /></ProtectedRoute>} />
+        <Route path="/tourist/Itinerarypayment" element={<ProtectedRoute><TouristITpay /></ProtectedRoute>} />
+
 
         {/* Tour Guide Routes */}
         <Route path="/tourGuideHome" element={<ProtectedRoute><TourGuideHome /></ProtectedRoute>} />
@@ -200,6 +207,7 @@ const App = () => {
         <Route path="/book-flights" element={<ProtectedRoute><BookFlights /></ProtectedRoute>} />
         <Route path="/book-hotels" element={<ProtectedRoute><BookHotels /></ProtectedRoute>} />
         <Route path="/room-details/:hotelId" element={<ProtectedRoute><RoomDetails /></ProtectedRoute>} />
+        
         
         <Route path="/map" element={<ProtectedRoute><MapMarker /></ProtectedRoute>} />
 

@@ -21,7 +21,7 @@ const museumTagRoute = require('./Routes/museumTagController');
 const complaintRoute = require('./Routes/complaintRoutes');
 const amadeusRoute = require('./Routes/amadeusRoute');
 const notificationRoute = require('./Routes/notificationRoutes');
-const forgetpass = require('./Routes/forgetpass'); // Adjust the path as needed
+const forgetpassRoute = require('./Routes/forgetpass'); // Adjust the path as needed
 require('./Services/reminderService');
 
 
@@ -79,4 +79,4 @@ app.use('/museumTags', museumTagRoute);
 app.use('/complaints', complaintRoute);
 app.use('/amadeus', amadeusRoute);
 app.use('/notifications', notificationRoute);
-app.use('/forget', forgetpass);
+app.use('/forget', forgetpassRoute);

@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { getAllTouristItineraries } from '../services/touristItineraryService';
 import '../styles/ItineraryList.css';
@@ -21,6 +21,7 @@ const ItineraryList = () => {
   const [conversionRates, setConversionRates] = useState(null);
   const [ratesError, setRatesError] = useState(null);
   const [ratesLoading, setRatesLoading] = useState(true);
+  const navigate = useNavigate();
 
   const currentUserName = localStorage.getItem('currentUserName');
   const userId = localStorage.getItem('userID');
@@ -190,11 +191,16 @@ const ItineraryList = () => {
     setIsModalOpen(false);
   };
 
+  const handlePay = (itineraryId) => {
+    const touristId = localStorage.getItem('userID');
+    navigate(`/tourist/Itinerarypayment`, { state: { touristId, itineraryId } });
+  };
+
   return (
     <div className="itinerary-list-container">
       <h2>My Itineraries</h2>
       <div className="controls">
-      <select value={currency} onChange={handleCurrencyChange} className="currency-select">
+        <select value={currency} onChange={handleCurrencyChange} className="currency-select">
           {conversionRates && Object.keys(conversionRates).map(code => (
             <option key={code} value={code}>{code}</option>
           ))}
@@ -270,11 +276,9 @@ const ItineraryList = () => {
                 {itinerary.touristName && <p className="yellow-text">Tourist Name: {itinerary.touristName}</p>}
                 {itinerary.startDate && <p className="yellow-text">Start Date: {formatDate(itinerary.startDate)}</p>}
                 {itinerary.endDate && <p className="yellow-text">End Date: {formatDate(itinerary.endDate)}</p>}
-                
                 {itinerary.ratings !== undefined && <p className="yellow-text">Ratings: {itinerary.ratings.averageRating}</p>}
                 {itinerary.preferences && <p className="yellow-text">Preferences: {itinerary.preferences}</p>}
                 {itinerary.language && <p className="yellow-text">Language: {itinerary.language}</p>}
-                
                 {itinerary.activities && itinerary.activities.length > 0 && (
                   <>
                     <h4 className="yellow-text">Activities:</h4>
@@ -285,7 +289,6 @@ const ItineraryList = () => {
                     </ul>
                   </>
                 )}
-
                 {itinerary.locations && itinerary.locations.length > 0 && (
                   <>
                     <h4 className="yellow-text">Locations:</h4>
@@ -296,7 +299,6 @@ const ItineraryList = () => {
                     </ul>
                   </>
                 )}
-
                 {itinerary.tags && itinerary.tags.length > 0 && (
                   <>
                     <h4 className="yellow-text">Tags:</h4>
@@ -310,7 +312,10 @@ const ItineraryList = () => {
                 <div className="activity-actions">
                   <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
                   {itinerary.touristBookings[0] ? (
-                    <button className="cancel-booking-btn" onClick={() => handleCancelBooking(itinerary._id)}>Cancel Booking</button>
+                    <>
+                      <button className="cancel-booking-btn" onClick={() => handleCancelBooking(itinerary._id)}>Cancel Booking</button>{' '}
+                      <button className="pay-button" onClick={() => handlePay(itinerary._id)}>Pay</button>
+                    </>
                   ) : (
                     <button className="book-button" onClick={() => handleBookItinerary(itinerary._id)}>Book Itinerary</button>
                   )}
@@ -324,7 +329,6 @@ const ItineraryList = () => {
           <p>No Current Itineraries Available</p>
         </div>
       )}
-
       {isModalOpen && (
         <div className="share-modal">
           <div className="share-modal-content">

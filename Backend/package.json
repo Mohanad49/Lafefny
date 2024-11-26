@@ -17,6 +17,8 @@
   },
   "homepage": "https://github.com/Advanced-Computer-Lab-2022",
   "dependencies": {
+    "@stripe/react-stripe-js": "^3.0.0",
+    "@stripe/stripe-js": "^5.2.0",
     "amadeus": "^11.0.0",
     "axios": "^1.7.7",
     "bcrypt": "^5.1.1",
@@ -31,6 +33,7 @@
     "node-cron": "^3.0.3",
     "nodemailer": "^6.9.16",
     "react": "^18.3.1",
+    "stripe": "^17.4.0",
     "sweetalert2": "^11.14.5"
   },
   "devDependencies": {
