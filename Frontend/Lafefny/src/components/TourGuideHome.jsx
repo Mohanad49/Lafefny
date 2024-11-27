@@ -3,10 +3,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homePage.css'; // Create this CSS file
 import NotificationBell from './NotificationBell';
+import Navbar from './Navbar';
 
 const TourGuideHome = () => {
   return (
     <div className="home">
+      <Navbar />
       <div className="header">
         <h1>Welcome to the Tour Guide HomePage</h1>
         <div className="notification-container">

@@ -3,10 +3,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import NotificationBell from './NotificationBell';
 import '../styles/homePage.css';
+import Navbar from './Navbar';
 
 const AdvertiserHome = () => {
   return (
     <div className="home">
+      <Navbar />
       <div className="header">
         <h1>Welcome to the Advertiser HomePage</h1>
         <div className="notification-container">

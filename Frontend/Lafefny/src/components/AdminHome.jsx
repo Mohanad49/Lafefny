@@ -4,10 +4,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
 import NotificationBell from './NotificationBell';
+import Navbar from './Navbar';
 
 const AdminHome = () => {
   return (
     <div className="home">
+      <Navbar />
       <div className="header">
         <h1>Welcome to the Admin HomePage</h1>
         <div className="notification-container">
@@ -19,8 +21,6 @@ const AdminHome = () => {
         <Link to="/users">View All Users</Link> |{' '}
         <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
         <Link to="/changePassword">Change Password</Link> | {' '}
-        <Link to="/add-admin">Add Admin</Link>
-        <Link to="/changepassword">Change Password</Link> | {' '}
         <Link to="/add-admin">Add Admin</Link> | {' '}
         <Link to="/numberOfUsers">Number of Users</Link> | {' '}
 

@@ -2,10 +2,12 @@
 import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import '../styles/sign.css';
 import axios from 'axios';
 
 function Sign() {
+  const { login } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [userType, setUserType] = useState('Tourist');
   const [formData, setFormData] = useState({
@@ -24,9 +26,7 @@ function Sign() {
   const navigate = useNavigate();
 
   React.useEffect(() => {
-    // Clear any existing auth data when the sign page is loaded
-    localStorage.removeItem('userID');
-    localStorage.removeItem('currentUserName');
+    // No need to clear auth data on mount anymore
   }, []);
 
   const handleChange = (e) => {
@@ -151,12 +151,12 @@ function Sign() {
       } else {
         try {
           const signInResponse = await signIn(formData.email, formData.password);
-          const userRole = signInResponse.role;
-          localStorage.setItem('currentUserName', signInResponse.username);
-          localStorage.setItem('userID', signInResponse.id);
+          
+          // Use the login function from AuthContext
+          login(signInResponse);
           
           // Redirect based on the user role
-          switch(userRole) {
+          switch(signInResponse.role) {
             case 'Tourist':
               navigate('/touristHome');
               break;
@@ -171,6 +171,9 @@ function Sign() {
               break;
             case 'Admin':
               navigate('/adminHome');
+              break;
+            case 'TourismGovernor':
+              navigate('/TourismGovernorHome');
               break;
             default:
               alert('Invalid role detected');
