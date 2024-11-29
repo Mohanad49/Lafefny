@@ -58,5 +58,42 @@ router.post('/promo-codes', async (req, res) => {
         res.status(500).json({ message: 'Error creating promo code', error });
     }
 });
+router.post('/validate', async (req, res) => {
+    const { promoCode, touristId, originalPrice } = req.body; // Include originalPrice in the request body
+
+    try {
+        // Check if promo code exists and is active
+        const code = await PromoCode.findOne({ code: promoCode.toUpperCase() });
+        if (!code) {
+            return res.status(400).json({ message: 'Promo code does not exist' });
+        }
+
+        const now = new Date();
+
+        // Check if promo code is within valid date range
+        if (now < new Date(code.validFrom) || now > new Date(code.validUntil)) {
+            return res.status(400).json({ message: 'Promo code is not valid at this time' });
+        }
+
+        // Check if the promo code has reached its maximum usage
+        if (code.currentUses >= code.maxUses) {
+            return res.status(400).json({ message: 'Promo code has reached its maximum usage limit' });
+        }
+
+        // Calculate discounted price
+        const discountPercentage = code.discountPercentage;
+        const discountAmount = (originalPrice * discountPercentage) / 100;
+        const discountedPrice = originalPrice - discountAmount;
+
+        // Return discounted price
+        res.status(200).json({ discountPercentage, discountedPrice });
+    } catch (error) {
+        console.error('Error validating promo code:', error.message);
+        res.status(500).json({ message: 'Error validating promo code', error });
+    }
+});
+
+
+
 
 module.exports = router;

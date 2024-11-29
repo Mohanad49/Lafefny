@@ -1,7 +1,6 @@
 const { sendEmail } = require('./emailService');
 const PromoCode = require('../Models/PromoCode');
 const User = require('../Models/User');
-const { generateBirthdayPromoCode } = require('./birthdayPromoService');
 
 const checkBirthdays = async () => {
   try {
@@ -27,4 +26,4 @@ const checkBirthdays = async () => {
   }
 };
 
-module.exports = { checkBirthdays, generateBirthdayPromoCode };
+module.exports = { checkBirthdays };

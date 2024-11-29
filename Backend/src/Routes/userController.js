@@ -3,7 +3,6 @@ const User = require('../Models/User');
 const jwt = require('jsonwebtoken');
 const { auth, authorize } = require('../middleware/auth');
 const router = express.Router();
-const User = require('../Models/User');
 const TourismGovernor = require('../Models/TourismGovernor');
 const Admin = require('../Models/Admin');
 const PromoCode = require('../Models/PromoCode');

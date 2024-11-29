@@ -4,7 +4,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import axios from 'axios';
 
-const stripePromise = loadStripe('pk_test_51QP8ZuEtF2Lqtv9O8kg1FunK3YF9xXxeVt1oSsxe07QZHIZUOShRYHBjTYUrFcY61iQzfljEA6AT3ozj44mfPM9I00c9XZdQuA'); // Replace with your Stripe publishable key
+const stripePromise = loadStripe('your-stripe-public-key');
 
 const TouristItineraryPay = () => {
   const location = useLocation();
@@ -12,22 +12,20 @@ const TouristItineraryPay = () => {
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [promoCode, setPromoCode] = useState('');
+  const [discountedPrice, setDiscountedPrice] = useState(null);
+  const [promoError, setPromoError] = useState('');
   const stripe = useStripe();
   const elements = useElements();
 
+  // Fetch booking details
   useEffect(() => {
-    console.log('useEffect triggered');
-    console.log('itineraryId:', itineraryId);
-    console.log('touristId:', touristId);
-
     const fetchBooking = async () => {
       try {
-        console.log('Fetching booking details...');
         const bookingResponse = await axios.get(`http://localhost:8000/touristItinerary/${itineraryId}`);
-        console.log('Booking response:', bookingResponse.data);
         setBooking(bookingResponse.data);
+        setDiscountedPrice(bookingResponse.data.price); // Set initial price
       } catch (err) {
-        console.error('Error fetching booking details:', err);
         setError('Failed to fetch booking details');
       } finally {
         setLoading(false);
@@ -36,22 +34,29 @@ const TouristItineraryPay = () => {
 
     if (itineraryId && touristId) {
       fetchBooking();
-    } else {
-      console.error('Missing itineraryId or touristId');
-      setLoading(false);
     }
   }, [itineraryId, touristId]);
 
+  // Apply promo code
+  const handleApplyPromoCode = async () => {
+    setPromoError('');
+    try {
+      const response = await axios.post(`http://localhost:8000/promos/validate`, {
+        promoCode,
+        touristId,
+        originalPrice: booking.price, // Pass the original price to the backend
+      });
+      setDiscountedPrice(response.data.discountedPrice); // Update the discounted price
+    } catch (err) {
+      setPromoError(err.response?.data?.message || 'Error validating promo code');
+      setDiscountedPrice(booking.price); // Reset to original price on error
+    }
+  };
+
+  // Handle card payment
   const handleCardPayment = async (e) => {
     e.preventDefault();
-    if (!stripe || !elements) {
-      return;
-    }
-
-    if (booking.paidBy.includes(touristId)) {
-        alert('You have already paid for this itinerary');
-        return;
-      }
+    if (!stripe || !elements) return;
 
     const cardElement = elements.getElement(CardElement);
 
@@ -61,19 +66,17 @@ const TouristItineraryPay = () => {
     });
 
     if (error) {
-      console.error('Payment method error:', error);
+      console.error(error);
       alert('Payment failed');
       return;
     }
 
-    console.log('PaymentMethod created:', paymentMethod.id);
-
     try {
-      console.log('Making payment request...');
       await axios.post(`http://localhost:8000/tourist/${itineraryId}/payment`, {
         method: 'card',
         paymentMethodId: paymentMethod.id,
         touristId,
+        amount: discountedPrice, // Send the discounted price
       });
       alert('Payment successful');
     } catch (err) {
@@ -82,17 +85,13 @@ const TouristItineraryPay = () => {
     }
   };
 
+  // Handle wallet payment
   const handleWalletPayment = async () => {
-    if (booking.paidBy.includes(touristId)) {
-        alert('You have already paid for this itinerary');
-        return;
-    }
-
     try {
-      console.log('Making wallet payment request...');
       const response = await axios.post(`http://localhost:8000/tourist/${itineraryId}/payment`, {
         method: 'wallet',
         touristId,
+        amount: discountedPrice, // Send the discounted price
       });
       const { remainingBalance } = response.data;
       alert(`Payment successful. Remaining balance: ${remainingBalance} EGP`);
@@ -111,7 +110,22 @@ const TouristItineraryPay = () => {
       {booking && (
         <div>
           <h2>{booking.name}</h2>
-          <p>Price: {booking.price} EGP</p>
+          <p>Original Price: {booking.price} EGP</p>
+          <p>
+            Discounted Price: {discountedPrice !== null && discountedPrice !== undefined
+              ? discountedPrice.toFixed(2)
+              : booking.price} EGP
+          </p>
+          <div>
+            <input
+              type="text"
+              value={promoCode}
+              onChange={(e) => setPromoCode(e.target.value)}
+              placeholder="Enter promo code"
+            />
+            <button onClick={handleApplyPromoCode}>Apply Promo Code</button>
+            {promoError && <p style={{ color: 'red' }}>{promoError}</p>}
+          </div>
           <form onSubmit={handleCardPayment}>
             <CardElement />
             <button type="submit" disabled={!stripe}>Pay with Card</button>
