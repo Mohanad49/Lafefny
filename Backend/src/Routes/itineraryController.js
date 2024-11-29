@@ -1,6 +1,10 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const Itinerary = require("../Models/Itinerary");
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints'); 
+const Notification = require('../Models/notificationModel');
+const { sendInappropriateContentEmail } = require('../Services/emailService');
+const User = require('../Models/User');
 const router = express.Router();
 
 // POST route for creating a new itinerary
@@ -271,9 +275,49 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
     itinerary.inappropriateFlag = !itinerary.inappropriateFlag;
     await itinerary.save();
 
+    if (itinerary.inappropriateFlag) {
+      // Create notification for owner
+      await Notification.create({
+        recipient: itinerary.tourGuide,
+        recipientModel: 'TourGuide', 
+        message: `Your itinerary "${itinerary.name}" has been flagged as inappropriate`,
+        type: 'INAPPROPRIATE_FLAG'
+      });
+      const user = await User.findById(itinerary.tourGuide);
+      // Send email
+      await sendInappropriateContentEmail(
+        user.email,
+        'itinerary',
+        itinerary.name
+      );
+    }
+
     res.json(itinerary);
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+router.get('/tourGuide/:id', async (req, res) => {
+  const tourGuideId = req.params.id;
+  
+  if (!mongoose.isValidObjectId(tourGuideId)) {
+    return res.status(400).json({ error: "Invalid tourGuide ID" });
+  }
+
+  try {
+    const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
+    
+    if (!itineraries.length) {
+      return res.status(404).json({ message: "No itineraries found for this tour guide" });
+    }
+
+    res.status(200).json(itineraries);
+  } catch (error) {
+    res.status(500).json({ 
+      error: "Error fetching itineraries",
+      details: error.message 
+    });
   }
 });
 

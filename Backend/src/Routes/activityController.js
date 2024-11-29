@@ -1,7 +1,10 @@
 const express = require('express');
+const mongoose = require('mongoose');
 const Activity = require('../Models/Activity');
 const User = require('../Models/User');
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
+const Notification = require('../Models/notificationModel');
+const { sendInappropriateContentEmail } = require('../Services/emailService');
 const router = express.Router();
 
 // CREATE activity
@@ -233,11 +236,51 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
     activity.inappropriateFlag = !activity.inappropriateFlag;
     await activity.save();
 
+    if (activity.inappropriateFlag) {
+      // Create notification for owner
+      await Notification.create({
+        recipient: activity.advertiser,
+        recipientModel: 'Advertiser',
+        message: `Your activity "${activity.name}" has been flagged as inappropriate`,
+        type: 'INAPPROPRIATE_FLAG'
+      });
+      const user = await User.findById(activity.advertiser);
+      // Send email
+      await sendInappropriateContentEmail(
+        user.email,
+        'activity',
+        activity.name
+      );
+    }
+
     res.json(activity);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+router.get('/advertiser/:id', async (req, res) => {
+  const advertiserId = req.params.id;
+  
+  // Validate advertiser ID
+  if (!mongoose.isValidObjectId(advertiserId)) {
+      return res.status(400).json({ error: "Invalid advertiser ID" });
+  }
+
+  try {
+      const activities = await Activity.find({ advertiser: advertiserId });
+      
+      if (!activities.length) {
+          return res.status(404).json({ message: "No activities found for this advertiser" });
+      }
+
+      res.status(200).json(activities);
+  } catch (error) {
+      res.status(500).json({ 
+          error: "Error fetching activities",
+          details: error.message 
+      });
+  }
+});
 
 module.exports = router;

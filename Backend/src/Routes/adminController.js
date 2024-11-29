@@ -142,6 +142,58 @@ router.put('/promo-codes/:id/deactivate', async (req, res) => {
   } catch (error) {
     res.status(500).json({ message: 'Error deactivating promo code', error });
   }
+})
+router.get("/numberOfUsers",async(req,res)=>{
+  try{
+      const users = await User.find();
+      res.status(200).json(users.length)
+  }catch(error){
+      res.status(400).json({error:"not found"})
+  }
+});
+
+router.get("/numberOfNewUsers", async (req, res) => {
+  try {
+    const monthlyUsers = await User.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" },
+            month: { $month: "$createdAt" }
+          },
+          count: { $sum: 1 },
+          monthName: {
+            $first: {
+              $dateToString: {
+                format: "%Y-%m",
+                date: "$createdAt"
+              }
+            }
+          }
+        }
+      },
+      {
+        $sort: {
+          "_id.year": -1,
+          "_id.month": -1
+        }
+      },
+      {
+        $project: {
+          _id: 0,
+          month: "$monthName",
+          count: 1
+        }
+      }
+    ]);
+
+    res.status(200).json(monthlyUsers);
+  } catch (error) {
+    res.status(500).json({
+      error: "Error fetching monthly users count",
+      details: error.message
+    });
+  }
 });
 
 module.exports = router;

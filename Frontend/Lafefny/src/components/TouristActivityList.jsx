@@ -1,5 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { getActivities } from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
 import '../styles/ActivityList.css';
@@ -23,6 +24,8 @@ const ActivityList = () => {
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(null);
 
+  const navigate = useNavigate(); // Initialize useNavigate
+
   useEffect(() => {
     fetchActivities();
     fetchActivityCategories();
@@ -41,6 +44,7 @@ const ActivityList = () => {
     };
     getRates();
   }, []);
+
   const fetchActivityCategories = async () => {
     try {
       const categories = await getAllActivityCategories();
@@ -49,7 +53,7 @@ const ActivityList = () => {
       console.error('Error fetching activity categories:', error);
     }
   };
-  
+
   const fetchActivities = async () => {
     try {
       const response = await getActivities({
@@ -81,8 +85,8 @@ const ActivityList = () => {
     } catch (error) {
       console.error('Error fetching activities:', error);
       setActivities([]);
-    }
-  };
+    }
+  };
 
   const handleBookActivity = async (activityId) => {
     try {
@@ -144,6 +148,11 @@ const ActivityList = () => {
         alert("Failed to cancel the booking.");
       }
     }
+  };
+
+  const handlePay = (activityId) => {
+    const touristId = localStorage.getItem('userID');
+    navigate(`/tourist/payment`, { state: { touristId, activityId } });
   };
 
   const convertPrice = (price) => {
@@ -312,13 +321,21 @@ const ActivityList = () => {
               <div className="activity-actions">
                 <button className="share-button" onClick={() => openShareModal(activity)}>Share</button>
                 {activity.booked ? (
-                  <button 
-                    className="cancel-booking-btn" 
-                    onClick={() => handleCancelBooking(activity._id, activity.date)}
-                    disabled={!checkIfCanCancel(activity.date)}
-                  >
-                    Cancel Booking
-                  </button>
+                  <>
+                    <button 
+                      className="cancel-booking-btn" 
+                      onClick={() => handleCancelBooking(activity._id, activity.date)}
+                      disabled={!checkIfCanCancel(activity.date)}
+                    >
+                      Cancel Booking
+                    </button>
+                    {' '}<button 
+                      className="pay-button" 
+                      onClick={() => handlePay(activity._id)}
+                    >
+                      Pay
+                    </button>
+                  </>
                 ) : (
                   <button 
                     className="book-button" 

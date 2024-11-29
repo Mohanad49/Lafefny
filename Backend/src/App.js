@@ -23,6 +23,10 @@ const museumTagRoute = require('./Routes/museumTagController');
 const complaintRoute = require('./Routes/complaintRoutes');
 const amadeusRoute = require('./Routes/amadeusRoute');
 const promoRoutes = require('./Routes/promoRoutes');
+const notificationRoute = require('./Routes/notificationRoutes');
+const forgetpassRoute = require('./Routes/forgetpass'); // Adjust the path as needed
+require('./Services/reminderService');
+
 
 mongoose.set('strictQuery', false);
 require("dotenv").config();
@@ -49,7 +53,6 @@ mongoose.connect(MongoURI)
 app.get("/home", (req, res) => {
     res.status(200).send("You have everything installed!");
   });
-
 
 
   const corsOptions = {
@@ -90,3 +93,5 @@ cron.schedule('0 0 * * *', async () => {
     console.error('Error in birthday promo scheduler:', error);
   }
 });
+app.use('/notifications', notificationRoute);
+app.use('/forget', forgetpassRoute);

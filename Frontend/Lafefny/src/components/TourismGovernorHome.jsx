@@ -3,11 +3,12 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
 import ChangePassword from './ChangePassword';
-
+import Navbar from './Navbar';
 
 const TourGuideHome = () => {
   return (
     <div>
+      <Navbar />
       <h1>Welcome to the Tourism Governor HomePage</h1>
       <nav>
         <h2>Activity Management</h2>

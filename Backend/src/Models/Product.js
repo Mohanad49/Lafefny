@@ -11,6 +11,11 @@ const productSchema = new mongoose.Schema({
       type: String,  
       required: true
     },
+    ownerID: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
     isArchived: {type: Boolean, default: false},
     ratings: {
       averageRating: {type: Number , default: 0},

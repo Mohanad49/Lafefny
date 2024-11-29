@@ -3,9 +3,12 @@ const Tourist= require("../Models/touristModel");
 const User= require("../Models/User");
 const TouristItinerary = require("../Models/Tourist-Itinerary"); // Adjust the path to your Itinerary model
 const Activity = require("../Models/Activity");
+const { processCardPayment } = require('../Services/payingService');
 const TourGuide = require("../Models/tourGuideModel");
 const Advertiser = require("../Models/advertiserModel");
 const Product = require('../Models/Product'); // Import Product model
+const { createPaymentIntent } = require('../Services/payingService'); // Import createPaymentIntent
+const { sendReceiptEmail } = require('../Services/emailService');
 
 const { default: mongoose } = require("mongoose");
 
@@ -464,6 +467,183 @@ router.delete('/:userId/cart/:productId', async (req, res) => {
   } catch (error) {
     console.error('Error removing from cart:', error);
     res.status(500).json({ message: error.message });
+  }
+});
+
+router.get('/:id/bookings', async (req, res) => {
+  const { id } = req.params;
+  try {
+    const tourist = await Tourist.findById(id).populate('bookings');
+    if (!tourist) {
+      return res.status(404).json({ error: 'Tourist not found' });
+    }
+    res.status(200).json(tourist.bookings);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch bookings' });
+  }
+});
+
+router.post('/:activityId/pay', async (req, res) => {
+  const { activityId } = req.params;
+  const { method, paymentMethodId, touristId } = req.body;
+  try {
+    console.log('Received payment request');
+    console.log('activityId:', activityId);
+    console.log('method:', method);
+    console.log('paymentMethodId:', paymentMethodId);
+    console.log('touristId:', touristId);
+
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      console.error('Activity not found');
+      return res.status(404).json({ error: 'Activity not found' });
+    }
+
+    // Check if the user has already paid for this activity
+    if (activity.paidBy.includes(touristId)) {
+      return res.status(400).json({ error: 'You have already paid for this activity' });
+    }
+
+    let tourist;
+    if (method === 'card') {
+      const paymentResult = await processCardPayment(paymentMethodId, activity.price);
+      if (!paymentResult.success) {
+        console.error('Card payment failed:', paymentResult.error);
+        throw new Error(paymentResult.error);
+      }
+      tourist = await Tourist.findOne({ userID: touristId });
+      if (!tourist) {
+        console.error('Tourist not found');
+        return res.status(404).json({ error: 'Tourist not found' });
+      }
+    } else if (method === 'wallet') {
+      tourist = await Tourist.findOne({ userID: touristId });
+      if (!tourist) {
+        console.error('Tourist not found');
+        return res.status(404).json({ error: 'Tourist not found' });
+      }
+      if (tourist.wallet < activity.price) {
+        console.error('Insufficient wallet balance');
+        return res.status(400).json({ error: 'Insufficient wallet balance' });
+      }
+      tourist.wallet -= activity.price;
+      await tourist.save();
+    }
+
+    // Mark the activity as paid by the user
+    activity.paidBy.push(touristId);
+    await activity.save();
+
+    // Fetch user to get email
+    const user = await User.findOne({ _id: tourist.userID });
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Log user email
+    console.log('User email:', user.email);
+
+    // Ensure user email is defined
+    if (!user.email) {
+      console.error('User email is not defined');
+      throw new Error('User email is not defined');
+    }
+
+    // Send response first
+    res.status(200).json({ message: 'Payment successful', remainingBalance: tourist.wallet });
+
+    // Send receipt email asynchronously
+    const emailSubject = 'Payment Receipt';
+    const emailText = `Dear ${user.username},\n\nThank you for your payment of ${activity.price} EGP for the activity "${activity.name}".\n\nRemaining balance: ${tourist.wallet} EGP\n\nBest regards,\nLafefny Team`;
+    sendReceiptEmail(user.email, emailSubject, emailText).catch(error => {
+      console.error('Error sending receipt email:', error);
+    });
+  } catch (err) {
+    console.error('Payment processing error:', err);
+    res.status(500).json({ error: 'Payment failed', details: err.message });
+  }
+});
+
+router.post('/:itineraryId/payment', async (req, res) => {
+  const { itineraryId } = req.params;
+  const { method, paymentMethodId, touristId } = req.body;
+  try {
+    console.log('Received payment request');
+    console.log('itineraryId:', itineraryId);
+    console.log('method:', method);
+    console.log('paymentMethodId:', paymentMethodId);
+    console.log('touristId:', touristId);
+
+    const itinerary = await TouristItinerary.findById(itineraryId);
+    if (!itinerary) {
+      console.error('Itinerary not found');
+      return res.status(404).json({ error: 'Itinerary not found' });
+    }
+
+    // Check if the user has already paid for this itinerary
+    if (itinerary.paidBy.includes(touristId)) {
+      return res.status(400).json({ error: 'You have already paid for this itinerary' });
+    }
+
+    let tourist;
+    if (method === 'card') {
+      const paymentResult = await processCardPayment(paymentMethodId, itinerary.price);
+      if (!paymentResult.success) {
+        console.error('Card payment failed:', paymentResult.error);
+        throw new Error(paymentResult.error);
+      }
+      tourist = await Tourist.findOne({ userID: touristId });
+      if (!tourist) {
+        console.error('Tourist not found');
+        return res.status(404).json({ error: 'Tourist not found' });
+      }
+    } else if (method === 'wallet') {
+      tourist = await Tourist.findOne({ userID: touristId });
+      if (!tourist) {
+        console.error('Tourist not found');
+        return res.status(404).json({ error: 'Tourist not found' });
+      }
+      if (tourist.wallet < itinerary.price) {
+        console.error('Insufficient wallet balance');
+        return res.status(400).json({ error: 'Insufficient wallet balance' });
+      }
+      tourist.wallet -= itinerary.price;
+      await tourist.save();
+    }
+
+    // Mark the itinerary as paid by the user
+    itinerary.paidBy.push(touristId);
+    await itinerary.save();
+
+    // Fetch user to get email
+    const user = await User.findOne({ _id: tourist.userID });
+    if (!user) {
+      console.error('User not found');
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    // Log user email
+    console.log('User email:', user.email);
+
+    // Ensure user email is defined
+    if (!user.email) {
+      console.error('User email is not defined');
+      throw new Error('User email is not defined');
+    }
+
+    // Send response first
+    res.status(200).json({ message: 'Payment successful', remainingBalance: tourist.wallet });
+
+    // Send receipt email asynchronously
+    const emailSubject = 'Payment Receipt';
+    const emailText = `Dear ${user.username},\n\nThank you for your payment of ${itinerary.price} EGP for the itinerary "${itinerary.name}".\n\nRemaining balance: ${tourist.wallet} EGP\n\nBest regards,\nLafefny Team`;
+    sendReceiptEmail(user.email, emailSubject, emailText).catch(error => {
+      console.error('Error sending receipt email:', error);
+    });
+  } catch (err) {
+    console.error('Payment processing error:', err);
+    res.status(500).json({ error: 'Payment failed', details: err.message });
   }
 });
 

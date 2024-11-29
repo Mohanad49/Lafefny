@@ -11,6 +11,7 @@ const AddProduct = () => {
     imageUrl: '',
     description: '',
     seller: '',
+    ownerID: localStorage.getItem('userID') // Get logged in user's ID
   });
 
   const handleChange = (e) => {
@@ -30,9 +31,15 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
+      if (!product.ownerID) {
+        alert('Please login first');
+        return;
+      }
+
       const response = await addProduct(product);
       console.log('Product added successfully:', response);
       alert('Product added successfully');
+      
       // Reset form after successful submission
       setProduct({
         name: '',
@@ -41,6 +48,7 @@ const AddProduct = () => {
         imageUrl: '',
         description: '',
         seller: '',
+        ownerID: localStorage.getItem('userID') // Maintain ownerID after reset
       });
     } catch (error) {
       console.error('Error adding product:', error);

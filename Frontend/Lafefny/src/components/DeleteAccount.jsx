@@ -3,17 +3,29 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import Swal from 'sweetalert2';
 
 const DeleteAccount = () => {
   const [message, setMessage] = useState('');
   const [isRequestPending, setIsRequestPending] = useState(false);
   const navigate = useNavigate();
-  const userId = localStorage.getItem('userID');
+  const { auth } = useAuth();
 
   useEffect(() => {
     const checkExistingRequest = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/users/${userId}`);
+        const response = await fetch(`http://localhost:8000/users/${auth.userID}`, {
+          headers: {
+            'Authorization': `Bearer ${auth.token}`,
+            'Content-Type': 'application/json'
+          }
+        });
+        
+        if (!response.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        
         const userData = await response.json();
         
         if (userData.deletionRequested) {
@@ -21,100 +33,142 @@ const DeleteAccount = () => {
           setMessage('Your account deletion request is already being processed by an admin.');
         }
       } catch (error) {
+        console.error('Error checking deletion status:', error);
         setMessage('Error checking deletion status.');
       }
     };
 
-    checkExistingRequest();
-  }, [userId]);
+    if (auth.token && auth.userID) {
+      checkExistingRequest();
+    }
+  }, [auth.userID, auth.token]);
 
   const handleDeleteRequest = async () => {
     if (isRequestPending) {
       return; // Prevent new request if one is pending
     }
 
-    const confirmed = window.confirm(
-      "Are you sure you want to request account deletion? This request will be reviewed by an admin."
-    );
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You want to request account deletion? This request will be reviewed by an admin.",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
 
-    if (!confirmed) return;
+    if (!result.isConfirmed) return;
 
     try {
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${userId}`, 
+        `http://localhost:8000/request-deletion/${auth.userID}`, 
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
           }
         }
       );
 
       const data = await response.json();
-
-      if (response.ok) {
-        setIsRequestPending(true);
-        setMessage('Account deletion request submitted successfully. An admin will review your request.');
-        setTimeout(() => navigate('/'), 3000);
-      } else {
-        setMessage(data.message);
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit deletion request');
       }
+
+      setIsRequestPending(true);
+      
+      await Swal.fire({
+        icon: 'success',
+        title: 'Request Submitted',
+        text: 'Your account deletion request has been submitted successfully.',
+        timer: 2000,
+        showConfirmButton: false
+      });
+      
+      navigate('/');
     } catch (error) {
-      setMessage('Error submitting deletion request. Please try again.');
+      console.error('Error requesting deletion:', error);
+      
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to submit account deletion request. Please try again.',
+      });
     }
   };
 
   const handleCancelRequest = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cancel-deletion/${userId}`,
+        `http://localhost:8000/cancel-deletion/${auth.userID}`,
         {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${auth.token}`
           }
         }
       );
 
       const data = await response.json();
-
-      if (response.ok) {
-        setIsRequestPending(false);
-        setMessage('Deletion request cancelled successfully.');
-      } else {
-        setMessage(data.message);
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to cancel deletion request');
       }
+
+      setIsRequestPending(false);
+      setMessage('');
+      
+      await Swal.fire({
+        icon: 'success',
+        title: 'Request Cancelled',
+        text: 'Your account deletion request has been cancelled.',
+        timer: 2000,
+        showConfirmButton: false
+      });
     } catch (error) {
-      setMessage('Error cancelling deletion request. Please try again.');
+      console.error('Error cancelling request:', error);
+      
+      await Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: error.message || 'Failed to cancel deletion request. Please try again.',
+      });
     }
   };
 
   return (
-    <div className="delete-account">
-      <h2>Request Account Deletion</h2>
-      {isRequestPending ? (
-        <div className="pending-request">
-          <p className="warning">A deletion request for your account is already being processed.</p>
-          <p>Please wait for an admin to review your request.</p>
-          <button 
-            onClick={handleCancelRequest}
-            className="cancel-button"
-          >
-            Cancel Deletion Request
-          </button>
+    <div className="container mt-5">
+      <div className="card">
+        <div className="card-body">
+          <h2 className="card-title text-center mb-4">Account Deletion</h2>
+          
+          {message && (
+            <div className="alert alert-info" role="alert">
+              {message}
+            </div>
+          )}
+          
+          {isRequestPending ? (
+            <button 
+              onClick={handleCancelRequest}
+              className="btn btn-secondary btn-block"
+            >
+              Cancel Deletion Request
+            </button>
+          ) : (
+            <button 
+              onClick={handleDeleteRequest}
+              className="btn btn-danger btn-block"
+            >
+              Request Account Deletion
+            </button>
+          )}
         </div>
-      ) : (
-        <>
-          <p>Warning: Your request will be reviewed by an admin before deletion is processed.</p>
-          <button 
-            onClick={handleDeleteRequest}
-            className="delete-button"
-          >
-            Request Account Deletion
-          </button>
-        </>
-      )}
-      {message && <p className="message">{message}</p>}
+      </div>
     </div>
   );
 };

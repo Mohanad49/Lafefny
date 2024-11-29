@@ -2,18 +2,26 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
+import NotificationBell from './NotificationBell';
+import Navbar from './Navbar';
 
 const AdminHome = () => {
   return (
-    <div>
-      <h1>Welcome to the Admin HomePage</h1>
-      <nav>
-
+    <div className="home">
+      <Navbar />
+      <div className="header">
+        <h1>Welcome to the Admin HomePage</h1>
+        <div className="notification-container">
+          <NotificationBell />
+        </div>
+      </div>
+      <nav className="navigation">
         <h2>User Management</h2>
         <Link to="/users">View All Users</Link> |{' '}
         <Link to="/add-tourism-Governor">Add Tourism Governor</Link> | {' '}
-        <Link to="/changepassword">Change Password</Link> | {' '}
-        <Link to="/add-admin">Add Admin</Link>
+        <Link to="/changePassword">Change Password</Link> | {' '}
+        <Link to="/add-admin">Add Admin</Link> | {' '}
+        <Link to="/numberOfUsers">Number of Users</Link> | {' '}
 
         <h2>Activity Management</h2>
         <Link to="/admin-activities">View Activities</Link> |{' '}

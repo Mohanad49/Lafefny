@@ -28,7 +28,10 @@ export const getProductById = async (id) => {
 // Add a new product
 export const addProduct = async (productData) => {
   try {
-    const response = await axios.post(API_URL, productData);
+    const response = await axios.post(API_URL, {
+      ...productData,
+      ownerID: localStorage.getItem('userID')
+    });
     return response.data;
   } catch (error) {
     console.error('Error adding product:', error);
@@ -39,7 +42,10 @@ export const addProduct = async (productData) => {
 // Update an existing product by ID
 export const updateProduct = async (id, productData) => {
   try {
-    const response = await axios.put(`${API_URL}/${id}`, productData);
+    const response = await axios.put(`${API_URL}/${id}`, {
+      ...productData,
+      ownerID: localStorage.getItem('userID') // Include ownerID in update
+    });
     return response.data;
   } catch (error) {
     console.error('Error updating product:', error);

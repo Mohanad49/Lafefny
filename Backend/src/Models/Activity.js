@@ -27,7 +27,13 @@ const activitySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tourist',
     default: []
-  }]
+  }],
+  advertiser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Advertiser',
+    required: true
+  },
+  paidBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
 });
 
 module.exports = mongoose.model('Activity', activitySchema);

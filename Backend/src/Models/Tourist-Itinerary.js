@@ -28,7 +28,10 @@ const TouristItinerarySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Tourist',
     default: []
-  }]
+  }],
+  paidBy: [{ type: mongoose.Schema.Types.ObjectId,
+  ref: 'Tourist' }],
+  default: []
 });
 
 const TouristItinerary = mongoose.model("TouristItinerary", TouristItinerarySchema);

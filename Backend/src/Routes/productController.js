@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Product = require('../Models/Product');
 const Tourist = require('../Models/touristModel');
-
+const Notification = require('../Models/notificationModel');
+const User = require('../Models/User');
+const { sendOutOfStockEmail } = require('../Services/emailService');
 
 // GET all products
 router.get('/', async (req, res) => {
@@ -110,7 +112,7 @@ router.post('/', async (req, res) => {
 
 // Route to edit a product's details (accessible by admins or sellers)
 router.put('/:id', async (req, res) => {
-  const { name, imageUrl, price, quantity, description } = req.body;
+  const { name, imageUrl, price, quantity, description, ownerID } = req.body;
 
   try {
     const product = await Product.findById(req.params.id);
@@ -123,12 +125,56 @@ router.put('/:id', async (req, res) => {
     if (name) product.name = name;
     if (imageUrl) product.imageUrl = imageUrl;
     if (price) product.price = price;
-    if (quantity) product.quantity = quantity;
+    if (quantity !== undefined) {
+      product.quantity = quantity;
+      
+      // Add debug logging
+      console.log('Quantity update:', {
+        newQuantity: quantity,
+        ownerID: product.ownerID
+      });
+      
+      // Check if product is out of stock
+      if (parseInt(quantity) === 0) {
+        console.log('Product out of stock, sending notification...');
+        
+        try {
+          // Get owner's user record
+          const owner = await User.findById(product.ownerID);
+          if (!owner) {
+            console.error('Owner not found:', product.ownerID);
+            return res.status(404).json({ message: "Product owner not found" });
+          }
+
+          // Create notification
+          const notification = new Notification({
+            recipient: product.ownerID,
+            recipientModel: owner.role,
+            message: `Your product "${product.name}" is out of stock`,
+            type: 'OUT_OF_STOCK',
+            productId: product._id
+          });
+          
+          await notification.save();
+          console.log('Notification saved:', notification);
+
+          // Send email
+          if (owner.email) {
+            await sendOutOfStockEmail(owner.email, product.name);
+            console.log('Email sent to:', owner.email);
+          }
+        } catch (notificationError) {
+          console.error('Error sending notification:', notificationError);
+          // Continue with product update even if notification fails
+        }
+      }
+    }
     if (description) product.description = description;
 
     await product.save();
     res.json(product);
   } catch (err) {
+    console.error('Error updating product:', err);
     res.status(400).json({ message: err.message });
   }
 });

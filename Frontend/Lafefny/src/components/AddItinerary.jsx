@@ -34,6 +34,7 @@ const AddItinerary = () => {
           return new Date(Date.UTC(year, month - 1, day)).toISOString();
         }),
         ratings: 0, // Set initial rating to 0
+        tourGuide: localStorage.getItem('userID'), // Set the tour guide to the current user
       };
 
       console.log('Processed data:', processedData); // Log the processed data for debugging
