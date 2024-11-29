@@ -1,10 +1,7 @@
-/* eslint-disable no-unused-vars */
-// src/components/Home.jsx
+// src/components/AdminHome.jsx
 import React from 'react';
 import { Link } from 'react-router-dom';
 import '../styles/homepage.css';
-import ChangePassword from './ChangePassword';
-
 
 const AdminHome = () => {
   return (
@@ -29,6 +26,9 @@ const AdminHome = () => {
         <h2>Product Management</h2>
         <Link to="/products">View Products</Link> | {' '}
         <Link to="/add-product">Add Product</Link>
+
+        <h2>Promo Code Management</h2>
+        <Link to="/create-promo-code">Create Promo Code</Link>
 
         <h2>Complaints Management</h2>
         <Link to="/admin/complaints">View Complaints</Link>

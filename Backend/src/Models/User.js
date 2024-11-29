@@ -12,7 +12,8 @@ const userSchema = new mongoose.Schema({
   picture: String,
   isAccepted: { type: Boolean, default: false },
   termsAccepted: { type: Boolean, default: true },
-  deletionRequested: { type: Boolean, default: false }
+  deletionRequested: { type: Boolean, default: false },
+  promoCodes: [{ type: mongoose.Schema.Types.ObjectId, ref: 'PromoCode' }],
 }, { timestamps: true });
 
 const User = mongoose.model('User', userSchema);

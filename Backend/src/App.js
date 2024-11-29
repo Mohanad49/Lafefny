@@ -3,6 +3,8 @@ const express = require("express");
 const cors = require("cors");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const cron = require('node-cron');
+const { checkBirthdays } = require('./services/birthdayPromoService');
 
 const productRoute = require("./Routes/productController");
 const activityRoute = require('./Routes/activityController');
@@ -20,7 +22,7 @@ const touristRoutes = require('./Routes/touristRoutes');
 const museumTagRoute = require('./Routes/museumTagController');
 const complaintRoute = require('./Routes/complaintRoutes');
 const amadeusRoute = require('./Routes/amadeusRoute');
-
+const promoRoutes = require('./Routes/promoRoutes');
 
 mongoose.set('strictQuery', false);
 require("dotenv").config();
@@ -76,3 +78,15 @@ app.use('/tourist', touristRoutes);
 app.use('/museumTags', museumTagRoute);
 app.use('/complaints', complaintRoute);
 app.use('/amadeus', amadeusRoute);
+app.use('/promos', promoRoutes);
+
+// This schedules the birthday check to run at midnight every day
+cron.schedule('0 0 * * *', async () => {
+  try {
+    console.log('Running birthday promo check...');
+    await checkBirthdays();
+    console.log('Birthday promo check completed');
+  } catch (error) {
+    console.error('Error in birthday promo scheduler:', error);
+  }
+});

@@ -10,7 +10,7 @@ import AddTourismGovernor from './components/AddTourismGovernor';
 import AdminComplaintDetail from './components/AdminComplaintDetail';
 import AdminComplaintList from './components/AdminComplaintList';
 import ComplaintForm from './components/ComplaintForm';
-
+import CreatePromoCode from './components/CreatePromoCode';
 import EditActivityCategory from './components/EditActivityCategory';
 import ActivityCategoryList from './components/ActivityCategoryList';
 import PreferenceTagList from './components/PreferenceTagList';
@@ -123,6 +123,8 @@ const App = () => {
         <Route path="/admin/complaints/:id" element={<ProtectedRoute><AdminComplaintDetail /></ProtectedRoute>} />
         <Route path="/admin-itineraries" element={<ProtectedRoute><AdminItineraryList /></ProtectedRoute>} />
         <Route path="/admin-activities" element={<ProtectedRoute><AdminActivityList /></ProtectedRoute>} />
+        <Route path="/create-promo-code" element={<ProtectedRoute><CreatePromoCode /></ProtectedRoute>} />
+        
 
         {/* Tourist Routes */}
         <Route path="/touristHome" element={<ProtectedRoute><TouristHome /></ProtectedRoute>} />

@@ -1,8 +1,9 @@
-const express = require('express');
+const express = require('express'); // Added bcrypt for password hashing
 const router = express.Router();
 const User = require('../Models/User');
 const TourismGovernor = require('../Models/TourismGovernor');
 const Admin = require('../Models/Admin');
+const PromoCode = require('../Models/PromoCode');
 
 // Delete Account (any user)
 router.delete('/delete-account/:userId', async (req, res) => {
@@ -47,16 +48,19 @@ router.post('/add-admin', async (req, res) => {
   if (!username || !password) {
     return res.status(400).json({ message: 'Username and Password are required' });
   }
-  
+
   try {
     const existingUser = await Admin.findOne({ username });
     if (existingUser) {
       return res.status(400).json({ message: 'Username already exists' });
     }
 
+    // Hash the password before saving
+    const hashedPassword = await bcrypt.hash(password, 10);
+
     const admin = new Admin({
       username,
-      password,
+      password: hashedPassword, // Save hashed password
     });
 
     await admin.save();
@@ -66,9 +70,7 @@ router.post('/add-admin', async (req, res) => {
   }
 });
 
-
-
-//turn accept on/////////////////////////////////////////////////////
+// Turn accept on
 router.put('/accept/:id', async (req, res) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { isAccepted: true }, { new: true });
@@ -88,6 +90,57 @@ router.put('/reject/:id', async (req, res) => {
   } catch (error) {
     console.error(error); // Log the error to help with debugging
     res.status(500).json({ message: 'Failed to reject user', error: error.message });
+  }
+});
+
+// Create Promo Code
+router.post('/promo-codes', async (req, res) => {
+  const { code, discountPercentage, validUntil, maxUses } = req.body;
+
+  try {
+    const existingCode = await PromoCode.findOne({ code: code.toUpperCase() });
+    if (existingCode) {
+      return res.status(400).json({ message: 'Promo code already exists' });
+    }
+
+    const promoCode = new PromoCode({
+      code: code.toUpperCase(),
+      discountPercentage,
+      validUntil,
+      maxUses,
+    });
+
+    await promoCode.save();
+    res.status(201).json({ message: 'Promo code created successfully', promoCode });
+  } catch (error) {
+    res.status(500).json({ message: 'Error creating promo code', error });
+  }
+});
+
+// Get All Promo Codes
+router.get('/promo-codes', async (req, res) => {
+  try {
+    const promoCodes = await PromoCode.find();
+    res.json(promoCodes);
+  } catch (error) {
+    res.status(500).json({ message: 'Error fetching promo codes', error });
+  }
+});
+
+// Deactivate Promo Code
+router.put('/promo-codes/:id/deactivate', async (req, res) => {
+  try {
+    const promoCode = await PromoCode.findByIdAndUpdate(
+      req.params.id,
+      { isActive: false },
+      { new: true }
+    );
+    if (!promoCode) {
+      return res.status(404).json({ message: 'Promo code not found' });
+    }
+    res.json({ message: 'Promo code deactivated', promoCode });
+  } catch (error) {
+    res.status(500).json({ message: 'Error deactivating promo code', error });
   }
 });
 
