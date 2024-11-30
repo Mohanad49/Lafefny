@@ -1,7 +1,12 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
+import LandingPage from './pages/Index';
 import Sign from './components/Sign';
 import Home from './components/GuestHome';
 
@@ -108,14 +113,22 @@ import ForgotPassword from './components/ForgetPassword';
 import TouristPayment from './components/TouristPayment';
 import TouristITpay from './components/TouristItineraryPay';
 
+
+const queryClient = new QueryClient();
+
 const App = () => {
 
   return (
     <AuthProvider>
+      <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+      <Toaster />
+      <Sonner />
       <Router>
         <Routes>
           {/* Public Routes */}
-          <Route path="/" element={<Sign />} />
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/sign" element={<Sign />} />
           <Route path="/guestHome" element={<Home />} />
           <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/guestActivities" element={<GuestActivityList />} />
@@ -214,6 +227,8 @@ const App = () => {
           <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin']}><ActivityReport /></ProtectedRoute>} />
         </Routes>
       </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
     </AuthProvider>
   );
 };

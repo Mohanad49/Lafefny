@@ -96,21 +96,6 @@
   color: white;
 }
 
-button {
-  padding: 10px 15px;
-  background-color: #3498db; /* Blue background */
-  color: #000; /* Black text color before hover */
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-button:hover {
-  background-color: #2980b9; /* Darker blue on hover */
-  transform: scale(1.05); /* Slightly enlarge on hover */
-}
-
 @media (max-width: 600px) {
   .controls {
     flex-direction: column;

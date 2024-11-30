@@ -1,14 +1,4 @@
-h2 {
-    color: #ffd700; /* A gold color for the headings to make them stand out */
-  }
-  
-  a {
-    color: white; /* White color for the links */
-  }
-  
-  a:hover {
-    color: #f0f0f0; /* Optional: Lighter color when hovering */
-  }
+
   .home {
     padding: 20px;
   }

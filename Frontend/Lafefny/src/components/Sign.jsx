@@ -5,6 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import '../styles/sign.css';
 import axios from 'axios';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 function Sign() {
   const { login } = useAuth();
@@ -19,11 +23,12 @@ function Sign() {
     nationality: '',
     job: '',
     role: 'Tourist',
-    termsAccepted:false,
+    termsAccepted: false,
   });
   const [showTerms, setShowTerms] = useState(false); // State to control the terms modal
   const [pdf, setPdf] = useState(null);
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   React.useEffect(() => {
     // No need to clear auth data on mount anymore
@@ -31,10 +36,10 @@ function Sign() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({
-      ...formData,
-      [name]: value,
-    });
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
   };
 
   const handleCheckboxChange = () => {
@@ -196,189 +201,192 @@ function Sign() {
     setShowTerms(!showTerms);
   };
 
-  return (
-    <div className="sign">
-      <h1>{isSignUp ? 'Sign Up' : 'Sign In'}</h1>
-      <form onSubmit={handleSubmit}>
-        {isSignUp ? (
-          <>
-            <div>
-              <label>User Type: </label>
-              <select name="userType" value={userType} onChange={(e) => setUserType(e.target.value)}>
-                <option value="Tourist">Tourist</option>
-                <option value="TourGuide">Tour Guide</option>
-                <option value="Advertiser">Advertiser</option>
-                <option value="Seller">Seller</option>
-              </select>
-            </div>
+  const handleViewTerms = () => {
+    setShowTerms(true);
+  };
 
-            {/* Common fields */}
-            <div>
-              <label>Username: </label>
-              <input
-                type="text"
-                name="username"
-                value={formData.username}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Email: </label>
-              <input
-                type="email"
+  const renderUserSpecificFields = () => {
+    if (formData.role === 'Tourist') {
+      return (
+        <>
+          <div className="space-y-2">
+            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <Input
+              id="dateOfBirth"
+              name="dateOfBirth"
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={handleChange}
+              required
+            />
+          </div>
+          
+          <div className="space-y-2">
+            <Label htmlFor="mobileNumber">Mobile Number</Label>
+            <Input
+              id="mobileNumber"
+              name="mobileNumber"
+              type="tel"
+              value={formData.mobileNumber}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="nationality">Nationality</Label>
+            <Input
+              id="nationality"
+              name="nationality"
+              value={formData.nationality}
+              onChange={handleChange}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="job">Job/Student Status</Label>
+            <Input
+              id="job"
+              name="job"
+              value={formData.job}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </>
+      );
+    } else {
+      return (
+        <div className="space-y-2">
+          <Label htmlFor="documents">Required Documents (PDF)</Label>
+          <Input
+            id="documents"
+            type="file"
+            accept=".pdf"
+            onChange={(e) => setPdf(e.target.files[0])}
+            required
+            className="w-full cursor-pointer
+            file:cursor-pointer file:mr-4 
+            file:py-2 file:px-4 
+            file:rounded-md file:border-0 
+            file:text-sm file:font-medium
+            file:bg-primary file:text-primary-foreground
+            hover:file:bg-primary/90
+            border border-input"          />
+          <p className="text-sm text-gray-500">Please upload your required documents in PDF format</p>
+        </div>
+      );
+    }
+  };
+
+  return (
+    <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <div className="w-full max-w-md space-y-8">
+        <div className="text-center">
+          <h2 className="text-4xl font-bold tracking-tight mb-6">
+            {!isSignUp ? "Welcome back" : "Create an account"}
+          </h2>
+          <p className="text-secondary mb-8">
+            {!isSignUp
+              ? "Enter your details to sign in"
+              : "Enter your details to get started"}
+          </p>
+        </div>
+        <div className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            
+            <div className="space-y-2">
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
                 name="email"
+                type="email"
                 value={formData.email}
                 onChange={handleChange}
                 required
               />
             </div>
-            <div>
-              <label>Password: </label>
-              <input
-                type="password"
+
+            <div className="space-y-2">
+              <Label htmlFor="password">Password</Label>
+              <Input
+                id="password"
                 name="password"
+                type="password"
                 value={formData.password}
                 onChange={handleChange}
                 required
               />
             </div>
 
-            {/* Additional fields for Tourist */}
-            {userType === 'Tourist' && (
+            {isSignUp && (
               <>
-                <div>
-                  <label>Date of Birth: </label>
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
+                <div className="space-y-2">
+                  <Label htmlFor="userType">User Type</Label>
+                  <select
+                    name="role"
+                    value={formData.role}
                     onChange={handleChange}
-                    required
-                  />
+                    className="w-full p-2 border rounded"
+                  >
+                    <option value="Tourist">Tourist</option>
+                    <option value="Tour Guide">Tour Guide</option>
+                    <option value="Advertiser">Advertiser</option>
+                    <option value="Seller">Seller</option>
+                  </select>
                 </div>
-                <div>
-                  <label>Mobile Number: </label>
-                  <input
-                    type="tel"
-                    name="mobileNumber"
-                    value={formData.mobileNumber}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Nationality: </label>
-                  <input
-                    type="text"
-                    name="nationality"
-                    value={formData.nationality}
-                    onChange={handleChange}
-                    required
-                  />
-                </div>
-                <div>
-                  <label>Job: </label>
-                  <input
-                    type="text"
-                    name="job"
-                    value={formData.job}
-                    onChange={handleChange}
-                    required
-                  />
+
+                {renderUserSpecificFields()}
+                
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2">
+                    <Input
+                      type="checkbox"
+                      name="termsAccepted"
+                      checked={formData.termsAccepted}
+                      onChange={(e) => setFormData(prev => ({
+                        ...prev,
+                        termsAccepted: e.target.checked
+                      }))}
+                    />
+                    I accept the terms and conditions
+                    <Button 
+                      type="button"
+                      variant="link"
+                      onClick={handleViewTerms}
+                      className="text-blue-500 underline ml-2"
+                    >
+                      View Terms
+                    </Button>
+                  </Label>
                 </div>
               </>
             )}
 
-            {/* Document upload for non-Tourist roles */}
-            {isSignUp && userType !== 'Tourist' && (
-              <div>
-                <label>Required Documents (PDF): </label>
-                <input
-                  type="file"
-                  accept="application/pdf"
-                  onChange={handleFileChange}
-                  required
-                />
-                <p className="help-text">
-                  {userType === 'TourGuide' && "Please upload your tour guide license and certifications"}
-                  {userType === 'Seller' && "Please upload your business registration documents"}
-                  {userType === 'Advertiser' && "Please upload your company registration and advertising credentials"}
-                </p>
-              </div>
-            )}
-
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <input
-                type="checkbox"
-                checked={formData.termsAccepted}
-                onChange={(e) =>
-                  setFormData({ ...formData, termsAccepted: e.target.checked })
-               }
-              />
-              <label style={{ marginLeft: '8px' }}>
-                I accept the terms and conditions
-              </label>
-              <button type="button" onClick={toggleTermsModal} style={{ marginLeft: '10px' }}>
-                View Terms
-              </button>
-            </div>
-            <button type="submit">Sign Up</button>
-          </>
-        ) : (
-          <>
-            <div>
-              <label>Email: </label>
-              <input
-                type="email"
-                name="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div>
-              <label>Password: </label>
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <button
-        type="button"
-        onClick={() => navigate('/forgotPassword')}
-        style={{ textDecoration: 'underline', border: 'none', background: 'none', color: '#007bff', cursor: 'pointer' }}
-      >
-        Forgot Password?
-      </button>
-    </div>
-            <button type="submit">Sign In</button>
-          </>
-        )}
-      </form>
-
-      <div>
-        {isSignUp ? (
-          <p>
-            Already have an account? <button onClick={handleSignIn}>Sign In</button>
-          </p>
-        ) : (
-          <p>
-            Don&apos;t have an account? <button onClick={handleSignUp}>Sign Up</button>
-          </p>
-        )}
+            <Button type="submit" className="w-full bg-accent text-primary hover:bg-accent/90">
+              {!isSignUp ? "Sign In" : "Sign Up"}
+            </Button>
+          </form>
+          
+          <div className="mt-6 text-center">
+            <button
+              onClick={() => setIsSignUp(!isSignUp)}
+              className="text-primary hover:text-primary transition-colors"
+            >
+              {!isSignUp
+                ? "Don't have an account? Sign up"
+                : "Already have an account? Sign in"}
+            </button>
+          </div>
+        </div>
       </div>
 
-      {/* Terms and Conditions Modal */}
       {showTerms && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={toggleTermsModal}>&times;</span>
-            <h2>Terms and Conditions</h2>
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
+            <h3 className="text-xl font-bold mb-4">Terms and Conditions</h3>
+            {/* Terms content */}
             <ol>
               <li><strong>Booking Confirmation:</strong> Your booking will be confirmed once you receive a confirmation email from us.</li>
               <li><strong>Payment:</strong> Full payment must be made at the time of booking unless stated otherwise.</li>
@@ -389,6 +397,12 @@ function Sign() {
               <li><strong>Liability:</strong> Our company is not liable for any injuries, losses, or damages incurred during your trip.</li>
               <li><strong>Governing Law:</strong> These terms are governed by the laws of [Your Country/Region].</li>
             </ol>
+            <Button 
+              onClick={() => setShowTerms(false)}
+              className="mt-4"
+            >
+              Close
+            </Button>
           </div>
         </div>
       )}
