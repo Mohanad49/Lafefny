@@ -9,10 +9,13 @@ const Advertiser = require("../Models/advertiserModel");
 const Product = require('../Models/Product'); // Import Product model
 const { createPaymentIntent } = require('../Services/payingService'); // Import createPaymentIntent
 const { sendReceiptEmail } = require('../Services/emailService');
+const Order = require('../Models/Order');
 
 const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
+
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Add a test route
 router.get('/test', (req, res) => {
@@ -644,6 +647,309 @@ router.post('/:itineraryId/payment', async (req, res) => {
   } catch (err) {
     console.error('Payment processing error:', err);
     res.status(500).json({ error: 'Payment failed', details: err.message });
+  }
+});
+
+// Get all addresses
+router.get("/:userId/addresses", async (req, res) => {
+    try {
+        const tourist = await Tourist.findOne({ userID: req.params.userId });
+        if (!tourist) {
+            return res.status(404).json({ error: "Tourist not found" });
+        }
+        res.status(200).json(tourist.addresses || []);
+    } catch (error) {
+        console.error('Error fetching addresses:', error);
+        res.status(500).json({ error: "Failed to fetch addresses" });
+    }
+});
+
+// Add new address
+router.post("/:userId/addresses", async (req, res) => {
+    try {
+        console.log('Adding address for user:', req.params.userId);
+        console.log('Address data:', req.body);
+
+        // Use findOneAndUpdate instead of findOne and save
+        const updatedTourist = await Tourist.findOneAndUpdate(
+            { userID: req.params.userId },
+            { $push: { addresses: req.body } },
+            { new: true, runValidators: true }
+        );
+        
+        if (!updatedTourist) {
+            console.log('Tourist not found for ID:', req.params.userId);
+            return res.status(404).json({ error: "Tourist not found" });
+        }
+
+        console.log('Address added successfully:', updatedTourist.addresses);
+        res.status(201).json(updatedTourist.addresses);
+    } catch (error) {
+        console.error('Error details:', error);
+        res.status(500).json({ error: error.message || "Failed to add address" });
+    }
+});
+
+// Update address
+router.put("/:userId/addresses/:index", async (req, res) => {
+    try {
+        console.log('Updating address for user:', req.params.userId, 'at index:', req.params.index);
+        console.log('New address data:', req.body);
+
+        const updatedTourist = await Tourist.findOneAndUpdate(
+            { userID: req.params.userId },
+            { $set: { [`addresses.${req.params.index}`]: req.body } },
+            { new: true, runValidators: true }
+        );
+
+        if (!updatedTourist) {
+            console.log('Tourist not found for ID:', req.params.userId);
+            return res.status(404).json({ error: "Tourist not found" });
+        }
+
+        console.log('Address updated successfully:', updatedTourist.addresses);
+        res.status(200).json(updatedTourist.addresses);
+    } catch (error) {
+        console.error('Error updating address:', error);
+        res.status(500).json({ error: "Failed to update address" });
+    }
+});
+
+// Delete address
+router.delete("/:userId/addresses/:index", async (req, res) => {
+    try {
+        console.log('Deleting address for user:', req.params.userId, 'at index:', req.params.index);
+
+        const updatedTourist = await Tourist.findOneAndUpdate(
+            { userID: req.params.userId },
+            { $unset: { [`addresses.${req.params.index}`]: 1 } },
+            { new: true }
+        );
+
+        if (!updatedTourist) {
+            console.log('Tourist not found for ID:', req.params.userId);
+            return res.status(404).json({ error: "Tourist not found" });
+        }
+
+        // Remove null values from addresses array
+        await Tourist.findOneAndUpdate(
+            { userID: req.params.userId },
+            { $pull: { addresses: null } }
+        );
+
+        console.log('Address deleted successfully');
+        res.status(200).json({ message: "Address deleted successfully" });
+    } catch (error) {
+        console.error('Error deleting address:', error);
+        res.status(500).json({ error: "Failed to delete address" });
+    }
+});
+
+// Add this route for Stripe payment intent
+router.post('/:userId/create-payment-intent', async (req, res) => {
+  try {
+    console.log('Creating payment intent:', req.body);
+    const { amount, currency = 'usd' } = req.body;
+
+    // Create a PaymentIntent with the order amount and currency
+    const paymentIntent = await stripe.paymentIntents.create({
+      amount: Math.round(amount), // amount in cents
+      currency: currency,
+      automatic_payment_methods: {
+        enabled: true,
+      },
+      metadata: {
+        userId: req.params.userId
+      }
+    });
+
+    console.log('Payment intent created:', paymentIntent.client_secret);
+    res.json({
+      clientSecret: paymentIntent.client_secret,
+      amount: amount
+    });
+  } catch (error) {
+    console.error('Error creating payment intent:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Create new order
+router.post('/:userId/orders', async (req, res) => {
+  try {
+    console.log('Creating order for user:', req.params.userId);
+
+    // Find the tourist by userID
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Check wallet balance if payment method is Wallet
+    if (req.body.paymentMethod === 'Wallet') {
+      if (tourist.wallet < req.body.totalAmount) {
+        return res.status(400).json({ 
+          error: "Insufficient wallet balance",
+          currentBalance: tourist.wallet,
+          requiredAmount: req.body.totalAmount
+        });
+      }
+      tourist.wallet -= req.body.totalAmount;
+    }
+
+    // Generate unique orderId
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const orderId = `ORD-${timestamp}-${random}`;
+    if (!orderId) {
+      console.error("Generated orderId is null or undefined");
+    }
+
+    // Log the orderId to confirm it is being generated correctly
+    console.log('Generated orderId:', orderId);
+
+    // Ensure orderId is set
+    if (!orderId) {
+      return res.status(500).json({ error: "Failed to generate a unique orderId" });
+    }
+
+    // Create order data
+    const orderData = {
+      orderId: orderId,
+      user: tourist._id,
+      products: req.body.products.map(product => ({
+        productId: product.productId,
+        quantity: product.quantity,
+        price: product.price
+      })),
+      totalAmount: req.body.totalAmount,
+      paymentMethod: req.body.paymentMethod,
+      selectedAddress: req.body.selectedAddress,
+      orderStatus: 'Processing'
+    };
+
+    // Log the order data to confirm all fields are set
+    console.log('Creating order with data:', orderData);
+
+    // Create a new order document with the orderData
+    const newOrder = new Order(orderData);
+    
+    // Save the order
+    const savedOrder = await newOrder.save();
+
+    // Add order to tourist's orders array and clear cart
+    tourist.orders = tourist.orders || [];
+    tourist.orders.push(savedOrder._id);
+    tourist.cart = []; // Empty the cart after placing the order
+    await tourist.save();
+
+    // Send the response with order details and updated wallet balance
+    res.status(201).json({
+      order: savedOrder,
+      newWalletBalance: tourist.wallet
+    });
+  } catch (error) {
+    console.error('Error creating order:', error);
+    res.status(500).json({
+      error: error.message,
+      details: error.stack
+    });
+  }
+});
+
+
+
+// Update wallet balance route to use existing wallet field
+router.get('/:userId/wallet-balance', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+    res.json({ balance: tourist.wallet });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get tourist orders
+router.get('/:userId/orders', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate({
+        path: 'orders',
+        populate: {
+          path: 'products.productId',
+          model: 'Product'
+        }
+      });
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.status(200).json(tourist.orders);
+  } catch (error) {
+    console.error('Error fetching orders:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Add this new route for cancelling orders
+router.put('/:userId/orders/:orderId/cancel', async (req, res) => {
+  try {
+    const { userId, orderId } = req.params;
+    
+    // Find the tourist
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Find and update the order
+    const order = await Order.findById(orderId);
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    // Only allow cancellation if order is in Processing state
+    if (order.orderStatus !== 'Processing') {
+      return res.status(400).json({ 
+        error: "Order cannot be cancelled in its current state" 
+      });
+    }
+
+    order.orderStatus = 'Cancelled';
+    await order.save();
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error('Error cancelling order:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single order details
+router.get('/:userId/orders/:orderId', async (req, res) => {
+  try {
+    const { userId, orderId } = req.params;
+    
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    const order = await Order.findById(orderId)
+      .populate('products.productId');
+    
+    if (!order) {
+      return res.status(404).json({ error: "Order not found" });
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    console.error('Error fetching order details:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

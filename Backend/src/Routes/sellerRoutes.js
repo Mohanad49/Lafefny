@@ -2,6 +2,7 @@ const express= require("express");
 const Seller= require("../Models/sellerModel");
 const {uploadPdf} = require('./uploadController');
 const { default: mongoose } = require("mongoose");
+const userSalesReportService = require('../Services/userSalesReportService');
 
 const router = express.Router();
 
@@ -99,6 +100,39 @@ router.get("/getPDF/:id", async(req,res)=>{
   res.setHeader('Content-Disposition', `inline; filename="${seller.filename}"`);
   res.send(seller.data);
 });
+
+// Seller Sales Report Route
+router.get('/seller/sales-report', auth.verifySeller, async (req, res) => {
+    try {
+      const { startDate, endDate, productId, month, year } = req.query;
+      if (!startDate || !endDate) {
+        return res.status(400).json({
+          success: false,
+          message: 'Start date and end date are required'
+        });
+      }
+  
+      const filters = {
+        productId,
+        month,
+        year
+      };
+  
+      const report = await userSalesReportService.getSellerSalesReport(req.user._id, startDate, endDate, filters);
+      res.json({
+        success: true,
+        data: report
+      });
+    } catch (error) {
+      console.error('Error in seller sales report:', error);
+      res.status(500).json({
+        success: false,
+        message: 'Error generating seller sales report',
+        error: error.message
+      });
+    }
+  });
+  
 
 
 
