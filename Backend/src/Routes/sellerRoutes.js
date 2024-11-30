@@ -102,7 +102,7 @@ router.get("/getPDF/:id", async(req,res)=>{
 });
 
 // Seller Sales Report Route
-router.get('/seller/sales-report', auth.verifySeller, async (req, res) => {
+router.get('/seller/sales-report', async (req, res) => {
     try {
       const { startDate, endDate, productId, month, year } = req.query;
       if (!startDate || !endDate) {

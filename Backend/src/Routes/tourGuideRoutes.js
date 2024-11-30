@@ -115,7 +115,7 @@ router.get("/numberOfTourists/:id", async (req, res) => {
 });
 
 // Tour Guide Sales Report Route
-router.get('/tourguide/sales-report', auth.verifyTourGuide, async (req, res) => {
+router.get('/tourguide/sales-report', async (req, res) => {
   try {
     const { startDate, endDate, itineraryId, month, year } = req.query;
     if (!startDate || !endDate) {

@@ -34,6 +34,4 @@ const TouristItinerarySchema = new mongoose.Schema({
   default: []
 });
 
-const TouristItinerary = mongoose.model("TouristItinerary", TouristItinerarySchema);
-
-module.exports = TouristItinerary;
+module.exports = mongoose.models.TouristItinerary || mongoose.model("TouristItinerary", TouristItinerarySchema);

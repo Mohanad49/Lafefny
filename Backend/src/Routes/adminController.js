@@ -197,7 +197,7 @@ router.get("/numberOfNewUsers", async (req, res) => {
   }
 });
 
-router.get('/sales-report', auth.verifyAdmin, async (req, res) => {
+router.get('/sales-report', async (req, res) => {
   try {
     const { startDate, endDate, productId, month, year } = req.query;
     

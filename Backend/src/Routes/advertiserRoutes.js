@@ -127,7 +127,7 @@ router.get("/numberOfTourists/:id", async (req, res) => {
 });
 
 // Advertiser Sales Report Route
-router.get('/advertiser/sales-report', auth.verifyAdvertiser, async (req, res) => {
+router.get('/advertiser/sales-report', async (req, res) => {
   try {
     const { startDate, endDate, activityId, month, year } = req.query;
     if (!startDate || !endDate) {
