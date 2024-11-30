@@ -1,6 +1,7 @@
 const express = require("express");
 const Advertiser = require("../Models/advertiserModel");
 const Activity = require("../Models/Activity");
+const userSalesReportService = require('../Services/userSalesReportService');
 const { uploadPdf } = require("./uploadController");
 const { default: mongoose } = require("mongoose");
 
@@ -125,4 +126,35 @@ router.get("/numberOfTourists/:id", async (req, res) => {
   res.status(200).json(activity.touristBookings);
 });
 
+// Advertiser Sales Report Route
+router.get('/advertiser/sales-report', auth.verifyAdvertiser, async (req, res) => {
+  try {
+    const { startDate, endDate, activityId, month, year } = req.query;
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Start date and end date are required'
+      });
+    }
+
+    const filters = {
+      activityId,
+      month,
+      year
+    };
+
+    const report = await userSalesReportService.getAdvertiserSalesReport(req.user._id, startDate, endDate, filters);
+    res.json({
+      success: true,
+      data: report
+    });
+  } catch (error) {
+    console.error('Error in advertiser sales report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error generating advertiser sales report',
+      error: error.message
+    });
+  }
+});
 module.exports = router;

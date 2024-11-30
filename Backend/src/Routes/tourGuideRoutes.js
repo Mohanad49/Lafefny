@@ -1,6 +1,7 @@
 const express = require("express");
 const TourGuide = require("../Models/tourGuideModel");
 const Itinerary = require("../Models/Itinerary");
+const userSalesReportService = require('../Services/userSalesReportService');
 const { uploadPdf } = require("./uploadController");
 const { default: mongoose } = require("mongoose");
 
@@ -113,6 +114,37 @@ router.get("/numberOfTourists/:id", async (req, res) => {
   }
 });
 
+// Tour Guide Sales Report Route
+router.get('/tourguide/sales-report', auth.verifyTourGuide, async (req, res) => {
+  try {
+    const { startDate, endDate, itineraryId, month, year } = req.query;
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Start date and end date are required'
+      });
+    }
+
+    const filters = {
+      itineraryId,
+      month,
+      year
+    };
+
+    const report = await userSalesReportService.getTourGuideSalesReport(req.user._id, startDate, endDate, filters);
+    res.json({
+      success: true,
+      data: report
+    });
+  } catch (error) {
+    console.error('Error in tour guide sales report:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error generating tour guide sales report',
+      error: error.message
+    });
+  }
+});
 
 
 

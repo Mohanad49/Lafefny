@@ -4,6 +4,7 @@ const User = require('../Models/User');
 const TourismGovernor = require('../Models/TourismGovernor');
 const Admin = require('../Models/Admin');
 const PromoCode = require('../Models/PromoCode');
+const salesReportService = require('../Services/adminSalesReportService');
 
 // Delete Account (any user)
 router.delete('/delete-account/:userId', async (req, res) => {
@@ -192,6 +193,39 @@ router.get("/numberOfNewUsers", async (req, res) => {
     res.status(500).json({
       error: "Error fetching monthly users count",
       details: error.message
+    });
+  }
+});
+
+router.get('/sales-report', auth.verifyAdmin, async (req, res) => {
+  try {
+    const { startDate, endDate, productId, month, year } = req.query;
+    
+    if (!startDate || !endDate) {
+      return res.status(400).json({
+        success: false,
+        message: 'Start date and end date are required'
+      });
+    }
+
+    const filters = {
+      productId,
+      month,
+      year
+    };
+
+    const report = await salesReportService.generateSalesReport(startDate, endDate, filters);
+    
+    res.json({
+      success: true,
+      data: report
+    });
+  } catch (error) {
+    console.error('Error in sales report endpoint:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Error generating sales report',
+      error: error.message
     });
   }
 });
