@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import '../styles/productList.css';
 
@@ -7,6 +7,7 @@ const TouristCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -114,7 +115,13 @@ const TouristCart = () => {
           </table>
           <div className="cart-summary" style={{ marginTop: '20px', textAlign: 'right' }}>
             <h3>Total: ${total.toFixed(2)}</h3>
-            <button className="edit-button">Proceed to Checkout</button>
+            <button 
+              className="edit-button"
+              onClick={() => navigate('/checkout')}
+              disabled={cartItems.length === 0}
+            >
+              Proceed to Checkout
+            </button>
           </div>
         </>
       )}

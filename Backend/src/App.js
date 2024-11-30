@@ -37,6 +37,7 @@ const app = express();
 const port = process.env.PORT || "8000";
 app.use(cors());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // configurations
 // Mongo DB
@@ -57,7 +58,9 @@ app.get("/home", (req, res) => {
 
   const corsOptions = {
     origin: 'http://localhost:5173', 
-    optionsSuccessStatus: 200 
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization'],
+    credentials: true
   };
   
   app.use(cors(corsOptions));

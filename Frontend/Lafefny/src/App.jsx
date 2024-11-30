@@ -107,6 +107,10 @@ import ActivityReport from './components/ActivityReport';
 import ForgotPassword from './components/ForgetPassword';
 import TouristPayment from './components/TouristPayment';
 import TouristITpay from './components/TouristItineraryPay';
+import ManageAddresses from './components/ManageAddresses';
+import CheckoutPage from './components/CheckoutPage';
+import MyOrders from './components/MyOrders';
+import OrderDetails from './components/OrderDetails';
 
 const App = () => {
 
@@ -151,6 +155,10 @@ const App = () => {
           <Route path="/touristSelectPreferences" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristSelectPreferences /></ProtectedRoute>} />
           <Route path="/tourist/payment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristPayment /></ProtectedRoute>} />
           <Route path="/tourist/Itinerarypayment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristITpay /></ProtectedRoute>} />
+          <Route path="/manage-addresses" element={<ProtectedRoute allowedRoles={['Tourist']}><ManageAddresses /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute allowedRoles={['Tourist']}><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['Tourist']}><MyOrders /></ProtectedRoute>} />
+          <Route path="/order-details/:orderId" element={<ProtectedRoute allowedRoles={['Tourist']}><OrderDetails /></ProtectedRoute>} />
 
           {/* Tour Guide Routes */}
           <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />

@@ -31,10 +31,14 @@ const TouristHome = () => {
           <Link to="/delete-account" className="delete-link">Delete Account</Link> | {' '}
           <Link to="/touristSelectPreferences">Select Preferences</Link> | {' '}
           <Link to="/complaints">Submit Complaint</Link> | {' '}
-          <Link to="/my-complaints">View My Complaints</Link>
+          <Link to="/my-complaints">View My Complaints</Link> | {' '}
+          <Link to="/manage-addresses">Manage Addresses</Link>
 
           <h2>Product Management</h2>
-          <Link to="/touristProducts">View Products</Link>
+          <Link to="/touristProducts">View Products</Link> | {' '}
+          <Link to="/my-orders" className="dashboard-button">
+            My Orders
+          </Link>
 
           <h2>Bookings</h2>
           <Link to="/book-flights">Book Flights</Link> | {' '}

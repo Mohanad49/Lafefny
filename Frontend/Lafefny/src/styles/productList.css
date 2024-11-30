@@ -138,3 +138,64 @@ button:hover {
     margin-top: 10px; /* Space above button */
   }
 }
+
+/* Add these styles to your existing productList.css */
+
+.order-products-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.order-products-list li {
+  margin-bottom: 5px;
+}
+
+.status-processing {
+  color: #ffc107;
+  font-weight: bold;
+}
+
+.status-shipped {
+  color: #17a2b8;
+  font-weight: bold;
+}
+
+.status-delivered {
+  color: #28a745;
+  font-weight: bold;
+}
+
+.status-cancelled {
+  color: #dc3545;
+  font-weight: bold;
+}
+
+.product-table td {
+  vertical-align: top;
+  padding: 15px;
+}
+
+.product-table ul {
+  margin: 0;
+}
+
+/* Add these styles for the cancel button */
+.delete-button {
+  background-color: #dc3545;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.delete-button:hover {
+  background-color: #c82333;
+}
+
+.delete-button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
