@@ -3,7 +3,6 @@ import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import '../styles/sign.css';
 import axios from 'axios';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -159,30 +158,7 @@ function Sign() {
           
           // Use the login function from AuthContext
           login(signInResponse);
-          
-          // Redirect based on the user role
-          switch(signInResponse.role) {
-            case 'Tourist':
-              navigate('/touristHome');
-              break;
-            case 'Seller':
-              navigate('/sellerHome');
-              break;
-            case 'TourGuide':
-              navigate('/tourGuideHome');
-              break;
-            case 'Advertiser':
-              navigate('/advertiserHome');
-              break;
-            case 'Admin':
-              navigate('/adminHome');
-              break;
-            case 'TourismGovernor':
-              navigate('/TourismGovernorHome');
-              break;
-            default:
-              alert('Invalid role detected');
-          }
+          navigate('/');
         } catch (error) {
           if (error.response?.status === 403) {
             alert('Your account is pending approval. Please wait for admin confirmation.');
@@ -203,6 +179,19 @@ function Sign() {
 
   const handleViewTerms = () => {
     setShowTerms(true);
+  };
+
+  const getDocumentRequirements = (userType) => {
+    switch (userType) {
+      case 'Tour Guide':
+        return "Please upload your ID and tour guide certificates";
+      case 'Advertiser':
+        return "Please upload your ID and taxation registry card";
+      case 'Seller':
+        return "Please upload your ID and taxation registry card";
+      default:
+        return "Please upload the required documents in PDF format";
+    }
   };
 
   const renderUserSpecificFields = () => {
@@ -274,138 +263,178 @@ function Sign() {
             file:bg-primary file:text-primary-foreground
             hover:file:bg-primary/90
             border border-input"          />
-          <p className="text-sm text-gray-500">Please upload your required documents in PDF format</p>
+          <p className="text-sm text-muted-foreground mt-1">
+            {getDocumentRequirements(formData.role)}
+          </p>
         </div>
       );
     }
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md space-y-8">
-        <div className="text-center">
-          <h2 className="text-4xl font-bold tracking-tight mb-6">
-            {!isSignUp ? "Welcome back" : "Create an account"}
-          </h2>
-          <p className="text-secondary mb-8">
-            {!isSignUp
-              ? "Enter your details to sign in"
-              : "Enter your details to get started"}
-          </p>
-        </div>
-        <div className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="password">Password</Label>
-              <Input
-                id="password"
-                name="password"
-                type="password"
-                value={formData.password}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {isSignUp && (
-              <>
-                <div className="space-y-2">
-                  <Label htmlFor="userType">User Type</Label>
-                  <select
-                    name="role"
-                    value={formData.role}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                  >
-                    <option value="Tourist">Tourist</option>
-                    <option value="Tour Guide">Tour Guide</option>
-                    <option value="Advertiser">Advertiser</option>
-                    <option value="Seller">Seller</option>
-                  </select>
-                </div>
-
-                {renderUserSpecificFields()}
-                
-                <div className="space-y-2">
-                  <Label className="flex items-center gap-2">
-                    <Input
-                      type="checkbox"
-                      name="termsAccepted"
-                      checked={formData.termsAccepted}
-                      onChange={(e) => setFormData(prev => ({
-                        ...prev,
-                        termsAccepted: e.target.checked
-                      }))}
-                    />
-                    I accept the terms and conditions
-                    <Button 
-                      type="button"
-                      variant="link"
-                      onClick={handleViewTerms}
-                      className="text-blue-500 underline ml-2"
-                    >
-                      View Terms
-                    </Button>
-                  </Label>
-                </div>
-              </>
-            )}
-
-            <Button type="submit" className="w-full bg-accent text-primary hover:bg-accent/90">
-              {!isSignUp ? "Sign In" : "Sign Up"}
-            </Button>
-          </form>
-          
-          <div className="mt-6 text-center">
-            <button
-              onClick={() => setIsSignUp(!isSignUp)}
-              className="text-primary hover:text-primary transition-colors"
-            >
-              {!isSignUp
-                ? "Don't have an account? Sign up"
-                : "Already have an account? Sign in"}
-            </button>
-          </div>
-        </div>
+    <div className="min-h-screen bg-background relative">
+      {/* Back to Home Button */}
+      <div className="absolute top-4 left-4">
+        <Button
+          onClick={() => navigate('/')}
+          variant="ghost"
+          className="flex items-center gap-2 hover:bg-accent/10"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="24" 
+            height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Back to Home
+        </Button>
       </div>
 
-      {showTerms && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-          <div className="bg-white p-6 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
-            <h3 className="text-xl font-bold mb-4">Terms and Conditions</h3>
-            {/* Terms content */}
-            <ol>
-              <li><strong>Booking Confirmation:</strong> Your booking will be confirmed once you receive a confirmation email from us.</li>
-              <li><strong>Payment:</strong> Full payment must be made at the time of booking unless stated otherwise.</li>
-              <li><strong>Cancellation Policy:</strong> Cancellations made within 48 hours of the trip will incur a 100% cancellation fee.</li>
-              <li><strong>Changes to Bookings:</strong> Any changes to bookings must be requested via email and are subject to availability.</li>
-              <li><strong>Travel Insurance:</strong> We recommend that all travelers obtain comprehensive travel insurance.</li>
-              <li><strong>Conduct:</strong> All guests are expected to behave respectfully towards other guests and staff.</li>
-              <li><strong>Liability:</strong> Our company is not liable for any injuries, losses, or damages incurred during your trip.</li>
-              <li><strong>Governing Law:</strong> These terms are governed by the laws of [Your Country/Region].</li>
-            </ol>
-            <Button 
-              onClick={() => setShowTerms(false)}
-              className="mt-4"
-            >
-              Close
-            </Button>
+      {/* Existing sign form content */}
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold tracking-tight mb-6">
+              {!isSignUp ? "Welcome back" : "Create an account"}
+            </h2>
+            <p className="text-primary mb-8">
+              {!isSignUp
+                ? "Enter your details to sign in"
+                : "Enter your details to get started"}
+            </p>
+          </div>
+          <div className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+            <form onSubmit={handleSubmit} className="space-y-6">
+              
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="password">Password</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                />
+                {!isSignUp && (
+                  <div className="text-right">
+                    <Button 
+                      variant="link" 
+                      className="text-sm text-gray-600 hover:text-gray-900"
+                      onClick={() => navigate('/forgot-password')}
+                    >
+                      Forgot Password?
+                    </Button>
+                  </div>
+                )}
+              </div>
+
+              {isSignUp && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="userType">User Type</Label>
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      className="w-full p-2 border rounded"
+                    >
+                      <option value="Tourist">Tourist</option>
+                      <option value="Tour Guide">Tour Guide</option>
+                      <option value="Advertiser">Advertiser</option>
+                      <option value="Seller">Seller</option>
+                    </select>
+                  </div>
+
+                  {renderUserSpecificFields()}
+                  
+                  <div className="space-y-2">
+                    <Label className="flex items-center gap-2">
+                      <Input
+                        type="checkbox"
+                        name="termsAccepted"
+                        checked={formData.termsAccepted}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          termsAccepted: e.target.checked
+                        }))}
+                      />
+                      I accept the terms and conditions
+                      <Button 
+                        type="button"
+                        variant="link"
+                        onClick={handleViewTerms}
+                        className="text-blue-500 underline ml-2"
+                      >
+                        View Terms
+                      </Button>
+                    </Label>
+                  </div>
+                </>
+              )}
+
+              <Button type="submit" className="w-full bg-accent text-primary hover:bg-accent/90">
+                {!isSignUp ? "Sign In" : "Sign Up"}
+              </Button>
+            </form>
+            
+            <div className="mt-6 text-center">
+              <button
+                onClick={() => setIsSignUp(!isSignUp)}
+                className="text-primary hover:text-primary transition-colors"
+              >
+                {!isSignUp
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </button>
+            </div>
           </div>
         </div>
-      )}
+
+        {showTerms && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white p-6 rounded-lg max-w-2xl max-h-[80vh] overflow-y-auto">
+              <h3 className="text-xl font-bold mb-4">Terms and Conditions</h3>
+              {/* Terms content */}
+              <ol>
+                <li><strong>Booking Confirmation:</strong> Your booking will be confirmed once you receive a confirmation email from us.</li>
+                <li><strong>Payment:</strong> Full payment must be made at the time of booking unless stated otherwise.</li>
+                <li><strong>Cancellation Policy:</strong> Cancellations made within 48 hours of the trip will incur a 100% cancellation fee.</li>
+                <li><strong>Changes to Bookings:</strong> Any changes to bookings must be requested via email and are subject to availability.</li>
+                <li><strong>Travel Insurance:</strong> We recommend that all travelers obtain comprehensive travel insurance.</li>
+                <li><strong>Conduct:</strong> All guests are expected to behave respectfully towards other guests and staff.</li>
+                <li><strong>Liability:</strong> Our company is not liable for any injuries, losses, or damages incurred during your trip.</li>
+                <li><strong>Governing Law:</strong> These terms are governed by the laws of Egypt.</li>
+              </ol>
+              <Button 
+                onClick={() => setShowTerms(false)}
+                className="mt-4"
+              >
+                Close
+              </Button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

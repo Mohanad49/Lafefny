@@ -1,5 +1,9 @@
+/* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
@@ -85,44 +89,124 @@ const ForgotPassword = () => {
   };
 
   return (
-    <div>
-      {step === 1 && (
-        <div>
-          <h2>Forgot Password</h2>
-          <input
-            type="email"
-            placeholder="Enter your email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <button onClick={handleSendOtp}>Send OTP</button>
+    <div className="min-h-screen bg-background relative">
+      {/* Back Button */}
+      <div className="absolute top-4 left-4">
+        <Button
+          onClick={() => navigate('/sign')}
+          variant="ghost"
+          className="flex items-center gap-2 hover:bg-accent/10"
+        >
+          <svg 
+            xmlns="http://www.w3.org/2000/svg" 
+            width="24" height="24" 
+            viewBox="0 0 24 24" 
+            fill="none" 
+            stroke="currentColor" 
+            strokeWidth="2" 
+            strokeLinecap="round" 
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5M12 19l-7-7 7-7"/>
+          </svg>
+          Back to Sign In
+        </Button>
+      </div>
+
+      <div className="min-h-screen bg-background flex items-center justify-center px-4">
+        <div className="w-full max-w-md space-y-8">
+          <div className="text-center">
+            <h2 className="text-4xl font-bold tracking-tight mb-6">
+              Reset Password
+            </h2>
+            <p className="text-primary mb-8">
+              {step === 1 && "Enter your email to receive a reset code"}
+              {step === 2 && "Enter the verification code sent to your email"}
+              {step === 3 && "Enter your new password"}
+            </p>
+          </div>
+
+          <div className="bg-surface p-8 rounded-2xl border border-border shadow-sm">
+            <div className="space-y-6">
+              {step === 1 && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="Enter your email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    onClick={handleSendOtp}
+                  >
+                    Send Reset Code
+                  </Button>
+                </div>
+              )}
+
+              {step === 2 && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="otp">Verification Code</Label>
+                    <Input
+                      id="otp"
+                      type="text"
+                      placeholder="Enter verification code"
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    onClick={handleVerifyOtp}
+                  >
+                    Verify Code
+                  </Button>
+                </div>
+              )}
+
+              {step === 3 && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="Enter new password"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-black text-white hover:bg-gray-800"
+                    onClick={handleResetPassword}
+                  >
+                    Reset Password
+                  </Button>
+                </div>
+              )}
+
+              {message && (
+                <div className="mt-4 text-center text-sm">
+                  <p className={`${
+                    message.includes('successfully') ? 'text-green-600' : 'text-red-600'
+                  }`}>
+                    {message}
+                  </p>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
-      )}
-      {step === 2 && (
-        <div>
-          <h2>Verify OTP</h2>
-          <input
-            type="text"
-            placeholder="Enter OTP"
-            value={otp}
-            onChange={(e) => setOtp(e.target.value)}
-          />
-          <button onClick={handleVerifyOtp}>Verify OTP</button>
-        </div>
-      )}
-      {step === 3 && (
-        <div>
-          <h2>Reset Password</h2>
-          <input
-            type="password"
-            placeholder="Enter new password"
-            value={newPassword}
-            onChange={(e) => setNewPassword(e.target.value)}
-          />
-          <button onClick={handleResetPassword}>Reset Password</button>
-        </div>
-      )}
-      {message && <p>{message}</p>}
+      </div>
     </div>
   );
 };
