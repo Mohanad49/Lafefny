@@ -1,382 +1,341 @@
-/* eslint-disable no-unused-vars */
-// BookHotels.jsx
-import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
-import { FixedSizeGrid } from 'react-window';
-import { calculateGridDimensions } from '../utils/windowUtils';
-import axios from 'axios';
-import '../styles/bookHotels.css';
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "../css/BookHotel.css";
+import { useCookies } from "react-cookie";
 
-const BookHotels = () => {
-  // State initialization
-  const [searchParams, setSearchParams] = useState({
-    cityCode: '',
-    checkInDate: '',
-    checkOutDate: '',
-    adults: 1,
-    roomQuantity: 1
-  });
+const BookHotel = () => {
+  const [cityCode, setCityCode] = useState("");
+  const [checkInDate, setCheckInDate] = useState("");
+  const [checkOutDate, setCheckOutDate] = useState("");
+  const [adults, setAdults] = useState(1);
+  const [roomQuantity, setRoomQuantity] = useState(1);
+  const [hotelOffers, setHotelOffers] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [selectedOffer, setSelectedOffer] = useState(null);
+  const [cookies] = useCookies(["userType", "username"]);
+  const username = cookies.username;
+  const [formErrors, setFormErrors] = useState({});
+  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
+  const [successMessage, setSuccessMessage] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalHotels, setTotalHotels] = useState(0);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
 
-  const [hotels, setHotels] = useState([]);
-  const [error, setError] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [progress, setProgress] = useState({
-    currentBatch: 0,
-    totalBatches: 0,
-    processed: 0,
-    total: 0
-  });
-  const [showScrollTop, setShowScrollTop] = useState(false);
-  const [dimensions, setDimensions] = useState({
-    width: window.innerWidth,
-    height: window.innerHeight,
-    gridDimensions: null
-  });
-  const [pagination, setPagination] = useState({
-    currentPage: 1,
-    itemsPerPage: 20,
-    totalPages: 0
-  });
+  const validateForm = () => {
+    const errors = {};
+    const today = new Date();
+    const checkIn = new Date(checkInDate);
+    const checkOut = new Date(checkOutDate);
 
-  const containerRef = useRef(null);
-  const gridRef = useRef(null);
+    if (checkIn < today) {
+      errors.checkIn = "Check-in date cannot be in the past";
+    }
+    if (checkOut <= checkIn) {
+      errors.checkOut = "Check-out date must be after check-in date";
+    }
+    if (cityCode.length !== 3) {
+      errors.cityCode = "City code must be 3 characters";
+    }
+    if (adults < 1) {
+      errors.adults = "There must be at least one adult";
+    }
+    if (roomQuantity < 1 || roomQuantity > adults) {
+      errors.roomQuantity =
+        "Room quantity must be between 1 and the number of adults";
+    }
 
-  // Effects
+    setFormErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
+
+  const handleSearch = async (e) => {
+    e.preventDefault();
+    setError(null);
+    if (!validateForm()) return;
+
+    setLoading(true);
+    setHotelOffers([]);
+    setCurrentPage(1);
+    
+    try {
+      console.log('Starting hotel search...');
+      await fetchHotels(1);
+    } catch (err) {
+      console.error('Search error:', err);
+      setError(err.response?.data?.error || "Failed to fetch hotel offers");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchHotels = async (page) => {
+    try {
+      setIsLoadingMore(true);
+      console.log('Fetching hotels for page:', page, {
+        cityCode,
+        checkInDate,
+        checkOutDate,
+        adults,
+        roomQuantity
+      });
+
+      const response = await axios.post("http://localhost:8000/amadeus/hotelOffer", {
+        cityCode: cityCode.toUpperCase(),
+        checkInDate,
+        checkOutDate,
+        adults: parseInt(adults),
+        roomQuantity: parseInt(roomQuantity),
+        page,
+        limit: 10
+      });
+
+      console.log('Hotel search response:', response.data);
+      const { data, pagination } = response.data;
+      
+      if (page === 1) {
+        setHotelOffers(data);
+      } else {
+        setHotelOffers(prev => [...prev, ...data]);
+      }
+      
+      setTotalPages(pagination.totalPages);
+      setTotalHotels(pagination.totalHotels);
+      setCurrentPage(pagination.currentPage);
+    } catch (err) {
+      console.error('Error fetching hotels:', err.response || err);
+      const errorMessage = err.response?.data?.error || err.message || "Failed to fetch hotel offers";
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setIsLoadingMore(false);
+    }
+  };
+
+  const loadMore = () => {
+    if (currentPage < totalPages && !isLoadingMore) {
+      fetchHotels(currentPage + 1);
+    }
+  };
+
+  // Add scroll event listener for infinite scroll
   useEffect(() => {
-    const updateDimensions = () => {
-      if (containerRef.current) {
-        const { width, height } = containerRef.current.getBoundingClientRect();
-        const gridDimensions = calculateGridDimensions(width, height, hotels);
-        setDimensions({ width, height, gridDimensions });
+    const handleScroll = () => {
+      const { scrollTop, clientHeight, scrollHeight } = document.documentElement;
+      if (scrollHeight - scrollTop <= clientHeight * 1.5) {
+        loadMore();
       }
     };
 
-    updateDimensions();
-    window.addEventListener('resize', updateDimensions);
-    return () => window.removeEventListener('resize', updateDimensions);
-  }, [hotels]);
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [currentPage, totalPages, isLoadingMore]);
 
-  useEffect(() => {
-    if (hotels.length > 0) {
-      setPagination(prev => ({
-        ...prev,
-        totalPages: Math.ceil(hotels.length / prev.itemsPerPage)
-      }));
-    }
-  }, [hotels]);
-
-  // Handlers
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setSearchParams(prev => ({
-      ...prev,
-      [name]: value
-    }));
+  const handleOfferSelection = (offer) => {
+    setSelectedOffer((current) => (current === offer ? null : offer));
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError('');
-    setHotels([]);
-    setProgress({
-      currentBatch: 0,
-      totalBatches: 0,
-      processed: 0,
-      total: 0
-    });
-    setPagination(prev => ({ ...prev, currentPage: 1 }));
+  const handleBookHotel = async () => {
+    if (!selectedOffer) {
+      setError("Please select a hotel to book");
+      return;
+    }
 
     try {
-      const response = await fetch('http://localhost:8000/amadeus/search-hotels?' + 
-        new URLSearchParams({
-          cityCode: searchParams.cityCode.toUpperCase(),
-          checkInDate: searchParams.checkInDate,
-          checkOutDate: searchParams.checkOutDate,
-          adults: searchParams.adults,
-          roomQuantity: searchParams.roomQuantity
-        }));
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-
-      while (true) {
-        const { value, done } = await reader.read();
-        if (done) break;
-
-        const chunk = decoder.decode(value);
-        const lines = chunk.split('\n').filter(line => line.trim());
-        
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          
-          const eventData = JSON.parse(line.slice(6));
-
-          switch(eventData.type) {
-            case 'batch':
-              { const { hotels: newHotels, progress: batchProgress } = eventData.data;
-              setHotels(prev => [...prev, ...newHotels]);
-              setProgress(batchProgress);
-              break; }
-
-            case 'error':
-              throw new Error(eventData.error);
-
-            case 'complete':
-              setIsLoading(false);
-              return;
-          }
+      setLoading(true);
+      const response = await axios.put(
+        "http://localhost:8000/amadeus/hotelOffer/bookHotels",
+        {
+          username,
+          newBookedHotelId: selectedOffer.hotel.hotelId,
         }
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      setError(error.message || 'Failed to fetch hotels');
+      );
+      setSuccessMessage(response.data.message || "Hotel booked successfully!");
+      setShowSuccessPopup(true);
+    } catch (err) {
+      setError(err.response?.data?.error || "Failed to book hotel");
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const handlePageChange = (pageNumber) => {
-    setPagination(prev => ({
-      ...prev,
-      currentPage: pageNumber
-    }));
-    gridRef.current?.scrollTo({ top: 0 });
-  };
-
-  const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  // Memoized values
-  const visibleHotels = useMemo(() => {
-    const start = (pagination.currentPage - 1) * pagination.itemsPerPage;
-    return hotels.slice(start, start + pagination.itemsPerPage);
-  }, [hotels, pagination.currentPage, pagination.itemsPerPage]);
-
-  // Grid Cell component
-  const Cell = useCallback(({ columnIndex, rowIndex, style }) => {
-    const { gridDimensions } = dimensions;
-    if (!gridDimensions) return null;
-
-    const index = rowIndex * gridDimensions.columns + columnIndex;
-    const hotel = visibleHotels[index];
-
-    if (!hotel) return null;
-
+  const formatPolicies = (policies) => {
+    if (!policies) return "Not available";
+    const { cancellations, guarantee, paymentType } = policies;
+    const formattedCancellations = cancellations
+      ? cancellations
+          .map((c) => `Cancel by ${new Date(c.deadline).toLocaleString()}`)
+          .join(", ")
+      : "No cancellations";
+    const formattedGuarantee = guarantee
+      ? `Accepted Payments: ${guarantee.acceptedPayments.methods.join(", ")}`
+      : "No guarantee (No payment required to hold the reservation)";
+    const formattedPaymentType =
+      paymentType === "guarantee"
+        ? "Payment Type: guarantee (Payment required to hold the reservation)"
+        : `Payment Type: ${paymentType}`;
     return (
-      <div style={{...style, padding: '10px'}}>
-        <div className="hotel-card">
-          <div className="hotel-image-wrapper">
-            {hotel.hotel?.media?.[0]?.uri ? (
-              <img 
-                src={hotel.hotel.media[0].uri}
-                alt={hotel.hotel.name}
-                className="hotel-image"
-                onError={(e) => e.target.src = '/hotel-placeholder.jpg'}
-              />
-            ) : (
-              <div className="hotel-image-placeholder">
-                <i className="fas fa-hotel"></i>
-              </div>
-            )}
-            
-            {hotel.hotel?.rating && (
-              <div className="hotel-rating">
-                <span>★ {hotel.hotel.rating}</span>
-              </div>
-            )}
-          </div>
-
-          <div className="hotel-content">
-            <h3 className="hotel-name">{hotel.hotel?.name || 'Unnamed Hotel'}</h3>
-            
-            <div className="hotel-location">
-              <i className="fas fa-map-marker-alt"></i>
-              <span>{hotel.hotel?.address?.lines?.join(', ') || 'Address not available'}</span>
-            </div>
-
-            {hotel.offers?.[0]?.price && (
-              <div className="hotel-price">
-                <span className="price-amount">
-                  {hotel.offers[0].price.currency} {hotel.offers[0].price.total}
-                </span>
-                <span className="price-night">/night</span>
-              </div>
-            )}
-
-            <button className="view-details-btn">View Details</button>
-          </div>
-        </div>
-      </div>
+      <>
+        <strong>Room Policies:</strong> <br />
+        {formattedCancellations}. <br />
+        {formattedGuarantee}. <br />
+        {formattedPaymentType}
+      </>
     );
-  }, [dimensions, visibleHotels]);
+  };
 
-  // Pagination Controls component
-  const PaginationControls = () => (
-    <div className="pagination-controls">
-      <button 
-        onClick={() => handlePageChange(pagination.currentPage - 1)}
-        disabled={pagination.currentPage === 1}
-        className="pagination-button"
-      >
-        Previous
-      </button>
-      <span className="page-info">
-        Page {pagination.currentPage} of {pagination.totalPages}
-      </span>
-      <button 
-        onClick={() => handlePageChange(pagination.currentPage + 1)}
-        disabled={pagination.currentPage === pagination.totalPages}
-        className="pagination-button"
-      >
-        Next
-      </button>
-    </div>
-  );
-
-  // Render
   return (
-    <div className="book-hotels-container" ref={containerRef}>
-      <form onSubmit={handleSubmit} className="search-form">
-        <div className="form-group">
-          <label>City Code (e.g., PAR, LON, NYC)</label>
-          <input
-            type="text"
-            name="cityCode"
-            value={searchParams.cityCode}
-            onChange={handleChange}
-            placeholder="Enter 3-letter city code"
-            maxLength="3"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Check-in Date</label>
-          <input
-            type="date"
-            name="checkInDate"
-            value={searchParams.checkInDate}
-            onChange={handleChange}
-            min={new Date().toISOString().split('T')[0]}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Check-out Date</label>
-          <input
-            type="date"
-            name="checkOutDate"
-            value={searchParams.checkOutDate}
-            onChange={handleChange}
-            min={searchParams.checkInDate || new Date().toISOString().split('T')[0]}
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Number of Adults</label>
-          <input
-            type="number"
-            name="adults"
-            value={searchParams.adults}
-            onChange={handleChange}
-            min="1"
-            max="9"
-            required
-          />
-        </div>
-
-        <div className="form-group">
-          <label>Number of Rooms</label>
-          <input
-            type="number"
-            name="roomQuantity"
-            value={searchParams.roomQuantity}
-            onChange={handleChange}
-            min="1"
-            max="9"
-            required
-          />
-        </div>
-
-        <button type="submit" className="search-button" disabled={isLoading}>
-          {isLoading ? 'Searching...' : 'Search Hotels'}
-        </button>
-      </form>
-
-      {progress.currentBatch > 0 && (
-        <div className="progress-indicator">
-          <div className="batch-progress">
-            <span>Batch {progress.currentBatch} of {progress.totalBatches}</span>
-            <div className="progress-bar">
-              <div 
-                className="progress-fill" 
-                style={{width: `${(progress.processed / progress.total) * 100}%`}}
-              />
+    <div className="book-hotel-container">
+      <h1>Search for Hotels</h1>
+      <div className="form-card">
+        <form className="hotel-form" onSubmit={handleSearch}>
+          <div className="search-section">
+            <div className="form-row">
+              <div className="form-group">
+                <label>City Code</label>
+                <input
+                  type="text"
+                  value={cityCode}
+                  onChange={(e) => setCityCode(e.target.value.toUpperCase())}
+                  required
+                  placeholder="e.g. PAR, NYC, LON"
+                />
+                {formErrors.cityCode && (
+                  <span className="error-message">{formErrors.cityCode}</span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Check-in Date</label>
+                <input
+                  type="date"
+                  value={checkInDate}
+                  onChange={(e) => setCheckInDate(e.target.value)}
+                  required
+                />
+                {formErrors.checkIn && (
+                  <span className="error-message">{formErrors.checkIn}</span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Check-out Date</label>
+                <input
+                  type="date"
+                  value={checkOutDate}
+                  onChange={(e) => setCheckOutDate(e.target.value)}
+                  required
+                />
+                {formErrors.checkOut && (
+                  <span className="error-message">{formErrors.checkOut}</span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Adults</label>
+                <input
+                  type="number"
+                  value={adults}
+                  onChange={(e) => setAdults(e.target.value)}
+                  required
+                  min="1"
+                />
+                {formErrors.adults && (
+                  <span className="error-message">{formErrors.adults}</span>
+                )}
+              </div>
+              <div className="form-group">
+                <label>Room Quantity</label>
+                <input
+                  type="number"
+                  value={roomQuantity}
+                  onChange={(e) => setRoomQuantity(e.target.value)}
+                  required
+                  min="1"
+                  max={adults}
+                />
+                {formErrors.roomQuantity && (
+                  <span className="error-message">{formErrors.roomQuantity}</span>
+                )}
+              </div>
             </div>
+          </div>
+
+          <div className="button-group">
+            <button className="search-button" type="submit" disabled={loading}>
+              {loading ? "Searching..." : "Search Hotels"}
+            </button>
+            <button
+              className="book-button"
+              type="button"
+              onClick={handleBookHotel}
+              disabled={!selectedOffer || loading}
+            >
+              {loading ? "Processing..." : "Book Selected Hotel"}
+            </button>
+          </div>
+        </form>
+      </div>
+
+      {loading && (
+        <div className="loading-overlay">
+          <div className="loading-spinner">
+            <div className="spinner"></div>
+            <p className="loading-text">Processing your request...</p>
           </div>
         </div>
       )}
+      {error && <div className="error-banner">{String(error)}</div>}
 
-      {visibleHotels.length > 0 && dimensions.gridDimensions && (
-        <div className="hotels-section">
-          <FixedSizeGrid
-            className="hotels-grid"
-            columnCount={dimensions.gridDimensions.columns}
-            columnWidth={dimensions.gridDimensions.cardWidth}
-            height={Math.min(
-              dimensions.gridDimensions.totalHeight,
-              dimensions.height * 0.7
-            )}
-            rowCount={dimensions.gridDimensions.rows}
-            rowHeight={dimensions.gridDimensions.cardHeight}
-            width={dimensions.gridDimensions.totalWidth}
-            ref={gridRef}
-          >
-            {Cell}
-          </FixedSizeGrid>
-          <PaginationControls />
+      {hotelOffers.length > 0 && (
+        <div className="hotel-offers">
+          <h2>Available Hotels ({totalHotels} found)</h2>
+          <div className="hotel-cards">
+            {hotelOffers.map((offer, index) => (
+              <div
+                key={`${offer.hotel.hotelId}-${index}`}
+                className={`hotel-card ${
+                  selectedOffer === offer ? "selected" : ""
+                }`}
+                onClick={() => handleOfferSelection(offer)}
+              >
+                <h3>{offer.hotel.name}</h3>
+                <p className="hotel-location">
+                  {offer.hotel.address.cityName}, {offer.hotel.address.countryCode}
+                </p>
+                <div className="hotel-details">
+                  <p className="price">
+                    Price: {offer.offers[0].price.total} {offer.offers[0].price.currency}
+                  </p>
+                  <p>Room Type: {offer.offers[0].room.type || "Standard Room"}</p>
+                  <div className="policies">
+                    {formatPolicies(offer.offers[0].policies)}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+          {isLoadingMore && (
+            <div className="loading-more">
+              Loading more hotels...
+            </div>
+          )}
+          {currentPage < totalPages && !isLoadingMore && (
+            <button className="load-more-btn" onClick={loadMore}>
+              Load More Hotels
+            </button>
+          )}
         </div>
       )}
 
-      {isLoading && (
-        <div className="loading-indicator">
-          <div className="spinner"></div>
-          <p>Finding hotels...</p>
+      {showSuccessPopup && (
+        <div className="popup">
+          <div className="popup-content">
+            <h3>{successMessage}</h3>
+            <button onClick={() => setShowSuccessPopup(false)}>Close</button>
+          </div>
         </div>
-      )}
-
-      {!isLoading && hotels.length === 0 && !error && (
-        <div className="no-results">
-          <p>No hotels found. Try different search criteria.</p>
-          <ul>
-            <li>Use valid city code (e.g., LON, PAR, NYC)</li>
-          </ul>
-        </div>
-      )}
-
-      {error && (
-        <div className="error-message">
-          <p>{error}</p>
-          <button onClick={handleSubmit} className="retry-button">
-            Retry Search
-          </button>
-        </div>
-      )}
-
-      {showScrollTop && (
-        <button 
-          className="scroll-top-button"
-          onClick={scrollToTop}
-          aria-label="Scroll to top"
-        >
-          ↑
-        </button>
       )}
     </div>
   );
 };
 
-export default BookHotels;
+export default BookHotel;

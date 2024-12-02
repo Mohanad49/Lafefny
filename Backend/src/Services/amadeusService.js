@@ -9,6 +9,8 @@ const amadeus = new Amadeus({
 });
 
 const iataCache = new NodeCache({ stdTTL: 86400 });
+const hotelIdsCache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour
+const searchResultsCache = new NodeCache({ stdTTL: 300 }); // Cache search results for 5 minutes
 
 const getLocationCode = async (locationName, subType = 'CITY') => {
   try {
@@ -214,25 +216,33 @@ const bookFlight = async (flightOffer, traveler) => {
 // hotel booking
 
 
+const HOTEL_SEARCH_CONFIG = {
+  batchSize: 2, // Process 2 hotels at a time
+  delayBetweenBatches: 200, // 200ms between batches to stay under rate limit
+  maxRetries: 3,
+  retryDelay: 1000, // 1 second retry delay
+  maxConcurrentBatches: 4 // 4 concurrent batches = 8 requests per second (safe under 10 req/s limit)
+};
+
 const fetchHotelIdsByCity = async (cityCode, radius = 5, radiusUnit = 'KM') => {
   try {
     console.log('Fetching hotel IDs for city:', cityCode);
 
-    // Use the Hotel List API to retrieve hotels in the specified city
     const response = await amadeus.referenceData.locations.hotels.byCity.get({
       cityCode,
       radius,
       radiusUnit
     });
 
-    if (response.data?.length === 0) {
-      throw new Error('No hotels found in the specified city.');
+    if (!response.data || response.data.length === 0) {
+      console.log('No hotels found in response');
+      return [];
     }
 
-    // Extract hotel IDs from the response
     const hotelIds = response.data.map(hotel => hotel.hotelId);
-    console.log('Retrieved hotel IDs:', hotelIds);
+    console.log(`Retrieved ${hotelIds.length} hotel IDs for ${cityCode}`);
     return hotelIds;
+
   } catch (error) {
     console.error('Error fetching hotel IDs:', {
       message: error.message,
@@ -243,148 +253,74 @@ const fetchHotelIdsByCity = async (cityCode, radius = 5, radiusUnit = 'KM') => {
   }
 };
 
-
-// Step 2: Retrieve hotel offers for the specified hotel IDs, dates, and guests
-const HOTEL_SEARCH_CONFIG = {
-  batchSize: 3, // Reduced from 5
-  delayBetweenBatches: 100, // 10 requests per second
-  maxRetries: 10
-};
-
 const fetchHotelOffers = async function* (hotelIds, checkInDate, checkOutDate, adults, roomQuantity = 1) {
   try {
-    if (!hotelIds?.length) {
-      throw new Error('Hotel IDs required');
+    if (!Array.isArray(hotelIds) || hotelIds.length === 0) {
+      console.error('Invalid hotel IDs:', hotelIds);
+      return [];
     }
 
-    const { batchSize, delayBetweenBatches } = HOTEL_SEARCH_CONFIG;
-    const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
-    
-    // Process hotels in sequential batches
-    for (let i = 0; i < hotelIds.length; i += batchSize) {
-      const batch = hotelIds.slice(i, i + batchSize);
-      
+    const maxBatchSize = 20;
+    console.log(`Fetching hotel offers for ${hotelIds.length} hotels`);
+
+    // Process hotels in batches
+    for (let i = 0; i < hotelIds.length; i += maxBatchSize) {
+      const batch = hotelIds.slice(i, i + maxBatchSize);
+      const batchIds = batch.join(',');
+
       try {
         const response = await amadeus.shopping.hotelOffersSearch.get({
-          hotelIds: batch.join(','),
+          hotelIds: batchIds,
           checkInDate,
           checkOutDate,
           adults: parseInt(adults),
           roomQuantity: parseInt(roomQuantity),
-          currency: 'USD',
-          bestRateOnly: true
+          currency: 'USD'
         });
 
-        const validHotels = response.data?.filter(hotel => 
-          hotel?.hotel?.name && 
-          hotel?.offers?.[0]?.price?.total
-        ) || [];
-
-        if (validHotels.length > 0) {
+        if (response.data && response.data.length > 0) {
+          // Yield each batch of results immediately
           yield {
-            hotels: validHotels,
+            hotels: response.data,
             progress: {
-              processed: Math.min(i + batchSize, hotelIds.length),
+              processed: Math.min(i + maxBatchSize, hotelIds.length),
               total: hotelIds.length,
-              currentBatch: Math.floor(i / batchSize) + 1,
-              totalBatches: Math.ceil(hotelIds.length / batchSize)
+              currentBatch: Math.floor(i / maxBatchSize) + 1,
+              totalBatches: Math.ceil(hotelIds.length / maxBatchSize)
             }
           };
         }
 
-        // Rate limiting delay
-        await delay(delayBetweenBatches);
+        console.log(`Processed batch ${Math.floor(i / maxBatchSize) + 1}/${Math.ceil(hotelIds.length / maxBatchSize)}`);
 
-      } catch (error) {
-        console.error(`Batch processing error for hotels ${batch.join(',')}:`, error);
-        // Continue with next batch instead of failing completely
+      } catch (batchError) {
+        console.warn('Batch error:', batchError.message);
         continue;
+      }
+
+      // Add a small delay between batches to avoid rate limiting
+      if (i + maxBatchSize < hotelIds.length) {
+        await new Promise(resolve => setTimeout(resolve, 100));
       }
     }
 
   } catch (error) {
-    console.error('Hotel offers fetch failed:', error);
+    console.error('Error fetching hotel offers:', {
+      message: error.message,
+      code: error.code,
+      details: error.stack
+    });
     throw error;
   }
 };
 
-// const getHotelOffers = async (hotelId) => {
-//   try {
-//     const response = await amadeus.shopping.hotelOffersByHotel.get({
-//       hotelId: hotelId
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error retrieving hotel offers:', error);
-//     throw error;
-//   }
-// };
-
-// const getHotelRoomDetails = async (offerId) => {
-//   try {
-//     const response = await amadeus.shopping.hotelOffer.get({
-//       offerId: offerId
-//     });
-//     return response.data;
-//   } catch (error) {
-//     console.error('Error retrieving hotel room details:', error);
-//     throw error;
-//   }
-// };
-
-// const bookHotel = async (offerId, guestDetails, touristId) => {
-//   try {
-//     const response = await amadeus.booking.hotelBookings.post(
-//       JSON.stringify({
-//         data: {
-//           offerId: offerId,
-//           guests: [guestDetails],
-//           payments: [{
-//             method: 'creditCard',
-//             card: {
-//               vendorCode: 'VI',
-//               cardNumber: '4111111111111111',
-//               expiryDate: '2023-12'
-//             }
-//           }]
-//         }
-//       })
-//     );
-
-//     const bookingDetails = response.data;
-//     const hotelBooking = {
-//       hotelName: bookingDetails.hotel.name,
-//       roomType: bookingDetails.room.type,
-//       checkInDate: bookingDetails.checkInDate,
-//       checkOutDate: bookingDetails.checkOutDate,
-//       numberOfGuests: bookingDetails.guests.length,
-//       bookingStatus: 'Confirmed',
-//       price: bookingDetails.price.total
-//     };
-
-//     await Tourist.findByIdAndUpdate(touristId, {
-//       $push: { hotelBookings: hotelBooking }
-//     });
-
-//     return bookingDetails;
-//   } catch (error) {
-//     console.error('Error booking hotel:', error);
-//     throw error;
-//   }
-// };
-
-
-
-
 module.exports = {
   getLocationCode,
+  formatDate,
   searchFlights,
   fetchFlightPriceOffers,
   bookFlight,
   fetchHotelIdsByCity,
   fetchHotelOffers,
-  HOTEL_SEARCH_CONFIG,
-  // getHotelOffers,
-  // getHotelRoomDetails,
-  // bookHotel
+  HOTEL_SEARCH_CONFIG
 };
