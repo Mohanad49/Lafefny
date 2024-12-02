@@ -8,6 +8,7 @@ const itinerarySchema = new mongoose.Schema({
   duration: [{ type: Number, required: true }], // duration in hours
   language: { type: String, required: true },
   price: { type: Number, required: true },
+  image: { type: String, default: '' },
   availableDates: [{ type: Date, required: true }],
   accessibility: { type: String, required: true },
   pickUpLocation: { type: String, required: true },
