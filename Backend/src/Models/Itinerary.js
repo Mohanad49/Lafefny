@@ -41,7 +41,9 @@ const itinerarySchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TourGuide',
     required: true
-  }
+  },
+  paidBy: [{ type: mongoose.Schema.Types.ObjectId,
+    ref: 'Tourist' }],
 }, { timestamps: true });
 
 const Itinerary = mongoose.model('Itinerary', itinerarySchema);

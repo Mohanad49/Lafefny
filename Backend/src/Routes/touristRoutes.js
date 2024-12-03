@@ -953,4 +953,23 @@ router.get('/:userId/orders/:orderId', async (req, res) => {
   }
 });
 
+router.post('/:touristId/add-wallet', async (req, res) => {
+  const { touristId } = req.params;
+
+  try {
+    const tourist = await Tourist.findOne({ userID: touristId });
+    if (!tourist) {
+      return res.status(404).json({ error: 'Tourist not found' });
+    }
+
+    tourist.wallet += 10000000;
+    await tourist.save();
+
+    res.status(200).json({ message: 'Wallet updated successfully', wallet: tourist.wallet });
+  } catch (error) {
+    console.error('Error updating wallet:', error);
+    res.status(500).json({ error: 'Failed to update wallet' });
+  }
+});
+
 module.exports=router

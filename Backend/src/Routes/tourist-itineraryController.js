@@ -1,7 +1,12 @@
 const express = require("express");
 const TouristItinerary = require("../Models/Tourist-Itinerary");
+const Itinerary = require("../Models/Itinerary");
+const Tourist = require("../Models/touristModel");
+const User = require("../Models/User");
 const router = express.Router();
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
+const { processCardPayment } = require('../Services/payingService');
+const { sendReceiptEmail } = require('../Services/emailService');
 
 // CREATE a new itinerary
 router.post("/", async (req, res) => {
@@ -31,6 +36,89 @@ router.post("/", async (req, res) => {
       res.status(201).json(newItinerary);
     } catch (error) {
       res.status(400).json({ error: error.message });
+    }
+  });
+
+  router.post('/:itineraryId/payment', async (req, res) => {
+    const { itineraryId } = req.params;
+    const { method, paymentMethodId, touristId, amount } = req.body;
+    try {
+      console.log('Received payment request');
+      console.log('itineraryIdd:', itineraryId);
+      console.log('method:', method);
+      console.log('paymentMethodId:', paymentMethodId);
+      console.log('touristId:', touristId);
+      console.log('amount:', amount);
+  
+      const itinerary = await Itinerary.findById(itineraryId);
+      if (!itinerary) {
+        console.error('Itinerary not found');
+        return res.status(404).json({ error: 'Itinerary not found' });
+      }
+  
+      //Check if the user has already paid for this itinerary
+      // if (itinerary.paidBy.includes(touristId)) {
+      //   return res.status(400).json({ error: 'You have already paid for this itinerary' });
+      // }
+  
+      let tourist;
+      if (method === 'card') {
+        const paymentResult = await processCardPayment(paymentMethodId, amount);
+        if (!paymentResult.success) {
+          console.error('Card payment failed:', paymentResult.error);
+          throw new Error(paymentResult.error);
+        }
+        tourist = await Tourist.findOne({ userID: touristId });
+        if (!tourist) {
+          console.error('Tourist not found');
+          return res.status(404).json({ error: 'Tourist not found' });
+        }
+      } else if (method === 'wallet') {
+        tourist = await Tourist.findOne({ userID: touristId });
+        if (!tourist) {
+          console.error('Tourist not found');
+          return res.status(404).json({ error: 'Tourist not found' });
+        }
+        if (tourist.wallet < itinerary.price) {
+          console.error('Insufficient wallet balance');
+          return res.status(400).json({ error: 'Insufficient wallet balance' });
+        }
+        tourist.wallet -= itinerary.price;
+        await tourist.save();
+      }
+  
+      // Mark the itinerary as paid by the user
+      itinerary.paidBy.push(touristId);
+      await itinerary.save();
+  
+      // Fetch user to get email
+      const user = await User.findOne({ _id: tourist.userID });
+      if (!user) {
+        console.error('User not found');
+        return res.status(404).json({ error: 'User not found' });
+      }
+  
+      // Log user email
+      console.log('User email:', user.email);
+  
+      // Ensure user email is defined
+      if (!user.email) {
+        console.error('User email is not defined');
+        throw new Error('User email is not defined');
+      }
+  
+      // Send response first
+      res.status(200).json({ message: 'Payment successful', remainingBalance: tourist.wallet });
+  
+      // Send receipt email asynchronously
+      const emailSubject = 'Payment Receipt';
+      const emailText = `Dear ${user.username},\n\nThank you for your payment of ${itinerary.price} EGP for the itinerary "${itinerary.name}".\n\nRemaining balance: ${tourist.wallet} EGP\n\nBest regards,\nLafefny Team`;
+      sendReceiptEmail(user.email, emailSubject, emailText).catch(error => {
+        console.error('Error sending receipt email:', error);
+      });
+    } catch (err) {
+      console.error('Payment processing error:', err);
+      res.status(500).json({ error: 'Payment failed', details: err.message });
     }
   });
   

@@ -242,9 +242,20 @@ router.post('/:id/cancel', async (req, res) => {
     itinerary.touristBookings.splice(bookingIndex, 1);
     await itinerary.save();
     decreaseLoyaltyPoints(userId, itinerary.price); // Decrease loyalty points for the tourist
-    res.status(200).json({ 
-      message: "Booking cancelled successfully",
-      itinerary 
+    
+    // Refund the amount to the tourist's wallet
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+    tourist.wallet += itinerary.price;
+    await tourist.save();
+
+    res.status(200).json({
+      message: "Booking canceled successfully",
+      itinerary,
+      refundedAmount: itinerary.price,
+      newWalletBalance: tourist.wallet
     });
   } catch (error) {
     console.error('Cancel booking error:', error);

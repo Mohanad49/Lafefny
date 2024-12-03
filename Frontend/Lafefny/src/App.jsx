@@ -116,6 +116,7 @@ import ManageAddresses from './components/ManageAddresses';
 import CheckoutPage from './components/CheckoutPage';
 import MyOrders from './components/MyOrders';
 import OrderDetails from './components/OrderDetails';
+import TouristAllPay from './components/TouristAllPay';
 
 
 const queryClient = new QueryClient();
@@ -172,6 +173,8 @@ const App = () => {
           <Route path="/checkout" element={<ProtectedRoute allowedRoles={['Tourist']}><CheckoutPage /></ProtectedRoute>} />
           <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['Tourist']}><MyOrders /></ProtectedRoute>} />
           <Route path="/order-details/:orderId" element={<ProtectedRoute allowedRoles={['Tourist']}><OrderDetails /></ProtectedRoute>} />
+          <Route path="/tourist/AllPay" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristAllPay /></ProtectedRoute>} />
+
 
           {/* Tour Guide Routes */}
           <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />

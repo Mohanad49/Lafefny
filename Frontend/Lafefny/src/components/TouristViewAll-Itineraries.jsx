@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getItineraries, bookItinerary, cancelBooking } from '../services/itineraryService';
 import { fetchExchangeRates } from '../services/currencyService';
 import axios from 'axios';
@@ -24,7 +24,8 @@ const ItineraryList = () => {
   const [bookedItineraries, setBookedItineraries] = useState(new Set());
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
-
+  const navigate = useNavigate();
+  
   useEffect(() => {
     fetchItineraries();
   }, [searchTerm, filterType, filterValue, sortBy, currency]);
@@ -225,6 +226,10 @@ const ItineraryList = () => {
       booking.tourist === userId
     ) || false;
   };
+  const handlePay = (itineraryId) => {
+    const touristId = localStorage.getItem('userID');
+    navigate(`/tourist/AllPay`, { state: { touristId, itineraryId } });
+  };
 
   const filteredItineraries = itineraries
     .filter(itinerary => {
@@ -423,14 +428,22 @@ const ItineraryList = () => {
               <div className="activity-actions">
                 <button className="share-button" onClick={() => handleShare(itinerary)}>Share</button>
                 {checkIfBooked(itinerary) && (
-                  <button 
-                    className="cancel-booking-btn"
-                    onClick={() => handleCancelBooking(itinerary)}
-                    disabled={!checkIfCanCancel(itinerary)}
-                    title={!checkIfCanCancel(itinerary) ? "Cancellation not allowed less than 2 days before booked date" : ""}
-                  >
-                    Cancel Booking
-                  </button>
+                 <>
+                 <button 
+                   className="cancel-booking-btn"
+                   onClick={() => handleCancelBooking(itinerary)}
+                   disabled={!checkIfCanCancel(itinerary)}
+                   title={!checkIfCanCancel(itinerary) ? "Cancellation not allowed less than 2 days before booked date" : ""}
+                 >
+                   Cancel Booking
+                 </button> {' '}
+                 <button 
+                   className="pay-button"
+                   onClick={() => handlePay(itinerary._id)}
+                 >
+                   Pay
+                 </button>
+               </>
                 )}
                 {!checkIfBooked(itinerary) && (
                   <button 
