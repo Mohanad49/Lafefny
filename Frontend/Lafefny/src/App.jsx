@@ -7,8 +7,14 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import LandingPage from './pages/Index';
-import Sign from './components/Sign';
+import Sign from './pages/Sign';
+import About from './pages/About';
+import Destinations from './pages/Destinations';
+import Tours from './pages/Tours';
+import Activities from './pages/Activities'
+import HistoricalPlaces from './pages/HistoricalPlaces'
 import Home from './components/GuestHome';
+import { CurrencyProvider } from './context/CurrencyContext';
 
 import AdminUserManagement from './components/AdminUserManagement';
 import AddAdmin from './components/AddAdmin';
@@ -125,6 +131,7 @@ const App = () => {
 
   return (
     <AuthProvider>
+      <CurrencyProvider>
       <QueryClientProvider client={queryClient}>
       <TooltipProvider>
       <Toaster />
@@ -134,11 +141,14 @@ const App = () => {
           {/* Public Routes */}
           <Route path="/" element={<LandingPage />} />
           <Route path="/sign" element={<Sign />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/destinations" element={<Destinations />} />
+          <Route path="/tours" element={<Tours />} />
           <Route path="/guestHome" element={<Home />} />
-          <Route path="/forgotPassword" element={<ForgotPassword />} />
-          <Route path="/guestActivities" element={<GuestActivityList />} />
+          <Route path="/forgot-Password" element={<ForgotPassword />} />
+          <Route path="/activities" element={<Activities />} />
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
-          <Route path="/guestMuseums" element={<GuestMuseumList />} />
+          <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
 
           {/* Admin Routes */}
           <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />
@@ -193,9 +203,9 @@ const App = () => {
           <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
           <Route path="/editSellerLogo" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerLogo /></ProtectedRoute>} />
           <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
-          <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller']}><ProductList /></ProtectedRoute>} />
-          <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller']}><AddProduct /></ProtectedRoute>} />
-          <Route path="/edit-product/:id" element={<ProtectedRoute allowedRoles={['Seller']}><EditProduct /></ProtectedRoute>} />
+          <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
+          <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProduct /></ProtectedRoute>} />
+          <Route path="/edit-product/:id" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><EditProduct /></ProtectedRoute>} />
 
           {/* Advertiser Routes */}
           <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
@@ -204,7 +214,7 @@ const App = () => {
           <Route path="/getAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserInfo /></ProtectedRoute>} />
           <Route path="/editAdvertiserPhoto" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserLogo /></ProtectedRoute>} />
           <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
-          <Route path="/activities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
+          <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
           <Route path="/add-activity" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddActivity /></ProtectedRoute>} />
           <Route path="/edit-activity/:id" element={<ProtectedRoute allowedRoles={['Advertiser']}><EditActivity /></ProtectedRoute>} />
 
@@ -240,6 +250,7 @@ const App = () => {
       </Router>
       </TooltipProvider>
     </QueryClientProvider>
+    </CurrencyProvider>
     </AuthProvider>
   );
 };
