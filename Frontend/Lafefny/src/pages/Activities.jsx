@@ -81,20 +81,25 @@ const Activities = () => {
     navigate(`/activity/${activityId}`);
   };
 
-    const { currency } = useCurrency();
+  const handleBookNow = (activityId) => {
+    const touristId = localStorage.getItem('userID');
+    navigate(`/tourist/payment`, { state: { touristId, activityId } });
+  };
+
+  const { currency } = useCurrency();
     
-    const convertPrice = (price, reverse = false) => {
-      if (!price) return 0;
-      const numericPrice = typeof price === 'string' ? 
-        parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
-        parseFloat(price);
-        
-      if (reverse) {
-        return numericPrice / currencies[currency].rate;
-      }
-      const convertedPrice = numericPrice * currencies[currency].rate;
-      return convertedPrice;
-    };
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice;
+  };
 
   const getCategoryIcon = (category) => {
     const iconMap = {
@@ -320,7 +325,7 @@ const Activities = () => {
                       </div>
                     </div>
                     {isLoggedIn && (
-                      <Button className="w-full">Book Now</Button>
+                      <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(activity._id); }}>Book Now</Button>
                     )}
                   </div>
                 </CardContent>

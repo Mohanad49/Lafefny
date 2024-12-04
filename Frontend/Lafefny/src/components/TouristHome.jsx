@@ -10,17 +10,18 @@ import NotificationBell from './NotificationBell';
 import axios from 'axios';
 
 const TouristHome = () => {
-  const [profile, setProfile] = useState({
-    level: 1,
-    badge: 'Bronze',
-    loyaltyPoints: 0,
-    wallet: 0
-  });
   const [upcomingActivities, setUpcomingActivities] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [userPreferences, setUserPreferences] = useState([]);
   const userId = localStorage.getItem('userID');
+
+  const [profile, setProfile] = useState({
+    level: 1,
+    badge: 'Bronze',
+    loyaltyPoints: 0,
+    wallet: 0,
+  });
 
   useEffect(() => {
     const fetchTouristData = async () => {

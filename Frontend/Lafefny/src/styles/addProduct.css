@@ -1,0 +1,120 @@
+
+.min-h-screen {
+    min-height: 100vh;
+  }
+  
+  .bg-background {
+    background-color: #f9f9f9;
+  }
+  
+  .text-primary {
+    color: #333;
+  }
+  
+  .text-4xl {
+    font-size: 2.25rem;
+  }
+  
+  .md\:text-5xl {
+    font-size: 3rem;
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .tracking-tight {
+    letter-spacing: -0.025em;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem;
+  }
+  
+  .max-w-2xl {
+    max-width: 42rem;
+  }
+  
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .flex {
+    display: flex;
+  }
+  
+  .justify-center {
+    justify-content: center;
+  }
+  
+  .overflow-hidden {
+    overflow: hidden;
+  }
+  
+  .hover\:/* styles/addProduct.css */
+  
+  .min-h-screen {
+    min-height: 100vh;
+  }
+  
+  .bg-background {
+    background-color: #f9f9f9;
+  }
+  
+  .text-primary {
+    color: #333;
+  }
+  
+  .text-4xl {
+    font-size: 2.25rem;
+  }
+  
+  .md\:text-5xl {
+    font-size: 3rem;
+  }
+  
+  .font-bold {
+    font-weight: 700;
+  }
+  
+  .tracking-tight {
+    letter-spacing: -0.025em;
+  }
+  
+  .mb-6 {
+    margin-bottom: 1.5rem;
+  }
+  
+  .text-lg {
+    font-size: 1.125rem;
+  }
+  
+  .max-w-2xl {
+    max-width: 42rem;
+  }
+  
+  .mx-auto {
+    margin-left: auto;
+    margin-right: auto;
+  }
+  
+  .flex {
+    display: flex;
+  }
+  
+  .justify-center {
+    justify-content: center;
+  }
+  
+  .overflow-hidden {
+    overflow: hidden;
+  }
+  
+  .hover\:shadow-lg:hover {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+  }

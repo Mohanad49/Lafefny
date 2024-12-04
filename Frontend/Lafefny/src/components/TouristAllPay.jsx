@@ -4,6 +4,11 @@ import { useLocation } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, useStripe, useElements, CardElement } from '@stripe/react-stripe-js';
 import axios from 'axios';
+import Navigation from "@/components/Navigation";
+import Footer from "@/components/Footer";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 
 const stripePromise = loadStripe('pk_test_51QP8ZuEtF2Lqtv9O8kg1FunK3YF9xXxeVt1oSsxe07QZHIZUOShRYHBjTYUrFcY61iQzfljEA6AT3ozj44mfPM9I00c9XZdQuA');
 
@@ -16,6 +21,7 @@ const TouristItineraryPay = () => {
   const [promoCode, setPromoCode] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState(null);
   const [promoError, setPromoError] = useState('');
+  const [notification, setNotification] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
 
@@ -68,7 +74,7 @@ const TouristItineraryPay = () => {
 
     if (error) {
       console.error(error);
-      alert('Payment failed');
+      setNotification({ type: 'error', message: 'Payment failed' });
       return;
     }
 
@@ -79,10 +85,10 @@ const TouristItineraryPay = () => {
         touristId,
         amount: discountedPrice, // Send the discounted price
       });
-      alert('Payment successful');
+      setNotification({ type: 'success', message: 'Payment successful' });
     } catch (err) {
       console.error('Payment error:', err);
-      alert('Payment failed');
+      setNotification({ type: 'error', message: 'Payment failed' });
     }
   };
 
@@ -95,44 +101,75 @@ const TouristItineraryPay = () => {
         amount: discountedPrice, // Send the discounted price
       });
       const { remainingBalance } = response.data;
-      alert(`Payment successful. Remaining balance: ${remainingBalance} EGP`);
+      setNotification({ type: 'success', message: `Payment successful. Remaining balance: ${remainingBalance} EGP` });
     } catch (err) {
       console.error('Wallet payment error:', err);
-      alert('Payment failed');
+      setNotification({ type: 'error', message: 'Payment failed' });
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
+  if (error) return <div className="min-h-screen flex items-center justify-center">Error: {error}</div>;
 
   return (
-    <div>
-      <h1>Tourist Itinerary Payment</h1>
-      {booking && (
-        <div>
-          <h2>{booking.name}</h2>
-          <p>Original Price: {booking.price} EGP</p>
-          <p>
-            Discounted Price: {discountedPrice !== null && discountedPrice !== undefined
-              ? discountedPrice.toFixed(2)
-              : booking.price} EGP
-          </p>
-          <div>
-            <input
-              type="text"
-              value={promoCode}
-              onChange={(e) => setPromoCode(e.target.value)}
-              placeholder="Enter promo code"
-            />
-            <button onClick={handleApplyPromoCode}>Apply Promo Code</button>
-            {promoError && <p style={{ color: 'red' }}>{promoError}</p>}
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <main className="pt-24 pb-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-16">
+            <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary mb-6">
+              Tourist Itinerary Payment
+            </h1>
           </div>
-          <form onSubmit={handleCardPayment}>
-            <CardElement />
-            <button type="submit" disabled={!stripe}>Pay with Card</button>
-          </form>
-          <button onClick={handleWalletPayment}>Pay with Wallet</button>
+          
+          <div className="flex justify-center">
+            {booking && (
+              <Card className="overflow-hidden hover:shadow-lg transition-shadow w-full max-w-md">
+                <CardContent className="p-6">
+                  <div className="space-y-4">
+                    <div>
+                      <h2 className="text-xl font-semibold text-primary mb-2">{booking.name}</h2>
+                      <p className="text-primary mb-2">Original Price: {booking.price} EGP</p>
+                      <p className="text-primary mb-2">
+                        Discounted Price: {discountedPrice !== null && discountedPrice !== undefined
+                          ? discountedPrice.toFixed(2)
+                          : booking.price} EGP
+                      </p>
+                    </div>
+                    
+                    <div className="space-y-4">
+                      <input
+                        type="text"
+                        value={promoCode}
+                        onChange={(e) => setPromoCode(e.target.value)}
+                        placeholder="Enter promo code"
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                      <Button onClick={handleApplyPromoCode} className="w-full">Apply Promo Code</Button>
+                      {promoError && <p style={{ color: 'red' }}>{promoError}</p>}
+                    </div>
+                    
+                    <form onSubmit={handleCardPayment} className="space-y-4">
+                      <CardElement className="p-2 border border-gray-300 rounded" />
+                      <Button type="submit" disabled={!stripe} className="w-full">Pay with Card</Button>
+                    </form>
+                    <Button onClick={handleWalletPayment} className="w-full">Pay with Wallet</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
+      </main>
+      <Footer />
+      {notification && (
+        <Dialog open={!!notification} onOpenChange={() => setNotification(null)}>
+          <DialogContent>
+            <DialogTitle>{notification.type === 'success' ? 'Success' : 'Error'}</DialogTitle>
+            <DialogDescription>{notification.message}</DialogDescription>
+            <Button onClick={() => setNotification(null)}>Close</Button>
+          </DialogContent>
+        </Dialog>
       )}
     </div>
   );

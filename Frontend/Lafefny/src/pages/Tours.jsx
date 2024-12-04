@@ -35,6 +35,11 @@ const Tours = () => {
     navigate(`/itinerary/${itineraryId}`);
   };
 
+  const handleBookNow = (itineraryId) => {
+    const touristId = localStorage.getItem('userID');
+    navigate(`/tourist/AllPay`, { state: { touristId, itineraryId } });
+  };
+
   const convertPrice = (price) => {
     if (!price) return currencies[currency].symbol + "0.00";
     const convertedPrice = price * currencies[currency].rate;
@@ -108,7 +113,7 @@ const Tours = () => {
                       </div>
                     </div>
                     {isLoggedIn && (
-                      <Button className="w-full">Book Now</Button>
+                      <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(itinerary._id); }}>Book Now</Button>
                     )}
                   </div>
                 </CardContent>

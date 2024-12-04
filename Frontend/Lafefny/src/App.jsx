@@ -123,6 +123,8 @@ import CheckoutPage from './components/CheckoutPage';
 import MyOrders from './components/MyOrders';
 import OrderDetails from './components/OrderDetails';
 import TouristAllPay from './components/TouristAllPay';
+import AddProductPage from './pages/AddProduct';
+
 
 
 const queryClient = new QueryClient();
@@ -206,6 +208,8 @@ const App = () => {
           <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
           <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProduct /></ProtectedRoute>} />
           <Route path="/edit-product/:id" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><EditProduct /></ProtectedRoute>} />
+          <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProductPage /></ProtectedRoute>} />
+
 
           {/* Advertiser Routes */}
           <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
