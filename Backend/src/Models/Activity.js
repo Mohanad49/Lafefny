@@ -7,6 +7,14 @@ const activitySchema = new mongoose.Schema({
   location: { type: String, required: true }, // Can be coordinates, use Google Maps API on frontend
   price: { type: Number, required: true },
   image: { type: String, default: ''},
+  description: { 
+    type: String, 
+    default: ''
+  },
+  highlights: { 
+    type: [String], 
+    default: [] 
+  },
   category: { type: String, required: true },
   tags: { type: [String], required: true },
   specialDiscounts: { type: String }, // Could be a percentage or other details

@@ -18,13 +18,15 @@ import {
     Ship,
     Palmtree,
     TreePine,
-    Camera
+    Camera,
+    Share2
   } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
+import ShareModal from "@/components/ui/share-modal";
 
 const Activities = () => {
   const [activities, setActivities] = useState([]);
@@ -32,6 +34,8 @@ const Activities = () => {
   const [error, setError] = useState(null);
   const [maxPrice, setMaxPrice] = useState(1000); // Default max price in base currency
   const [categories, setCategories] = useState([]);
+  const [isShareModalOpen, setIsShareModalOpen] = useState(false);
+  const [selectedItem, setSelectedItem] = useState(null);
 
   const navigate = useNavigate();
 
@@ -78,7 +82,7 @@ const Activities = () => {
   }, []);
 
   const handleActivityClick = (activityId) => {
-    navigate(`/activity/${activityId}`);
+    navigate(`/activities/${activityId}`);
   };
 
   const handleBookNow = (activityId) => {
@@ -189,6 +193,12 @@ const Activities = () => {
   };
   const filteredActivities = filterActivities();
 
+  const handleShare = (event, item) => {
+    event.stopPropagation();
+    setSelectedItem(item);
+    setIsShareModalOpen(true);
+  };
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center">Error: {error}</div>;
 
@@ -292,6 +302,14 @@ const Activities = () => {
                     alt={activity.name}
                     className="w-full h-full object-cover"
                   />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="absolute top-4 right-4 bg-white/80 hover:bg-white"
+                    onClick={(e) => handleShare(e, activity)}
+                  >
+                    <Share2 className="h-4 w-4" />
+                  </Button>
                 </div>
                 <CardContent className="p-6">
                   <div className="space-y-4">
@@ -335,6 +353,14 @@ const Activities = () => {
         </div>
       </main>
       <Footer />
+      {isShareModalOpen && selectedItem && (
+        <ShareModal
+          isOpen={isShareModalOpen}
+          onClose={() => setIsShareModalOpen(false)}
+          title={selectedItem.type || "Item"} // "Activity" or "Itinerary"
+          url={`${window.location.origin}/activities/${selectedItem._id}`}
+        />
+      )}
     </div>
   );
 };
