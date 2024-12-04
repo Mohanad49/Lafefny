@@ -11,8 +11,11 @@ import Sign from './pages/Sign';
 import About from './pages/About';
 import Destinations from './pages/Destinations';
 import Tours from './pages/Tours';
+import TourDetails from './pages/TourDetails';
 import Activities from './pages/Activities'
+import ActivityDetails from './pages/ActivityDetails';
 import HistoricalPlaces from './pages/HistoricalPlaces'
+import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
 import Home from './components/GuestHome';
 import { CurrencyProvider } from './context/CurrencyContext';
 
@@ -144,11 +147,14 @@ const App = () => {
           <Route path="/about" element={<About />} />
           <Route path="/destinations" element={<Destinations />} />
           <Route path="/tours" element={<Tours />} />
+          <Route path="/tours/:id" element={<TourDetails />} />
           <Route path="/guestHome" element={<Home />} />
           <Route path="/forgot-Password" element={<ForgotPassword />} />
           <Route path="/activities" element={<Activities />} />
+          <Route path="/activities/:id" element={<ActivityDetails />} />
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
           <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
+          <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
 
           {/* Admin Routes */}
           <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />

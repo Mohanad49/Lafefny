@@ -9,6 +9,32 @@ const itinerarySchema = new mongoose.Schema({
   language: { type: String, required: true },
   price: { type: Number, required: true },
   image: { type: String, default: '' },
+  description: { 
+    type: String, 
+    default: ''
+  },
+  highlights: { 
+    type: [String], 
+    default: [] 
+  },
+  groupSize: {
+    min: {
+      type: Number,
+      default: 0
+    },
+    max: {
+      type: Number,
+      default: 0
+    }
+  },
+  included: {
+    type: [String],
+    default: []
+  },
+  excluded: {
+    type: [String],
+    default: []
+  },
   availableDates: [{ type: Date, required: true }],
   accessibility: { type: String, required: true },
   pickUpLocation: { type: String, required: true },
