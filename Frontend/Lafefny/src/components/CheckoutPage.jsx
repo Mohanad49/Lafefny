@@ -9,8 +9,9 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import '../styles/checkout.css';
+import { ShoppingCart, CreditCard, MapPin, ArrowLeft } from 'lucide-react';
 
-// Initialize Stripe (replace with your publishable key)
+// Initialize Stripe
 const stripePromise = loadStripe('pk_test_51QP7WoG4UGkAwtrqHrV9BgIvG1T8ZNjqOpbKq9W8kD4xwUcmNCegaX0jOnKzU1JNckplg9MIomiIhdGEt3e1FFHn007MSX3aFl');
 
 // Separate component for Stripe payment form
@@ -282,10 +283,24 @@ const CheckoutPage = () => {
 
   return (
     <div className="checkout-container">
-      <h1>Checkout</h1>
+      <div className="flex items-center gap-4 mb-6">
+        <button 
+          onClick={() => navigate('/tourist/cart')}
+          className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Cart
+        </button>
+        <h1 className="checkout-header">Checkout</h1>
+      </div>
 
       <div className="order-summary">
-        <h2>Order Summary</h2>
+        <div className="p-4 border-b border-border">
+          <h2 className="text-lg font-semibold flex items-center gap-2">
+            <ShoppingCart className="h-5 w-5" />
+            Order Summary
+          </h2>
+        </div>
         <table className="checkout-table">
           <thead>
             <tr>
@@ -319,16 +334,11 @@ const CheckoutPage = () => {
         </table>
       </div>
 
-      <div className="delivery-section">
-        <div className="delivery-header">
-          <h2>Delivery Address</h2>
-          <button 
-            className="add-address-btn"
-            onClick={() => setShowAddModal(true)}
-          >
-            Add New Address
-          </button>
-        </div>
+      <div className="address-section">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <MapPin className="h-5 w-5" />
+          Delivery Address
+        </h2>
         {addresses.length === 0 ? (
           <p>No addresses found. Please add an address.</p>
         ) : (
@@ -346,6 +356,12 @@ const CheckoutPage = () => {
             ))}
           </div>
         )}
+        <button 
+          className="add-address-btn"
+          onClick={() => setShowAddModal(true)}
+        >
+          Add New Address
+        </button>
       </div>
 
       {showAddModal && (
@@ -394,7 +410,10 @@ const CheckoutPage = () => {
       )}
 
       <div className="payment-section">
-        <h2>Payment Method</h2>
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          <CreditCard className="h-5 w-5" />
+          Payment Method
+        </h2>
         <select 
           value={paymentMethod} 
           onChange={(e) => setPaymentMethod(e.target.value)}
@@ -419,7 +438,6 @@ const CheckoutPage = () => {
 
       {paymentMethod !== 'Credit Card' && (
         <div className="checkout-actions">
-          <button onClick={() => navigate('/tourist-cart')}>Back to Cart</button>
           <button 
             onClick={paymentMethod === 'Wallet' ? handleWalletPayment : handleCashOrder}
             disabled={!selectedAddress || cartItems.length === 0}
@@ -432,4 +450,4 @@ const CheckoutPage = () => {
   );
 };
 
-export default CheckoutPage; 
+export default CheckoutPage;
