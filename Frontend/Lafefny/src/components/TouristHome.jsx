@@ -26,8 +26,18 @@ const TouristHome = () => {
   useEffect(() => {
     const fetchTouristData = async () => {
       try {
-        const response = await axios.get(`http://localhost:8000/tourist/${userId}`);
-        setProfile(response.data);
+        // Fetch tourist profile information
+        const response = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userId}`);
+        if (response.data && response.data.length > 0) {
+          const touristInfo = response.data[0];
+          setProfile({
+            level: touristInfo.level,
+            badge: touristInfo.badge,
+            loyaltyPoints: touristInfo.loyaltyPoints,
+            wallet: touristInfo.wallet,
+            name: touristInfo.username,
+          });
+        }
         
         // Fetch upcoming activities
         const activitiesResponse = await axios.get(`http://localhost:8000/tourist/activities/${userId}`);
@@ -85,7 +95,7 @@ const TouristHome = () => {
                     <User className="h-5 w-5 text-primary" />
                     <div>
                       <p className="text-sm text-muted-foreground">Level {profile.level}</p>
-                      <p className="font-medium">{profile.badge} Member</p>
+                      <p className="font-medium">{profile.badge}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">

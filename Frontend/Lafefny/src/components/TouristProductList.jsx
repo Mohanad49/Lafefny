@@ -1,12 +1,15 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { getProducts } from '../services/productService';
 import '../styles/productList.css';
 import { fetchExchangeRates } from '../services/currencyService';
-import axios from 'axios';
 import { addProductReview, checkProductPurchase, addToWishlist, addToCart } from '../services/productService';
 import ReviewForm from './ReviewForm';
+import Navigation from './Navigation';
+import { ArrowLeft, Search, Filter, SortAsc, Star, ShoppingCart, Heart, ChevronDown } from 'lucide-react';
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { Button } from "./ui/button";
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -25,6 +28,9 @@ const ProductList = () => {
   const [touristName, setTouristName] = useState('');
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+
+  const navigate = useNavigate();
+  const isLoggedIn = !!localStorage.getItem('userID');
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -57,8 +63,6 @@ const ProductList = () => {
 
   useEffect(() => {
     const userID = localStorage.getItem('userID');
-    
-    
   }, []);
 
   const fetchProducts = async () => {
@@ -238,143 +242,209 @@ const ProductList = () => {
   };
 
   return (
-    <div className="product-list-container">
-      <div className="header-container">
-        <h1>Product List</h1>
-        <div className="nav-buttons">
-          <Link to="/tourist/wishlist" className="nav-button">
-            Wishlist   |
-          </Link>
-          <Link to="/tourist/cart" className="nav-button">
-                Cart
-          </Link>
-        </div>
-      </div>
-      <div className="controls">
-        {ratesLoading ? (
-          <p>Loading currencies...</p>
-        ) : ratesError ? (
-          <p>Error loading currencies</p>
-        ) : (
-          <select 
-            value={currency} 
-            onChange={(e) => setCurrency(e.target.value)}
-            className="currency-select"
-          >
-            {Object.keys(conversionRates).map(code => (
-              <option key={code} value={code}>{code}</option>
-            ))}
-          </select>
-        )}
-        <input
-          type="text"
-          placeholder="Search by name, description, or seller..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="search-input"
-        />
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">Select Filter</option>
-          <option value="price">Filter by Max Price</option>
-          <option value="quantity">Filter by Min Quantity</option>
-          <option value="rating">Filter by Min Rating</option>
-        </select>
-        {filterType && (
-          <input
-            type={filterType === 'quantity' ? 'number' : 'text'}
-            placeholder={`Enter ${filterType} value`}
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            className="filter-input"
-          />
-        )}
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="sort-select"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="price">Sort by Price</option>
-          <option value="rating">Sort by Rating</option>
-        </select>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Image</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Average Rating</th>
-            <th>Description</th>
-            <th>Seller</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.map((product) => (
-            <tr key={product._id}>
-              <td>{product.name}</td>
-              <td><img src={product.imageUrl} alt={product.name} width="100" /></td>
-              <td>{!ratesLoading && convertPrice(product.price)} {currency}</td>
-              <td>{product.quantity}</td>
-              <td>{product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})</td>
-              <td>{product.description}</td>
-              <td>{product.seller}</td>
-              <td>
-                <button onClick={() => openModal(product.ratings.reviews)}>View Reviews</button>
-                <button onClick={() => handleReviewClick(product)}>Add Review</button>
-                <button 
-                  onClick={() => handleAddToWishlist(product._id)}
-                  disabled={isAddingToWishlist}
-                >
-                  {isAddingToWishlist ? 'Adding...' : 'Add to Wishlist'}
-                </button>
-                <button 
-                  onClick={() => handleAddToCart(product._id)}
-                  disabled={isAddingToCart}
-                >
-                  {isAddingToCart ? 'Adding...' : 'Add to Cart'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="container mx-auto px-4 pt-24 pb-16">
+        <div className="flex gap-6">
+          {/* Sidebar */}
+          {isLoggedIn && (
+            <aside className="hidden lg:block w-64 space-y-6">
+              <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
+                <h3 className="font-semibold mb-4">Wishlist</h3>
+                <nav className="space-y-2">
+                  <Link
+                    to="/tourist/wishlist"
+                    className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
+                  >
+                    <Heart className="h-4 w-4" />
+                    View Wishlist
+                  </Link>
+                </nav>
+              </div>
+            </aside>
+          )}
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={closeModal}>&times;</span>
-            <h2>Reviews</h2>
-            {selectedReviews.length > 0 ? (
-              <ul>
-                {selectedReviews.map((review, index) => (
-                  <li key={index}>
-                    <strong>Reviewer:</strong> {review.reviewerName} <br />
-                    <strong>Rating:</strong> {review.rating.toFixed(1)} ★ <br />
-                    <strong>Comment:</strong> {review.comment} <br />
-                    <strong>Date:</strong> {formatDate(review.date)}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No reviews available.</p>
-            )}
+          {/* Main Content */}
+          <div className="flex-1">
+            {/* Back Button */}
+            <button 
+              onClick={() => navigate(-1)}
+              className="flex items-center text-primary hover:text-primary/80 mb-6"
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Back
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-12">
+              <h1 className="text-4xl font-bold tracking-tight text-primary mb-4">
+                Our Products
+              </h1>
+              <p className="text-muted-foreground">
+                Discover and shop our curated collection of authentic products
+              </p>
+            </div>
+
+            {/* Controls */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  value={searchTerm}
+                  onChange={handleSearch}
+                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
+                />
+              </div>
+
+              <select
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
+                className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="">Filter by...</option>
+                <option value="price">Price</option>
+                <option value="quantity">Quantity</option>
+                <option value="rating">Rating</option>
+              </select>
+
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="name">Sort by Name</option>
+                <option value="price">Sort by Price</option>
+                <option value="rating">Sort by Rating</option>
+              </select>
+
+              {!ratesLoading && !ratesError && (
+                <select
+                  value={currency}
+                  onChange={handleCurrencyChange}
+                  className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
+                >
+                  {Object.keys(conversionRates).map(code => (
+                    <option key={code} value={code}>{code}</option>
+                  ))}
+                </select>
+              )}
+            </div>
+
+            {/* Products Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {filteredProducts.length === 0 ? (
+                <div className="col-span-full text-center py-12 text-muted-foreground">
+                  No products available matching your criteria
+                </div>
+              ) : (
+                filteredProducts.map((product) => (
+                  <div key={product._id} className="bg-card rounded-xl shadow-sm border border-border overflow-hidden transition-all hover:shadow-md">
+                    <img
+                      src={product.image || 'https://via.placeholder.com/300x200'}
+                      alt={product.name}
+                      className="w-full h-48 object-cover"
+                    />
+                    <div className="p-4">
+                      <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-1">{product.name}</h3>
+                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
+                      
+                      <div className="flex items-center justify-between mb-4">
+                        <span className="text-lg font-bold text-primary">
+                          {currency} {convertPrice(product.price)}
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <Star className="h-4 w-4 text-amber-400" />
+                          <span>{product.ratings.averageRating.toFixed(1)}</span>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
+                        {isLoggedIn && (
+                          <>
+                            <button
+                              onClick={() => handleAddToCart(product._id)}
+                              disabled={isAddingToCart}
+                              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium transition-colors"
+                            >
+                              <ShoppingCart className="h-4 w-4" />
+                              Cart
+                            </button>
+                            
+                            <button
+                              onClick={() => handleAddToWishlist(product._id)}
+                              disabled={isAddingToWishlist}
+                              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 text-sm font-medium transition-colors"
+                            >
+                              <Heart className="h-4 w-4" />
+                              Wishlist
+                            </button>
+                          </>
+                        )}
+                        
+                        <button
+                          onClick={() => handleReviewClick(product)}
+                          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 text-sm font-medium transition-colors"
+                        >
+                          <Star className="h-4 w-4" />
+                          Review
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+      </main>
+
+      {/* Review Modal */}
+      {showReviewModal && selectedProduct && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-lg bg-card p-6 shadow-lg border border-border">
+            <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onClick={() => setShowReviewModal(false)}>×</button>
+            <ReviewForm
+              productId={selectedProduct._id}
+              touristName={touristName}
+              onSubmit={handleReviewSubmit}
+              onClose={() => setShowReviewModal(false)}
+            />
           </div>
         </div>
       )}
 
-      {showReviewModal && (
-        <ReviewForm
-          title={`Review Product: ${selectedProduct.name}`}
-          onClose={closeReviewModal}
-          onSubmit={handleReviewSubmit}
-        />
+      {/* Reviews Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
+          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-lg bg-card p-6 shadow-lg border border-border">
+            <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onClick={closeModal}>×</button>
+            <h2 className="text-xl font-semibold mb-4">Product Reviews</h2>
+            {selectedReviews.map((review, index) => (
+              <div key={index} className="mb-4 p-4 bg-accent rounded-lg">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="font-medium">{review.touristName}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {formatDate(review.date)}
+                  </span>
+                </div>
+                <div className="flex items-center mb-2">
+                  {[...Array(5)].map((_, i) => (
+                    <Star
+                      key={i}
+                      className={`h-4 w-4 ${
+                        i < review.rating ? 'text-amber-400' : 'text-muted-foreground'
+                      }`}
+                    />
+                  ))}
+                </div>
+                <p className="text-sm">{review.comment}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

@@ -40,7 +40,7 @@ const activitySchema = new mongoose.Schema({
   advertiser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'Advertiser',
-    required: true
+    required: false
   },
   paidBy: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Tourist' }]
 });
