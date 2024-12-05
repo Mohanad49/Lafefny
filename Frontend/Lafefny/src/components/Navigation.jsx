@@ -1,6 +1,6 @@
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
-import { Menu, Plane, MapPin, Globe, Navigation as NavigationIcon, Search, Activity, History, ChevronDown, User, LogOut, ShoppingCart } from "lucide-react"; 
+import { Menu, Plane, MapPin, Globe, Navigation as NavigationIcon, Search, Activity, History, ChevronDown, User, LogOut } from "lucide-react"; // Add User icon import
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Input } from "./ui/input";
 import { useNavigate } from "react-router-dom";
@@ -8,7 +8,6 @@ import authService from '../services/authService';
 import { useState, useEffect, useRef } from "react";
 import { destinations } from "../data/destinations"; 
 import { useCurrency, currencies } from "../context/CurrencyContext";
-import TouristMenubar from './TouristMenubar';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -21,17 +20,6 @@ const Navigation = () => {
   const currencyDropdownRef = useRef(null);
   const isLoggedIn = !!localStorage.getItem('userID');
   const username = localStorage.getItem('currentUserName');
-  const userRole = localStorage.getItem('userRole');
-  const isTourist = userRole === 'Tourist';
-  
-  // Debug logs
-  console.log('User Role:', userRole);
-  console.log('Is Tourist:', isTourist);
-  console.log('LocalStorage Items:', {
-    userRole: localStorage.getItem('userRole'),
-    userID: localStorage.getItem('userID'),
-    username: localStorage.getItem('currentUserName')
-  });
 
   // Handle click outside to close results
   useEffect(() => {
@@ -126,42 +114,28 @@ const Navigation = () => {
                 <div className="space-y-6">
                   <div className="border-b pb-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
-                    {/* Debug comment - Conditional rendering check */}
-                    {console.log('Rendering navigation, isTourist:', isTourist)}
-                    {isTourist ? (
-                      // Debug comment - Tourist menu
-                      <>
-                        {console.log('Rendering TouristMenubar')}
-                        <TouristMenubar />
-                      </>
-                    ) : (
-                      // Debug comment - Default menu
-                      <>
-                        {console.log('Rendering default menu')}
-                        <div className="space-y-4">
-                          <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                            <MapPin className="h-5 w-5" />
-                            Destinations
-                          </Link>
-                          <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                            <Activity className="h-5 w-5" />
-                            Activities
-                          </Link>
-                          <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                            <History className="h-5 w-5" />
-                            Historical Places
-                          </Link>
-                          <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                            <Globe className="h-5 w-5" />
-                            Tours
-                          </Link>
-                          <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                            <NavigationIcon className="h-5 w-5" />
-                            About
-                          </Link>
-                        </div>
-                      </>
-                    )}
+                    <div className="space-y-4">
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
                   </div>
 
                   <div className="space-y-4">
@@ -219,56 +193,76 @@ const Navigation = () => {
           </div>
         </div>
         
-        {isLoggedIn && isTourist && (
-          <div className="flex items-center gap-4">
-            {/* Currency Converter */}
-            <div className="relative" ref={currencyDropdownRef}>
-              <Button
-                variant="ghost"
-                className="flex items-center gap-1"
-                onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
-              >
-                {currency}
-                <ChevronDown className="h-4 w-4" />
-              </Button>
-              {isCurrencyDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg z-50">
-                  {Object.keys(currencies).map((code) => (
-                    <button
-                      key={code}
-                      className="block w-full text-left px-4 py-2 hover:bg-gray-100"
-                      onClick={() => {
-                        setCurrency(code);
-                        setIsCurrencyDropdownOpen(false);
-                      }}
-                    >
-                      {code}
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+        <div className="hidden md:flex items-center space-x-8">
+          <Link to="/destinations" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            Destinations
+          </Link>
+          <Link to="/tours" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+            Tours
+          </Link>
+          <div className="relative group" ref={currencyDropdownRef}>
+            <button 
+              className="flex items-center gap-2 text-gray-600 hover:text-gray-900 font-medium transition-colors"
+              onClick={() => setIsCurrencyDropdownOpen(!isCurrencyDropdownOpen)}
+            >
+              {currencies[currency].symbol} {currency}
+              <ChevronDown className="h-4 w-4" />
+            </button>
+            {isCurrencyDropdownOpen && (
+              <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg">
+                {Object.keys(currencies).map((code) => (
+                  <button
+                    key={code}
+                    className={`w-full px-4 py-2 text-left hover:bg-gray-100 ${
+                      currency === code ? 'bg-gray-50' : ''
+                    }`}
+                    onClick={() => {
+                      setCurrency(code);
+                      setIsCurrencyDropdownOpen(false);
+                    }}
+                  >
+                    {currencies[code].symbol} {code}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        </div>
 
-            {/* Cart Icon */}
-            <Link to="/tourist/cart">
-              <Button variant="ghost" size="icon">
-                <ShoppingCart className="h-5 w-5" />
-              </Button>
-            </Link>
-
-            {/* User Name and Logout */}
-            <div className="flex items-center gap-2">
-              <span className="text-sm font-medium">{username}</span>
+        <div className="flex items-center space-x-4">
+          {isLoggedIn ? (
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2 text-gray-600">
+                <User className="h-5 w-5" />
+                <span className="font-medium">{username}</span>
+              </div>
               <Button 
-                variant="ghost" 
-                size="icon"
+                variant="default"
+                className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
                 onClick={handleLogout}
               >
-                <LogOut className="h-5 w-5" />
+                <LogOut className="h-5 w-5 mr-2" />
+                Logout
               </Button>
             </div>
-          </div>
-        )}
+          ) : (
+            <>
+              <Button 
+                variant="ghost" 
+                className="hidden md:inline-flex hover:bg-gradient-to-r from-[#9EE755] to-[#CFDD3C] hover:text-black transition-all"
+                onClick={() => navigate('/sign')}
+              > 
+                Sign In
+              </Button>
+              <Button 
+                className="bg-black text-white hover:bg-gray-800" 
+                onClick={() => navigate('/sign')}
+              >
+                Book Now
+              </Button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

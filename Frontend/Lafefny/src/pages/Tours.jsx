@@ -233,11 +233,7 @@ const Tours = () => {
               </div>
             </div>
           </div>
-
-          <div className="mb-6 text-secondary">
-            {filteredItineraries.length} itineraries found
-          </div>
-          
+         
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {filteredItineraries.map((itinerary) => (
               <Card 
