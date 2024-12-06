@@ -47,23 +47,36 @@ router.get("/getTouristInfo/:id", async(req,res) => {
     }
 });
 
-router.patch("/updateTouristInfo/:id",async (req,res)=>{
-    const {username,dateOfBirth,mobileNumber,nationality,job,wallet} = req.body;
-    const _id= req.params.id
-    if(!mongoose.isValidObjectId(_id)){
-        res.status(400).json({error:"invalid tour guide"})
+router.patch("/updateTouristInfo/:id", async (req, res) => {
+  const { username, dateOfBirth, mobileNumber, nationality, job, wallet } = req.body;
+  const _id = req.params.id;
+  if (!mongoose.isValidObjectId(_id)) {
+    return res.status(400).json({ error: "Invalid tourist ID" });
+  }
+  try {
+    const tourist = await User.findOneAndUpdate(
+      { _id },
+      { username, dateOfBirth, mobileNumber, nationality, job },
+      { new: true }
+    );
+    const touristU = await Tourist.findOneAndUpdate(
+      { userID: _id },
+      { wallet },
+      { new: true }
+    );
+    if (!tourist || !touristU) {
+      return res.status(404).json({ error: "Tourist not found" });
     }
-    const tourist= await User.findOneAndUpdate({_id},{username,dateOfBirth,mobileNumber,nationality,job});
-    const touristU= await Tourist.create({userID:_id, wallet})
-   if(!tourist|| !touristU){
-    res.status(404).json({error:"tourist is not found"});
-   }
-   const result = {
-    ...tourist,
-    wallet: touristU.wallet
-}
-   res.status(200).json(result);
-})
+    const result = {
+      ...tourist.toObject(),
+      wallet: touristU.wallet
+    };
+    res.status(200).json(result);
+  } catch (error) {
+    console.error("Error updating tourist info:", error);
+    res.status(500).json({ error: "Failed to update tourist info" });
+  }
+});
 
 // New endpoint to update preferences
 router.put("/updatePreferences/:id", async (req, res) => {
@@ -174,6 +187,34 @@ router.get("/touristHistory/:userID", async (req, res) => {
       });
     } catch (error) {
       console.error("Error fetching tourist history:", error);
+      res.status(500).json({ message: error.message });
+    }
+  });
+  router.get("/upcomingActivities/:userID", async (req, res) => {
+    try {
+      const { userID } = req.params;
+  
+      // Step 1: Find the tourist to get the `touristName`
+      const tourist = await User.findOne({ _id: mongoose.Types.ObjectId(userID) });
+      if (!tourist) {
+        return res.status(404).json({ message: 'Tourist not found' });
+      }
+  
+      // Step 2: Fetch all activities
+      const allActivities = await Activity.find();
+  
+      // Step 3: Filter activities that contain the userID in `touristBookings` and have a future date
+      const upcomingActivities = allActivities.filter(activity => 
+        activity.touristBookings.includes(userID) && new Date(activity.date) > new Date()
+      );
+  
+      // Step 4: Send the filtered activities in the response
+      res.json({
+        upcomingActivities,
+        touristName: tourist.username
+      });
+    } catch (error) {
+      console.error("Error fetching upcoming activities:", error);
       res.status(500).json({ message: error.message });
     }
   });
