@@ -301,35 +301,49 @@ router.put('/promo-codes/:id/deactivate', async (req, res) => {
 });
 
 // Create User
-router.post('/users', async (req, res) => {
-  const { username, email, password, dateOfBirth } = req.body;
-
-  // Validate required fields
-  if (!username || !email || !password || !dateOfBirth) {
-    return res.status(400).json({ message: 'All fields are required' });
-  }
+router.post('/signup', async (req, res) => {
+  const { username, email, password, dateOfBirth, mobileNumber, nationality, job, role, termsAccepted } = req.body;
 
   try {
-    // Check if the email already exists
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(400).json({ message: 'Email already exists' });
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    // Create a new user
-    const user = new User({
-      username,
-      email,
-      password, // Ensure to hash this in production
-      dateOfBirth, // Use the birthday provided by the user
-      promoCodes: []
+    const newUser = new User({ username, email, password, dateOfBirth, mobileNumber, nationality, job, role });
+    await newUser.save();
+    
+    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    
+    res.status(201).json({ 
+      message: 'User registered successfully',
+      id: newUser._id,
+      token 
     });
-
-    await user.save();
-    res.status(201).json({ message: 'User created successfully', user });
-  } catch (error) {
-    res.status(500).json({ message: 'Error creating user', error });
+  } catch (err) {
+    res.status(500).json({ message: 'Error signing up', error: err.message });
   }
+});
+
+router.get('/users', async (req, res) => {
+  let users = await User.find()
+  return res.send(users).status(200)
+});
+
+// userController.js - Add this new route
+router.get('/users/:id', async (req, res) => {
+try {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+  res.status(200).json(user);
+} catch (error) {
+  res.status(500).json({ 
+    message: 'Error fetching user', 
+    error: error.message 
+  });
+}
 });
 
 // Protected route example

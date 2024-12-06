@@ -4,15 +4,13 @@ import axios from 'axios';
 import '../styles/productList.css';
 import Navigation from './Navigation';
 import { ArrowLeft, Minus, Plus, Trash2, ShoppingBag } from 'lucide-react';
-import { fetchExchangeRates } from '../services/currencyService';
-import { useCurrency } from '../context/CurrencyContext';
+import { useCurrency, currencies } from '../context/CurrencyContext';
 
 const TouristCart = () => {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-  const { currency, conversionRates } = useCurrency();
 
   useEffect(() => {
     const fetchCart = async () => {
@@ -31,10 +29,19 @@ const TouristCart = () => {
     fetchCart();
   }, []);
 
-  const convertPrice = (price) => {
-    if (!conversionRates || !price) return price;
-    const priceInUSD = price / conversionRates.EGP;
-    return (priceInUSD * conversionRates[currency]).toFixed(2);
+  const { currency } = useCurrency();
+    
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice.toFixed(2);
   };
 
   const updateQuantity = async (productId, newQuantity) => {
@@ -94,11 +101,11 @@ const TouristCart = () => {
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Back Button */}
         <button 
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/')}
           className="flex items-center text-primary hover:text-primary/80 mb-6"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />
-          Back
+          Back to Homepage
         </button>
 
         {/* Header */}
