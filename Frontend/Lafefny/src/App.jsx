@@ -254,8 +254,8 @@ const App = () => {
           <Route path="/room-details/:hotelId" element={<ProtectedRoute allowedRoles={['Tourist']}><RoomDetails /></ProtectedRoute>} />
 
           {/* Reports (Admin only) */}
-          <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin']}><ItineraryReport /></ProtectedRoute>} />
-          <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin']}><ActivityReport /></ProtectedRoute>} />
+          <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin','TourGuide']}><ItineraryReport /></ProtectedRoute>} />
+          <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin','Advertiser']}><ActivityReport /></ProtectedRoute>} />
         </Routes>
       </Router>
       </TooltipProvider>
