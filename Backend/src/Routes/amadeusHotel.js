@@ -188,38 +188,44 @@ router.put("/bookHotels", async (req, res) => {
     console.log("Raw request body:", req.body);
     console.log("Content-Type:", req.headers["content-type"]);
 
-    const { username, newBookedHotelId } = req.body;
-    console.log("Parsed request:", { username, newBookedHotelId });
+    const { userID, hotelBooking } = req.body;
+    console.log("Parsed request:", { userID, hotelBooking });
 
-    if (!username || !newBookedHotelId) {
-      console.log("Missing fields:", { username, newBookedHotelId });
+    if (!userID || !hotelBooking) {
+      console.log("Missing fields:", { userID, hotelBooking });
       return res.status(400).json({
         message: "Missing required fields",
-        received: { username, newBookedHotelId },
+        received: { userID, hotelBooking },
       });
     }
 
     // Get current tourist data
-    const tourist = await Tourist.findOne({ username });
+    const tourist = await Tourist.findOne({ userID });
     console.log("Found tourist:", tourist);
 
     if (!tourist) {
       return res.status(404).json({
-        message: "Tourist not found",
-        username: username,
+        message: "Tourist not found. Please make sure you are logged in.",
+        userID: userID,
       });
     }
 
-    // Ensure BookedHotels is initialized as an array
-    const currentHotels = tourist.BookedHotels || [];
-    const updatedHotels = [...currentHotels, newBookedHotelId];
-
-    console.log("Current hotels:", currentHotels);
-    console.log("Updated hotels:", updatedHotels);
-
+    // Update the tourist's hotel bookings
     const updatedTourist = await Tourist.findOneAndUpdate(
-      { username },
-      { $set: { BookedHotels: updatedHotels } },
+      { userID },
+      { 
+        $push: { 
+          hotelBookings: {
+            hotelName: hotelBooking.hotelName,
+            roomType: hotelBooking.roomType,
+            checkInDate: new Date(hotelBooking.checkInDate),
+            checkOutDate: new Date(hotelBooking.checkOutDate),
+            numberOfGuests: hotelBooking.numberOfGuests,
+            bookingStatus: hotelBooking.bookingStatus,
+            price: hotelBooking.price
+          }
+        }
+      },
       { new: true }
     );
 
@@ -227,7 +233,7 @@ router.put("/bookHotels", async (req, res) => {
 
     res.status(200).json({
       message: "Hotel booked successfully",
-      bookedHotels: updatedTourist.BookedHotels,
+      booking: updatedTourist.hotelBookings[updatedTourist.hotelBookings.length - 1]
     });
   } catch (error) {
     console.error("Detailed error:", error);

@@ -14,7 +14,8 @@ const BookHotel = () => {
   const [error, setError] = useState(null);
   const [selectedOffer, setSelectedOffer] = useState(null);
   const [cookies] = useCookies(["userType", "username"]);
-  const username = cookies.username;
+  const username = localStorage.getItem('currentUserName');
+  const userID = localStorage.getItem('userID');
   const [formErrors, setFormErrors] = useState({});
   const [showSuccessPopup, setShowSuccessPopup] = useState(false);
   const [successMessage, setSuccessMessage] = useState("");
@@ -116,17 +117,36 @@ const BookHotel = () => {
 
     try {
       setLoading(true);
+      
+      // Extract booking details from the selected offer
+      const hotelOffer = selectedOffer.offers[0];
+      const bookingDetails = {
+        userID,
+        hotelBooking: {
+          hotelName: selectedOffer.hotel.name,
+          roomType: hotelOffer.room.type || 'Standard',
+          checkInDate: checkInDate,
+          checkOutDate: checkOutDate,
+          numberOfGuests: adults,
+          bookingStatus: 'Confirmed',
+          price: parseFloat(hotelOffer.price.total) || 0,
+          hotelId: selectedOffer.hotel.hotelId
+        }
+      };
+
+      console.log('Sending booking details:', bookingDetails);
+
       const response = await axios.put(
         "http://localhost:8000/amadeusHotel/bookHotels",
-        {
-          username,
-          newBookedHotelId: selectedOffer.hotel.hotelId,
-        }
+        bookingDetails
       );
+
       setSuccessMessage(response.data.message || "Hotel booked successfully!");
       setShowSuccessPopup(true);
+      setSelectedOffer(null);
     } catch (err) {
-      setError(err.response?.data?.error || "Failed to book hotel");
+      console.error("Booking error:", err.response?.data || err);
+      setError(err.response?.data?.message || "Failed to book hotel");
     } finally {
       setLoading(false);
     }
