@@ -164,7 +164,7 @@ const Navigation = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {!isLoggedIn && (
+                  {!isTourist && (
                     <>
                     <div className="border-b pb-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
@@ -383,22 +383,23 @@ const Navigation = () => {
                       <Lock className="h-4 w-4" />
                       Change Password
                     </Link>
+                    {isTourist && (
+                    <>
                     <Link to="/touristSelectPreferences" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <Heart className="h-4 w-4" />
-                      Preferences
-                    </Link>
-                    <Link to="/manage-addresses" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <MapPin className="h-4 w-4" />
-                      Addresses
-                    </Link>
-                    <Link to="/complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <MessageSquare className="h-4 w-4" />
-                      Submit Complaint
-                    </Link>
-                    <Link to="/my-complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <List className="h-4 w-4" />
-                      View Complaints
-                    </Link>
+                        <Heart className="h-4 w-4" />
+                        Preferences
+                      </Link><Link to="/manage-addresses" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          <MapPin className="h-4 w-4" />
+                          Addresses
+                        </Link><Link to="/complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          <MessageSquare className="h-4 w-4" />
+                          Submit Complaint
+                        </Link><Link to="/my-complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                          <List className="h-4 w-4" />
+                          View Complaints
+                        </Link>
+                        </>
+                    )}
                     <div className="border-t my-2"></div>
                     <Link to="/delete-account" className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
                       <Trash2 className="h-4 w-4" />

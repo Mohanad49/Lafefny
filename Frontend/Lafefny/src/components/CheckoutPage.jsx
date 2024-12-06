@@ -14,10 +14,8 @@ import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { useCurrency, currencies } from '../context/CurrencyContext';
 
-// Initialize Stripe
 const stripePromise = loadStripe('pk_test_51QP7WoG4UGkAwtrqHrV9BgIvG1T8ZNjqOpbKq9W8kD4xwUcmNCegaX0jOnKzU1JNckplg9MIomiIhdGEt3e1FFHn007MSX3aFl');
 
-// Separate component for Stripe payment form
 const StripePaymentForm = ({ onPaymentSuccess, total, selectedAddress }) => {
   const stripe = useStripe();
   const elements = useElements();
@@ -122,6 +120,9 @@ const CheckoutPage = () => {
   const [addresses, setAddresses] = useState([]);
   const [paymentMethod, setPaymentMethod] = useState('Cash on Delivery');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showStripePayment, setShowStripePayment] = useState(false);
+  const [processing, setProcessing] = useState(false);
+  const [walletBalance, setWalletBalance] = useState(0);
   const [newAddress, setNewAddress] = useState({
     street: '',
     city: '',
@@ -130,8 +131,6 @@ const CheckoutPage = () => {
     postalCode: '',
     isDefault: false
   });
-  const [showStripePayment, setShowStripePayment] = useState(false);
-  const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
 
   const { currency } = useCurrency();
@@ -152,7 +151,11 @@ const CheckoutPage = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const userId = localStorage.getItem('userID');
+        if (!userId) {
+          throw new Error('User not logged in');
+        }
         
         // Fetch cart items
         const cartResponse = await axios.get(`http://localhost:8000/tourist/${userId}/cart`);
@@ -160,12 +163,27 @@ const CheckoutPage = () => {
 
         // Fetch addresses
         const addressResponse = await axios.get(`http://localhost:8000/tourist/${userId}/addresses`);
-        setAddresses(addressResponse.data);
+        const addressData = addressResponse.data;
+        setAddresses(addressData);
+        
+        // Set default address if available
+        const defaultAddress = addressData.find(addr => addr.isDefault);
+        if (defaultAddress) {
+          setSelectedAddress(addressData.indexOf(defaultAddress));
+        } else if (addressData.length > 0) {
+          setSelectedAddress(0); // Select first address by default
+        }
+
+        // Fetch wallet balance
+        const walletResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userId}`);
+        if (walletResponse.data && walletResponse.data.length > 0) {
+          setWalletBalance(walletResponse.data[0].wallet || 0);
+        }
         
         setLoading(false);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setError('Failed to load checkout data');
+        setError(error.message || 'Failed to load checkout data');
         setLoading(false);
       }
     };
@@ -175,90 +193,96 @@ const CheckoutPage = () => {
 
   const total = cartItems.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const createOrder = async (paymentMethod) => {
-    try {
-      const userId = localStorage.getItem('userID');
-      if (!userId) {
-        throw new Error('User ID not found');
-      }
-
-      console.log('Creating order with data:', {
-        userId,
-        cartItems,
-        total,
-        paymentMethod,
-        selectedAddress
-      });
-
-      const orderData = {
-        products: cartItems.map(item => ({
-          productId: item._id,
-          quantity: item.quantity,
-          price: item.price
-        })),
-        totalAmount: total,
-        paymentMethod: paymentMethod,
-        selectedAddress: selectedAddress
-      };
-
-      console.log('Sending order data:', orderData);
-
-      const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/orders`,
-        orderData
-      );
-
-      console.log('Order creation response:', response.data);
-      alert('Order placed successfully!');
-      navigate('/touristHome');
-    } catch (error) {
-      console.error('Error creating order:', error);
-      console.error('Error details:', error.response?.data);
-      alert('Failed to create order: ' + (error.response?.data?.error || error.message));
-      throw error;
-    }
-  };
-
-  const handleCashOrder = async () => {
-    try {
-      if (!selectedAddress) {
-        alert('Please select a delivery address');
-        return;
-      }
-      if (cartItems.length === 0) {
-        alert('Your cart is empty');
-        return;
-      }
-      console.log('Processing cash order...');
-      await createOrder('Cash on Delivery');
-    } catch (error) {
-      console.error('Cash order error:', error);
-      alert(error.message);
+  const handlePaymentMethodChange = (method) => {
+    setPaymentMethod(method);
+    if (method === 'Credit Card') {
+      setShowStripePayment(true);
+    } else {
+      setShowStripePayment(false);
     }
   };
 
   const handleWalletPayment = async () => {
+    if (walletBalance < total) {
+      alert('Insufficient wallet balance');
+      return;
+    }
+
     try {
-      if (!selectedAddress) {
-        alert('Please select a delivery address');
-        return;
+      setProcessing(true);
+      const userId = localStorage.getItem('userID');
+      
+      // Create order with wallet payment
+      const orderResponse = await axios.post(
+        `http://localhost:8000/tourist/${userId}/orders`,
+        {
+          products: cartItems.map(item => ({
+            productId: item._id,
+            quantity: item.quantity,
+            price: item.price
+          })),
+          totalAmount: total,
+          paymentMethod: 'Wallet',
+          selectedAddress: addresses[selectedAddress]
+        }
+      );
+
+      // Deduct from wallet
+      await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
+        amount: total
+      });
+
+      alert('Order placed successfully!');
+      navigate('/touristHome');
+    } catch (error) {
+      console.error('Wallet payment error:', error);
+      alert(error.response?.data?.message || 'Failed to process wallet payment');
+    } finally {
+      setProcessing(false);
+    }
+  };
+
+  const handlePlaceOrder = async () => {
+    if (selectedAddress === null || selectedAddress < 0) {
+      alert('Please select a delivery address');
+      return;
+    }
+
+    if (!addresses[selectedAddress]) {
+      alert('Selected address is invalid');
+      return;
+    }
+
+    if (cartItems.length === 0) {
+      alert('Your cart is empty');
+      return;
+    }
+
+    setProcessing(true);
+    try {
+      switch (paymentMethod) {
+        case 'Wallet':
+          await handleWalletPayment();
+          break;
+        case 'Cash on Delivery':
+          await handleCashOrder();
+          break;
+        case 'Credit Card':
+          setShowStripePayment(true);
+          break;
+        default:
+          throw new Error('Invalid payment method');
       }
-      // Add wallet balance check here if needed
-      await createOrder('Wallet');
     } catch (error) {
+      console.error('Order error:', error);
       alert(error.message);
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const handlePaymentSuccess = async () => {
-    try {
-      await createOrder('Credit Card');
-    } catch (error) {
-      alert('Payment successful but failed to create order. Please contact support.');
-    }
-  };
-
-  const handleAddAddress = async () => {
+  const handleAddAddress = async (e) => {
+    e.preventDefault();
     try {
       if (!newAddress.street || !newAddress.city || !newAddress.state || 
           !newAddress.country || !newAddress.postalCode) {
@@ -267,14 +291,26 @@ const CheckoutPage = () => {
       }
 
       const userId = localStorage.getItem('userID');
+      if (!userId) {
+        throw new Error('User not logged in');
+      }
+
+      setProcessing(true);
       const response = await axios.post(
         `http://localhost:8000/tourist/${userId}/addresses`,
         newAddress
       );
 
-      // Update addresses list
-      setAddresses(response.data);
-      setShowAddModal(false);
+      // Update addresses list and select the new address if it's default or there's no selected address
+      const updatedAddresses = response.data;
+      setAddresses(updatedAddresses);
+      
+      const addedAddress = updatedAddresses[updatedAddresses.length - 1];
+      if (newAddress.isDefault || selectedAddress === 0) {
+        setSelectedAddress(updatedAddresses.indexOf(addedAddress));
+      }
+
+      // Reset form and close modal
       setNewAddress({
         street: '',
         city: '',
@@ -283,21 +319,69 @@ const CheckoutPage = () => {
         postalCode: '',
         isDefault: false
       });
-      alert('Address added successfully!');
+      setShowAddModal(false);
+      
     } catch (error) {
       console.error('Error adding address:', error);
-      alert('Failed to add address: ' + (error.response?.data?.error || error.message));
+      alert(error.response?.data?.message || 'Failed to add address');
+    } finally {
+      setProcessing(false);
     }
   };
 
-  const handlePaymentMethodChange = (e) => {
-    const method = e.target.value;
-    setPaymentMethod(method);
-    setShowStripePayment(method === 'Credit Card');
+  const handleCashOrder = async () => {
+    try {
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        throw new Error('User not logged in');
+      }
+
+      const orderData = {
+        products: cartItems.map(item => ({
+          productId: item._id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        totalAmount: total,
+        paymentMethod: 'Cash on Delivery',
+        selectedAddress: addresses[selectedAddress]
+      };
+
+      await axios.post(`http://localhost:8000/tourist/${userId}/orders`, orderData);
+      alert('Order placed successfully!');
+      navigate('/touristHome');
+    } catch (error) {
+      console.error('Cash order error:', error);
+      throw error;
+    }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  const handlePaymentSuccess = async () => {
+    try {
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        throw new Error('User not logged in');
+      }
+
+      const orderData = {
+        products: cartItems.map(item => ({
+          productId: item._id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        totalAmount: total,
+        paymentMethod: 'Credit Card',
+        selectedAddress: addresses[selectedAddress]
+      };
+
+      await axios.post(`http://localhost:8000/tourist/${userId}/orders`, orderData);
+      alert('Order placed successfully!');
+      navigate('/touristHome');
+    } catch (error) {
+      console.error('Order creation error:', error);
+      alert('Payment successful but failed to create order. Please contact support.');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">

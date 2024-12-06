@@ -8,6 +8,8 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 import NotificationBell from './NotificationBell';
 import axios from 'axios';
+import { useCurrency, currencies } from '../context/CurrencyContext';
+
 
 const TouristHome = () => {
   const [upcomingActivities, setUpcomingActivities] = useState([]);
@@ -15,6 +17,11 @@ const TouristHome = () => {
   const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [userPreferences, setUserPreferences] = useState([]);
   const userId = localStorage.getItem('userID');
+
+  const { currency } = useCurrency();
+  const [conversionRates, setConversionRates] = useState(null);
+  const [ratesLoading, setRatesLoading] = useState(true);
+  const [ratesError, setRatesError] = useState(null);
 
   const [profile, setProfile] = useState({
     level: 1,
@@ -40,8 +47,8 @@ const TouristHome = () => {
         }
         
         // Fetch upcoming activities
-        const activitiesResponse = await axios.get(`http://localhost:8000/tourist/activities/${userId}`);
-        setUpcomingActivities(activitiesResponse.data);
+        const activitiesResponse = await axios.get(`http://localhost:8000/tourist/upcomingActivities/${userId}`);
+        setUpcomingActivities(activitiesResponse.data.upcomingActivities);
       } catch (error) {
         console.error('Error fetching tourist data:', error);
       }
@@ -71,6 +78,26 @@ const TouristHome = () => {
 
     fetchPersonalizedData();
   }, [userId]);
+
+  useEffect(() => {
+    const getRates = async () => {
+      try {
+        const rates = await fetchExchangeRates();
+        setConversionRates(rates);
+      } catch (error) {
+        setRatesError('Failed to load currency rates');
+      } finally {
+        setRatesLoading(false);
+      }
+    };
+    getRates();
+  }, []);
+
+  const convertWalletBalance = (wallet) => {
+    if (!conversionRates || !wallet) return wallet;
+    const walletInUSD = wallet / conversionRates.EGP;
+    return (walletInUSD * conversionRates[currency]).toFixed(2);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -102,22 +129,20 @@ const TouristHome = () => {
                     <Star className="h-5 w-5 text-amber-400" />
                     <div>
                       <p className="text-sm text-muted-foreground">Loyalty Points</p>
-                      <p className="font-medium">{profile.loyaltyPoints}</p>
+                      <p className="font-medium">{profile.loyaltyPoints.toFixed(2)}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
                     <Wallet className="h-5 w-5 text-green-500" />
                     <div>
                       <p className="text-sm text-muted-foreground">Wallet Balance</p>
-                      <p className="font-medium">EGP {profile.wallet}</p>
+                      <p className="font-medium">{currencies[currency].symbol} {convertWalletBalance(profile.wallet).toFixed(2)}</p>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="absolute top-4 right-4">
-                <NotificationBell />
-              </div>
+              
             </div>
           </div>
         </section>
@@ -164,12 +189,7 @@ const TouristHome = () => {
             <div className="grid gap-8">
               {/* Recommendations */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <h2 className="text-2xl font-bold">Recommended for You</h2>
-                  </div>
-                </div>
+                
                 <div className="grid md:grid-cols-3 gap-6">
                   {recommendations.slice(0, 3).map((item) => (
                     <Link
@@ -198,12 +218,7 @@ const TouristHome = () => {
 
               {/* Recently Viewed */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <h2 className="text-2xl font-bold">Recently Viewed</h2>
-                  </div>
-                </div>
+                
                 <div className="grid md:grid-cols-4 gap-4">
                   {recentlyViewed.slice(0, 4).map((item) => (
                     <Link
