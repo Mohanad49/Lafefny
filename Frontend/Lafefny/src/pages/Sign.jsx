@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { signUp, signIn } from '../services/signService';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Plane } from 'lucide-react';
+import { Plane, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 
 function Sign() {
@@ -37,6 +37,10 @@ function Sign() {
     });
   };
 
+  const handleBack = () => {
+    navigate('/');
+  };
+
   const handleCheckboxChange = () => {
     setFormData((prevData) => ({
       ...prevData,
@@ -61,6 +65,7 @@ function Sign() {
     const updatedFormData = {
       ...formData,
       role: userType,
+      isAccepted: userType === 'Tourist' ? true : false
     };
     try {
       if (isSignUp) {
@@ -137,8 +142,12 @@ function Sign() {
               }
             );
           }
-
-          alert('Sign up successful! Please wait for admin approval before signing in.');
+          if (userType === 'Tourist'){
+            alert ('Sign up successful!');
+          }
+          else{
+            alert('Sign up successful! Please wait for admin approval before signing in.');
+          }
           setIsSignUp(false);
 
         } catch (error) {
@@ -198,6 +207,13 @@ function Sign() {
 
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
+      <button
+        onClick={handleBack}
+        className="absolute top-4 left-4 p-2 flex items-center gap-2 text-gray-600 hover:text-gray-900 transition-colors"
+      >
+        <ArrowLeft className="h-5 w-5" />
+        <span>Back to Home</span>
+      </button>
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
           <div className="inline-flex items-center justify-center p-3 bg-accent/10 rounded-full mb-6">
