@@ -10,6 +10,9 @@ import {
 } from '@stripe/react-stripe-js';
 import '../styles/checkout.css';
 import { ShoppingCart, CreditCard, MapPin, ArrowLeft } from 'lucide-react';
+import Navigation from '../components/Navigation';
+import Footer from '../components/Footer';
+import { useCurrency, currencies } from '../context/CurrencyContext';
 
 // Initialize Stripe
 const stripePromise = loadStripe('pk_test_51QP7WoG4UGkAwtrqHrV9BgIvG1T8ZNjqOpbKq9W8kD4xwUcmNCegaX0jOnKzU1JNckplg9MIomiIhdGEt3e1FFHn007MSX3aFl');
@@ -130,6 +133,21 @@ const CheckoutPage = () => {
   const [showStripePayment, setShowStripePayment] = useState(false);
   const [processing, setProcessing] = useState(false);
   const navigate = useNavigate();
+
+  const { currency } = useCurrency();
+    
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice.toFixed(2);
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -282,170 +300,179 @@ const CheckoutPage = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="checkout-container">
-      <div className="flex items-center gap-4 mb-6">
-        <button 
-          onClick={() => navigate('/tourist/cart')}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back to Cart
-        </button>
-        <h1 className="checkout-header">Checkout</h1>
-      </div>
-
-      <div className="order-summary">
-        <div className="p-4 border-b border-border">
-          <h2 className="text-lg font-semibold flex items-center gap-2">
-            <ShoppingCart className="h-5 w-5" />
-            Order Summary
-          </h2>
-        </div>
-        <table className="checkout-table">
-          <thead>
-            <tr>
-              <th>Product</th>
-              <th>Price</th>
-              <th>Quantity</th>
-              <th>Subtotal</th>
-            </tr>
-          </thead>
-          <tbody>
-            {cartItems.map(item => (
-              <tr key={item._id}>
-                <td>
-                  <div className="product-info">
-                    <img src={item.imageUrl} alt={item.name} />
-                    <span>{item.name}</span>
-                  </div>
-                </td>
-                <td>EGP{item.price}</td>
-                <td>{item.quantity}</td>
-                <td>EGP{(item.price * item.quantity).toFixed(2)}</td>
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr>
-              <td colSpan="3"><strong>Total</strong></td>
-              <td><strong>EGP{total.toFixed(2)}</strong></td>
-            </tr>
-          </tfoot>
-        </table>
-      </div>
-
-      <div className="address-section">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <MapPin className="h-5 w-5" />
-          Delivery Address
-        </h2>
-        {addresses.length === 0 ? (
-          <p>No addresses found. Please add an address.</p>
-        ) : (
-          <div className="address-list">
-            {addresses.map((address, index) => (
-              <div 
-                key={index} 
-                className={`address-card ${selectedAddress === address ? 'selected' : ''}`}
-                onClick={() => setSelectedAddress(address)}
-              >
-                <p>{address.street}</p>
-                <p>{address.city}, {address.state}</p>
-                <p>{address.country}, {address.postalCode}</p>
-              </div>
-            ))}
-          </div>
-        )}
-        <button 
-          className="add-address-btn"
-          onClick={() => setShowAddModal(true)}
-        >
-          Add New Address
-        </button>
-      </div>
-
-      {showAddModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <h3>Add New Address</h3>
-            <input
-              value={newAddress.street}
-              onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
-              placeholder="Street"
-            />
-            <input
-              value={newAddress.city}
-              onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
-              placeholder="City"
-            />
-            <input
-              value={newAddress.state}
-              onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
-              placeholder="State"
-            />
-            <input
-              value={newAddress.country}
-              onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
-              placeholder="Country"
-            />
-            <input
-              value={newAddress.postalCode}
-              onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
-              placeholder="Postal Code"
-            />
-            <label>
-              <input
-                type="checkbox"
-                checked={newAddress.isDefault}
-                onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
-              />
-              Set as default
-            </label>
-            <div className="modal-actions">
-              <button onClick={handleAddAddress}>Add</button>
-              <button onClick={() => setShowAddModal(false)}>Cancel</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <div className="payment-section">
-        <h2 className="text-lg font-semibold flex items-center gap-2">
-          <CreditCard className="h-5 w-5" />
-          Payment Method
-        </h2>
-        <select 
-          value={paymentMethod} 
-          onChange={(e) => setPaymentMethod(e.target.value)}
-        >
-          <option value="Cash on Delivery">Cash on Delivery</option>
-          <option value="Credit Card">Credit Card</option>
-          <option value="Wallet">Wallet</option>
-        </select>
-
-        {paymentMethod === 'Credit Card' && (
-          <div className="stripe-payment-container">
-            <Elements stripe={stripePromise}>
-              <StripePaymentForm
-                onPaymentSuccess={handlePaymentSuccess}
-                total={total}
-                selectedAddress={selectedAddress}
-              />
-            </Elements>
-          </div>
-        )}
-      </div>
-
-      {paymentMethod !== 'Credit Card' && (
-        <div className="checkout-actions">
+    <div className="min-h-screen flex flex-col">
+      <Navigation />
+      
+      <main className="flex-1 py-16">
+        <div className="checkout-container">
+          {/* Back button styled consistently with other pages */}
           <button 
-            onClick={paymentMethod === 'Wallet' ? handleWalletPayment : handleCashOrder}
-            disabled={!selectedAddress || cartItems.length === 0}
+            onClick={() => navigate('/tourist/cart')}
+            className="flex items-center gap-2 text-primary hover:text-primary/80 mb-8"
           >
-            {paymentMethod === 'Wallet' ? 'Pay with Wallet' : 'Place Order'}
+            <ArrowLeft className="h-5 w-5" />
+            Back to Cart
           </button>
+
+          <h1 className="text-3xl font-bold text-foreground mb-8">Checkout</h1>
+
+          <div className="order-summary">
+            <div className="p-4 border-b border-border">
+              <h2 className="text-lg font-semibold flex items-center gap-2">
+                <ShoppingCart className="h-5 w-5" />
+                Order Summary
+              </h2>
+            </div>
+            <table className="checkout-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Price</th>
+                  <th>Quantity</th>
+                  <th>Subtotal</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cartItems.map(item => (
+                  <tr key={item._id}>
+                    <td>
+                      <div className="product-info">
+                        <img src={item.imageUrl} alt={item.name} />
+                        <span>{item.name}</span>
+                      </div>
+                    </td>
+                    <td>{currencies[currency].symbol}{convertPrice(item.price)}</td>
+                    <td>{item.quantity}</td>
+                    <td>{currencies[currency].symbol}{convertPrice((item.price * item.quantity))}</td>
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan="3"><strong>Total</strong></td>
+                  <td><strong>{currencies[currency].symbol}{convertPrice(total)}</strong></td>
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+
+          <div className="address-section">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <MapPin className="h-5 w-5" />
+              Delivery Address
+            </h2>
+            {addresses.length === 0 ? (
+              <p>No addresses found. Please add an address.</p>
+            ) : (
+              <div className="address-list">
+                {addresses.map((address, index) => (
+                  <div 
+                    key={index} 
+                    className={`address-card ${selectedAddress === address ? 'selected' : ''}`}
+                    onClick={() => setSelectedAddress(address)}
+                  >
+                    <p>{address.street}</p>
+                    <p>{address.city}, {address.state}</p>
+                    <p>{address.country}, {address.postalCode}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+            <button 
+              className="add-address-btn"
+              onClick={() => setShowAddModal(true)}
+            >
+              Add New Address
+            </button>
+          </div>
+
+          {showAddModal && (
+            <div className="modal">
+              <div className="modal-content">
+                <h3>Add New Address</h3>
+                <input
+                  value={newAddress.street}
+                  onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+                  placeholder="Street"
+                />
+                <input
+                  value={newAddress.city}
+                  onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+                  placeholder="City"
+                />
+                <input
+                  value={newAddress.state}
+                  onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
+                  placeholder="State"
+                />
+                <input
+                  value={newAddress.country}
+                  onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
+                  placeholder="Country"
+                />
+                <input
+                  value={newAddress.postalCode}
+                  onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
+                  placeholder="Postal Code"
+                />
+                <label>
+                  <input
+                    type="checkbox"
+                    checked={newAddress.isDefault}
+                    onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                  />
+                  Set as default
+                </label>
+                <div className="modal-actions">
+                  <button onClick={handleAddAddress}>Add</button>
+                  <button onClick={() => setShowAddModal(false)}>Cancel</button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <div className="payment-section">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+              <CreditCard className="h-5 w-5" />
+              Payment Method
+            </h2>
+            <select 
+              value={paymentMethod} 
+              onChange={(e) => setPaymentMethod(e.target.value)}
+            >
+              <option value="Cash on Delivery">Cash on Delivery</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="Wallet">Wallet</option>
+            </select>
+
+            {paymentMethod === 'Credit Card' && (
+              <div className="stripe-payment-container">
+                <Elements stripe={stripePromise}>
+                  <StripePaymentForm
+                    onPaymentSuccess={handlePaymentSuccess}
+                    total={total}
+                    selectedAddress={selectedAddress}
+                  />
+                </Elements>
+              </div>
+            )}
+          </div>
+
+          {paymentMethod !== 'Credit Card' && (
+            <div className="checkout-actions">
+              <button 
+                onClick={paymentMethod === 'Wallet' ? handleWalletPayment : handleCashOrder}
+                disabled={!selectedAddress || cartItems.length === 0}
+                className="w-full py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {paymentMethod === 'Wallet' ? 'Pay with Wallet' : 'Place Order'}
+              </button>
+            </div>
+          )}
         </div>
-      )}
+      </main>
+
+      <Footer />
     </div>
   );
 };

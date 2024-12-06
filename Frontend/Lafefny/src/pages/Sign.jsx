@@ -158,7 +158,7 @@ function Sign() {
           
           // Use the login function from AuthContext
           login(signInResponse);
-          navigate('/');
+          navigate('/touristHome');
         } catch (error) {
           if (error.response?.status === 403) {
             alert('Your account is pending approval. Please wait for admin confirmation.');
