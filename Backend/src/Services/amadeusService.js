@@ -1,6 +1,8 @@
 const Amadeus = require('amadeus');
 const NodeCache = require('node-cache');
 const Tourist = require('../Models/touristModel');
+const express = require('express');
+const axios = require('axios');
 
 // Initialize Amadeus client
 const amadeus = new Amadeus({
@@ -11,15 +13,38 @@ const amadeus = new Amadeus({
 // Initialize cache with 1-hour TTL
 const cache = new NodeCache({ stdTTL: 3600 });
 
+const getAmadeusToken = async () => {
+  try {
+    const cachedToken = cache.get('amadeus_token');
+    if (cachedToken) {
+      return cachedToken;
+    }
+
+    if (!authResponse.ok) {
+      throw new Error(`Authentication failed: ${authResponse.statusText}`);
+    }
+
+    const tokenData = await authResponse.json();
+    const token = tokenData.access_token;
+    
+    // Cache token for 29 minutes
+    cache.set('amadeus_token', token, 1740);
+    
+    return token;
+  } catch (error) {
+    console.error('Error getting Amadeus token:', error);
+    throw new Error('Failed to authenticate with Amadeus API');
+  }
+};
+
 // Helper function to handle API errors
 const handleAmadeusError = (error) => {
-  console.error('Amadeus API Error:', error);
-  const errorDetails = {
-    message: error.description || error.message || 'Unknown error occurred',
-    code: error.code || 'UNKNOWN_ERROR',
-    stack: error.stack
-  };
-  throw errorDetails;
+  console.error('Amadeus API error:', {
+    status: error.response?.status,
+    code: error.response?.data?.errors?.[0]?.code,
+    detail: error.response?.data?.errors?.[0]?.detail
+  });
+  throw error;
 };
 
 // Get location code (IATA code)
@@ -156,69 +181,117 @@ const fetchHotelIdsByCity = async (cityCode) => {
     handleAmadeusError(error);
   }
 };
-
+const isValidDate = (dateString) => {
+  const regex = /^\d{4}-\d{2}-\d{2}$/;
+  if (!dateString.match(regex)) return false;
+  const date = new Date(dateString);
+  const timestamp = date.getTime();
+  if (typeof timestamp !== "number" || Number.isNaN(timestamp)) return false;
+  return dateString === date.toISOString().split("T")[0];
+};
 // Fetch hotel offers with batch processing
-const fetchHotelOffers = async (hotelIds, checkInDate, checkOutDate, adults, roomQuantity = 1) => {
-  const BATCH_SIZE = 10;
-  const allHotelOffers = [];
-  const batches = [];
-
-  // Split hotel IDs into batches
-  for (let i = 0; i < hotelIds.length; i += BATCH_SIZE) {
-    batches.push(hotelIds.slice(i, i + BATCH_SIZE));
-  }
-
-  console.log(`Processing ${batches.length} batches of hotel offers`);
-
+const fetchHotelOffers = async (cityCode, checkInDate, checkOutDate, adults, roomQuantity, page = 1) => {
   try {
-    // Process each batch
-    for (const [index, batch] of batches.entries()) {
-      console.log(`Processing batch ${index + 1}/${batches.length}`);
-
-      const batchPromises = batch.map(hotelId => {
-        const cacheKey = `hotel_offer_${hotelId}_${checkInDate}_${checkOutDate}_${adults}_${roomQuantity}`;
-        const cachedOffer = cache.get(cacheKey);
-
-        if (cachedOffer) {
-          console.log(`Retrieved cached offer for hotel ${hotelId}`);
-          return Promise.resolve(cachedOffer);
-        }
-
-        return amadeus.shopping.hotelOffersByHotel.get({
-          hotelId: hotelId,
-          checkInDate: checkInDate,
-          checkOutDate: checkOutDate,
-          adults: adults,
-          roomQuantity: roomQuantity
-        }).then(response => {
-          if (response.data) {
-            cache.set(cacheKey, response.data);
-            return response.data;
-          }
-          return null;
-        }).catch(error => {
-          console.error(`Error fetching offers for hotel ${hotelId}:`, error);
-          return null;
-        });
-      });
-
-      const batchResults = await Promise.all(batchPromises);
-      allHotelOffers.push(...batchResults.filter(offer => offer !== null));
+    // Input validation
+    if (!cityCode || !checkInDate || !checkOutDate || !adults || !roomQuantity) {
+      throw new Error('Missing required parameters');
     }
 
-    console.log(`Successfully retrieved ${allHotelOffers.length} hotel offers`);
-    return allHotelOffers;
+    // Format parameters
+    const params = {
+      cityCode: cityCode.toUpperCase().trim(),
+      checkInDate: new Date(checkInDate).toISOString().split('T')[0],
+      checkOutDate: new Date(checkOutDate).toISOString().split('T')[0],
+      adults: parseInt(adults),
+      roomQuantity: parseInt(roomQuantity),
+      page: {
+        offset: (parseInt(page) - 1) * 10,
+        limit: 10
+      },
+      includeClosed: false,
+      bestRateOnly: true,
+      currency: 'USD',
+      ratings: ['3', '4', '5']
+    };
+
+    // Date validation
+    const today = new Date();
+    const checkIn = new Date(params.checkInDate);
+    const checkOut = new Date(params.checkOutDate);
+
+    if (checkIn < today) {
+      throw new Error('Check-in date cannot be in the past');
+    }
+    if (checkOut <= checkIn) {
+      throw new Error('Check-out date must be after check-in date');
+    }
+
+    // Cache check
+    const cacheKey = `hotels_${JSON.stringify(params)}`;
+    const cached = cache.get(cacheKey);
+    if (cached) return cached;
+
+    // Ensure valid token
+    await getAmadeusToken();
+
+    // Retry logic
+    const maxRetries = 3;
+    let lastError = null;
+
+    for (let attempt = 1; attempt <= maxRetries; attempt++) {
+      try {
+        const response = await amadeus.shopping.hotelOffers.get(params);
+
+        if (!response.data) {
+          throw new Error('Invalid API response');
+        }
+
+        const result = {
+          status: 'success',
+          data: response.data,
+          meta: {
+            count: response.data.length,
+            page: page,
+            limit: params.page.limit,
+            hasMore: response.data.length === params.page.limit
+          },
+          timestamp: new Date().toISOString(),
+          params
+        };
+
+        cache.set(cacheKey, result, 3600);
+        return result;
+
+      } catch (error) {
+        lastError = error;
+        console.error(`Attempt ${attempt} failed:`, {
+          status: error.response?.status,
+          error: error.message,
+          params
+        });
+
+        if (attempt < maxRetries) {
+          await new Promise(resolve => 
+            setTimeout(resolve, Math.min(1000 * Math.pow(2, attempt), 8000))
+          );
+        }
+      }
+    }
+
+    throw new Error(`Failed to fetch hotel offers after ${maxRetries} attempts. ${lastError?.message}`);
   } catch (error) {
     console.error('Error in fetchHotelOffers:', error);
-    handleAmadeusError(error);
+    throw error;
   }
 };
 
 module.exports = {
+  amadeus,
   getLocationCode,
   searchFlights,
   fetchFlightPriceOffers,
   bookFlight,
+  getAmadeusToken,
   fetchHotelIdsByCity,
   fetchHotelOffers
 };
