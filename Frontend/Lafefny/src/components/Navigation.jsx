@@ -4,7 +4,7 @@ import {
   Menu, Plane, MapPin, Globe, Navigation as NavigationIcon, Search, 
   Activity, History, ChevronDown, User, LogOut, ShoppingCart,
   Calendar, Landmark, Building, Car, ShoppingBag, Package, 
-  Settings, Lock, Heart, MessageSquare, List, Trash2, Bell,
+  Lock, Heart, MessageSquare, List, Trash2, Bell,
   AlertTriangle, House
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
@@ -34,8 +34,7 @@ const Navigation = () => {
   const [notifications, setNotifications] = useState([]);
   const [isNotificationDropdownOpen, setIsNotificationDropdownOpen] = useState(false);
   const notificationDropdownRef = useRef(null);
-  const editProfileRoute = `/edit${role}Info`;
-  const getProfileRoute = `/view${role}Info`;
+  const viewProfileRoute = `/view${role}Info`;
   const homeRoute = isLoggedIn ? `/${role}Home` : '/' ;
 
   const notificationIcons = {
@@ -379,14 +378,11 @@ const Navigation = () => {
                 
                 {isProfileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-border py-2 z-50">
-                    <Link to= {getProfileRoute} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Link to= {viewProfileRoute} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <User className="h-4 w-4" />
                       View Profile
                     </Link>
-                    <Link to= {editProfileRoute} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <Settings className="h-4 w-4" />
-                      Edit Profile
-                    </Link>
+                    
                     <Link to="/changePassword" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <Lock className="h-4 w-4" />
                       Change Password
@@ -399,22 +395,16 @@ const Navigation = () => {
                       </Link><Link to="/manage-addresses" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           <MapPin className="h-4 w-4" />
                           Addresses
-                        </Link><Link to="/complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                          <MessageSquare className="h-4 w-4" />
-                          Submit Complaint
-                        </Link><Link to="/my-complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        </Link>
+                         <Link to="/my-complaints" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                           <List className="h-4 w-4" />
                           View Complaints
                         </Link>
                         </>
                     )}
-                    <div className="border-t my-2"></div>
-                    <Link to="/delete-account" className="flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
-                      <Trash2 className="h-4 w-4" />
-                      Delete Account
-                    </Link>
                   </div>
                 )}
+                
               </div>
 
               {/* Notification Bell */}

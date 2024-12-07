@@ -16,6 +16,7 @@ import Activities from './pages/Activities'
 import ActivityDetails from './pages/ActivityDetails';
 import HistoricalPlaces from './pages/HistoricalPlaces'
 import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
+import Profile from './pages/Profile';
 import Home from './components/GuestHome';
 import { CurrencyProvider } from './context/CurrencyContext';
 
@@ -143,7 +144,7 @@ const App = () => {
           <Route path="/tours" element={<Tours />} />
           <Route path="/tours/:id" element={<TourDetails />} />
           <Route path="/guestHome" element={<Home />} />
-          <Route path="/forgot-Password" element={<ForgotPassword />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/activities/:id" element={<ActivityDetails />} />
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
@@ -195,7 +196,7 @@ const App = () => {
           {/* Seller Routes */}
           <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
           <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
-          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><SellerInfo /></ProtectedRoute>} />
+          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
           <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
           <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
