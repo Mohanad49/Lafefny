@@ -362,8 +362,6 @@ const Activities = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-　
-　
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="border-2 border-black">
                   <SelectValue placeholder="Select category" />
