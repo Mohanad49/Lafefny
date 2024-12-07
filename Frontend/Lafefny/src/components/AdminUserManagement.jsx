@@ -1,9 +1,8 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { fetchUsers, deleteUser,
-    acceptUser, rejectUser,
-    viewAdvertiser_pdf, viewSeller_pdf, viewTourGuide_pdf  } from '../services/adminService';
-import { useNavigate } from 'react-router-dom';
+import { fetchUsers, deleteUser, acceptUser, rejectUser, 
+  viewAdvertiser_pdf, viewSeller_pdf, viewTourGuide_pdf } from '../services/adminService';
+import { useNavigate, Link } from 'react-router-dom';
+import { Users, ArrowLeft, Eye, XCircle, Check, X, FileText } from 'lucide-react';
 
 function AdminUserManagement() {
   const [users, setUsers] = useState([]);
@@ -30,8 +29,8 @@ function AdminUserManagement() {
     if (window.confirm('Are you sure you want to delete this account?')) {
       try {
         await deleteUser(userId);
+        setUsers(users.filter(user => user._id !== userId));
         alert('User deleted successfully');
-        setUsers(users.filter(user => user._id !== userId)); // Remove user from UI
       } catch (error) {
         alert('Failed to delete user');
       }
@@ -82,32 +81,32 @@ function AdminUserManagement() {
 
   const handleViewDocument = async (userId, role) => {
     try {
+      let pdfUrl;
       switch(role.toLowerCase()) {
         case 'advertiser':
-          {
-            const advertiserPdfUrl = viewAdvertiser_pdf(userId);
-            window.open(advertiserPdfUrl, '_blank');
-            break;
-          }
+          pdfUrl = viewAdvertiser_pdf(userId);
+          break;
         case 'seller':
-          {
-            const sellerPdfUrl = await viewSeller_pdf(userId);
-            window.open(sellerPdfUrl, '_blank');
-            break;
-          }
+          pdfUrl = await viewSeller_pdf(userId);
+          break;
         case 'tourguide':
-          { 
-            const tourGuidePdfUrl = await viewTourGuide_pdf(userId);
-            window.open(tourGuidePdfUrl, '_blank');
-            break;
-         }
+          pdfUrl = await viewTourGuide_pdf(userId);
+          break;
         default:
           console.log('Invalid role for document viewing');
+          return;
       }
+      window.open(pdfUrl, '_blank');
     } catch (error) {
       alert('Failed to load document');
       console.error('Error:', error);
     }
+  };
+
+  const getStatusColor = (status) => {
+    if (status.deletionRequested) return 'bg-red-100 text-red-800';
+    if (status.isAccepted) return 'bg-green-100 text-green-800';
+    return 'bg-yellow-100 text-yellow-800';
   };
 
   const isRoleNeedingApproval = (role) => {
@@ -115,113 +114,124 @@ function AdminUserManagement() {
     return rolesNeedingApproval.includes(role.toLowerCase());
   };
 
-  const renderUserList = () => {
-    return users.map(user => (
-      <tr key={user._id} className={user.deletionRequested ? 'deletion-requested' : ''}>
-        <td>{user.username}</td>
-        <td>{user.email}</td>
-        <td>{user.role}</td>
-        <td>
-          {user.deletionRequested ? (
-            <span className="deletion-badge">Deletion Requested</span>
-          ) : (
-            <span className="active-badge">Active</span>
-          )}
-        </td>
-        <td>
-          <button className="delete-button" onClick={() => handleDelete(user._id)}>Delete</button>
-        </td>
-        <td>
-          {isRoleNeedingApproval(user.role) && (
-            <>
-              <button className="action-button accept-button" onClick={() => handleAccept(user._id)}>
-                Accept
-              </button>
-              <button className="action-button reject-button" onClick={() => handleReject(user._id)}>
-                Reject
-              </button>
-            </>
-          )}
-        </td>
-        <td>
-          {(user.role?.toLowerCase() === 'advertiser' || 
-            user.role?.toLowerCase() === 'seller' || 
-            user.role?.toLowerCase() === 'tourguide') && (
-            <button onClick={() => handleViewDocument(user._id, user.role)}>
-              View Documents
-            </button>
-          )}
-        </td>
-      </tr>
-    ));
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
-  if (loading) return <p>Loading users...</p>;
-  if (error) return <p>{error}</p>;
+  if (error) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-xl text-red-600">{error}</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="admin-user-management">
-      <h1>Manage User Accounts</h1>
-      <table>
-        <thead>
-          <tr>
-            <th>Username</th>
-            <th>Email</th>
-            <th>Role</th>
-            <th>Status</th>
-            <th>Delete Users</th>
-            <th>Approve Users</th>
-            <th>Documents</th>
-          </tr>
-        </thead>
-        <tbody>
-          {renderUserList()}
-        </tbody>
-      </table>
-      <style>
-        {`
-          .deletion-requested {
-            background-color: #fff3f3;
-          }
-          
-          .deletion-badge {
-            background-color: #ff4444;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: bold;
-          }
+    <div className="min-h-screen bg-background px-4 py-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="mb-8 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Link
+              to="/adminHome"
+              className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+            >
+              <ArrowLeft className="h-5 w-5 mr-2" />
+              Back to Dashboard
+            </Link>
+          </div>
+          <div className="flex items-center gap-2">
+            <Users className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-bold">Manage User Accounts</h1>
+          </div>
+        </div>
 
-          .active-badge {
-            background-color: #4CAF50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 0.8em;
-            font-weight: bold;
-          }
-
-          .action-button {
-            width: 80px;
-            padding: 5px;
-            margin: 0 5px;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-          }
-
-          .accept-button {
-            background-color: #4CAF50;
-            color: white;
-          }
-
-          .reject-button {
-            background-color: #ff4444;
-            color: white;
-          }
-        `}
-      </style>
+        {users.length === 0 ? (
+          <div className="text-center py-12">
+            <Users className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+            <p className="text-gray-500 text-lg">No users found</p>
+          </div>
+        ) : (
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200">
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Username</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Role</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {users.map(user => (
+                    <tr key={user._id} className={user.deletionRequested ? 'bg-red-50' : ''}>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                        {user.username}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.email}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.role}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          getStatusColor({ deletionRequested: user.deletionRequested, isAccepted: user.isAccepted })
+                        }`}>
+                          {user.deletionRequested ? 'Deletion Requested' : (user.isAccepted ? 'Active' : 'Pending')}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
+                        {isRoleNeedingApproval(user.role) && !user.isAccepted && (
+                          <>
+                            <button
+                              onClick={() => handleAccept(user._id)}
+                              className="inline-flex items-center px-3 py-1 border border-green-300 rounded-md text-green-700 bg-green-50 hover:bg-green-100 transition-colors"
+                            >
+                              <Check className="h-4 w-4 mr-1" />
+                              Accept
+                            </button>
+                            <button
+                              onClick={() => handleReject(user._id)}
+                              className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+                            >
+                              <X className="h-4 w-4 mr-1" />
+                              Reject
+                            </button>
+                          </>
+                        )}
+                        {(user.role?.toLowerCase() === 'advertiser' || 
+                          user.role?.toLowerCase() === 'seller' || 
+                          user.role?.toLowerCase() === 'tourguide') && (
+                          <button
+                            onClick={() => handleViewDocument(user._id, user.role)}
+                            className="inline-flex items-center px-3 py-1 border border-gray-300 rounded-md text-gray-700 bg-gray-50 hover:bg-gray-100 transition-colors"
+                          >
+                            <FileText className="h-4 w-4 mr-1" />
+                            Documents
+                          </button>
+                        )}
+                        <button
+                          onClick={() => handleDelete(user._id)}
+                          className="inline-flex items-center px-3 py-1 border border-red-300 rounded-md text-red-700 bg-red-50 hover:bg-red-100 transition-colors"
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
