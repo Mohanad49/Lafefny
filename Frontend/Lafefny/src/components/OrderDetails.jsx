@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Package, ArrowLeft, MapPin, CreditCard, XCircle } from 'lucide-react';
+import '../styles/checkout.css';
 
 const OrderDetails = () => {
   const [order, setOrder] = useState(null);
@@ -18,6 +18,7 @@ const OrderDetails = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.get(`http://localhost:8000/tourist/${userId}/orders/${orderId}`);
+      console.log('Fetched order details:', response.data); // Debug log
       setOrder(response.data);
       setLoading(false);
     } catch (error) {
@@ -35,6 +36,8 @@ const OrderDetails = () => {
 
       const userId = localStorage.getItem('userID');
       await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
+      
+      // Refresh order details
       await fetchOrderDetails();
       alert('Order cancelled successfully');
     } catch (error) {
@@ -43,134 +46,85 @@ const OrderDetails = () => {
     }
   };
 
-  const getStatusColor = (status) => {
-    const statusColors = {
-      'Processing': 'bg-blue-100 text-blue-800',
-      'Cancelled': 'bg-red-100 text-red-800',
-      'Delivered': 'bg-green-100 text-green-800',
-      'Shipped': 'bg-purple-100 text-purple-800'
-    };
-    return statusColors[status] || 'bg-gray-100 text-gray-800';
-  };
-
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-red-600">{error}</div>
-      </div>
-    );
-  }
-
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-gray-600">Order not found</div>
-      </div>
-    );
-  }
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!order) return <div>Order not found</div>;
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/my-orders')}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Orders
-          </button>
-          <div className="flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Order Details</h1>
-          </div>
+    <div className="checkout-container">
+      <div className="order-header">
+        <h1>Order Details</h1>
+        <div className="order-meta">
+          <p><strong>Order ID:</strong> {order.orderID}</p>
+          <p><strong>Date:</strong> {new Date(order.orderDate).toLocaleString()}</p>
+          <p className={`status-${order.orderStatus.toLowerCase()}`}>
+            <strong>Status:</strong> {order.orderStatus}
+          </p>
         </div>
+      </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">{order.orderID}</p>
-            </div>
-            <div className="flex flex-col items-end">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
-                {order.orderStatus}
-              </span>
-              <p className="text-sm text-gray-500 mt-2">
-                {new Date(order.orderDate).toLocaleString()}
-              </p>
-            </div>
-          </div>
+      <div className="order-summary">
+        <h2>Order Summary</h2>
+        <table className="checkout-table">
+          <thead>
+            <tr>
+              <th>Product</th>
+              <th>Quantity</th>
+              <th>Price</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+          <tbody>
+            {order.products.map((product, index) => (
+              <tr key={index}>
+                <td>{product.productId?.name || 'Product'}</td>
+                <td>{product.quantity}</td>
+                <td>${product.price.toFixed(2)}</td>
+                <td>${(product.price * product.quantity).toFixed(2)}</td>
+              </tr>
+            ))}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colSpan="3"><strong>Total Amount</strong></td>
+              <td><strong>${order.totalAmount.toFixed(2)}</strong></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-4">
-              {order.products.map((product, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div className="flex-1">
-                    <p className="font-medium">{product.productId?.name || 'Product'}</p>
-                    <p className="text-sm text-gray-500">Quantity: {product.quantity}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-medium">${(product.price * product.quantity).toFixed(2)}</p>
-                    <p className="text-sm text-gray-500">${product.price.toFixed(2)} each</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-200 mt-4 pt-4">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold">Total Amount</p>
-                <p className="font-semibold text-xl">${order.totalAmount.toFixed(2)}</p>
-              </div>
-            </div>
-          </div>
+      <div className="delivery-section">
+        <h2>Delivery Address</h2>
+        <div className="address-card selected">
+          <p>{order.selectedAddress.street}</p>
+          <p>{order.selectedAddress.city}, {order.selectedAddress.state}</p>
+          <p>{order.selectedAddress.country}, {order.selectedAddress.postalCode}</p>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold">Delivery Address</h2>
-            </div>
-            <div className="text-gray-600 space-y-1">
-              <p>{order.selectedAddress.street}</p>
-              <p>{order.selectedAddress.city}, {order.selectedAddress.state}</p>
-              <p>{order.selectedAddress.country}, {order.selectedAddress.postalCode}</p>
-            </div>
-          </div>
+      <div className="payment-section">
+        <h2>Payment Information</h2>
+        <p><strong>Payment Method:</strong> {order.paymentMethod}</p>
+      </div>
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <CreditCard className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold">Payment Information</h2>
-            </div>
-            <p className="text-gray-600">{order.paymentMethod}</p>
-          </div>
-        </div>
-
+      <div className="order-actions">
+        <button 
+          onClick={() => navigate('/my-orders')}
+          className="back-button"
+        >
+          Back to Orders
+        </button>
         {order.orderStatus === 'Processing' && (
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={handleCancelOrder}
-              className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 hover:bg-red-50 transition-colors"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Cancel Order
-            </button>
-          </div>
+          <button 
+            onClick={handleCancelOrder}
+            className="cancel-button"
+          >
+            Cancel Order
+          </button>
         )}
       </div>
     </div>
   );
 };
 
-export default OrderDetails;
+export default OrderDetails; 

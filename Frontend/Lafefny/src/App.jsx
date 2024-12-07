@@ -16,7 +16,6 @@ import Activities from './pages/Activities'
 import ActivityDetails from './pages/ActivityDetails';
 import HistoricalPlaces from './pages/HistoricalPlaces'
 import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
-import Profile from './pages/Profile';
 import Home from './components/GuestHome';
 import { CurrencyProvider } from './context/CurrencyContext';
 
