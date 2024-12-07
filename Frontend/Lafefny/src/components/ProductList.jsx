@@ -1,8 +1,7 @@
-/* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { getProducts, updateProductArchiveStatus } from '../services/productService';
-import '../styles/productList.css';
+import { ArrowLeft, Search, Plus } from 'lucide-react';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -12,6 +11,8 @@ const ProductList = () => {
   const [sortBy, setSortBy] = useState('name');
   const [showModal, setShowModal] = useState(false);
   const [selectedReviews, setSelectedReviews] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   const formatDate = (dateString) => {
     if (!dateString) return 'N/A';
@@ -30,16 +31,16 @@ const ProductList = () => {
 
   const fetchProducts = async () => {
     try {
+      setLoading(true);
       const response = await getProducts();
       setProducts(response);
     } catch (error) {
       console.error('Error fetching products:', error);
+      alert('Failed to fetch products');
       setProducts([]);
+    } finally {
+      setLoading(false);
     }
-  };
-
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
   };
 
   const openModal = (reviews) => {
@@ -47,9 +48,15 @@ const ProductList = () => {
     setShowModal(true);
   };
 
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedReviews([]);
+  const toggleArchiveStatus = async (id, currentStatus) => {
+    try {
+      await updateProductArchiveStatus(id);
+      await fetchProducts();
+      alert(`Product ${currentStatus ? 'unarchived' : 'archived'} successfully`);
+    } catch (error) {
+      console.error('Error toggling archive status:', error);
+      alert('Failed to update product status');
+    }
   };
 
   const filteredProducts = products
@@ -77,118 +84,176 @@ const ProductList = () => {
       return 0;
     });
 
-  const toggleArchiveStatus = async (id, currentStatus) => {
-    try {
-      await updateProductArchiveStatus(id);
-      await fetchProducts();
-    } catch (error) {
-      console.error('Error toggling archive status:', error);
-    }
-  };
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <div className="text-xl text-gray-600">Loading...</div>
+      </div>
+    );
+  }
 
   return (
-    <div className="product-list-container">
-      <h1>Product List</h1>
-      <Link to="/add-product" className="add-product-button">Add New Product</Link>
-      <div className="controls">
-        <input
-          type="text"
-          placeholder="Search by name, description, or seller..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="search-input"
-        />
-        <select
-          value={filterType}
-          onChange={(e) => setFilterType(e.target.value)}
-          className="filter-select"
-        >
-          <option value="">Select Filter</option>
-          <option value="price">Filter by Max Price</option>
-          <option value="quantity">Filter by Min Quantity</option>
-          <option value="rating">Filter by Min Rating</option>
-        </select>
-        {filterType && (
-          <input
-            type={filterType === 'quantity' ? 'number' : 'text'}
-            placeholder={`Enter ${filterType} value`}
-            value={filterValue}
-            onChange={(e) => setFilterValue(e.target.value)}
-            className="filter-input"
-          />
-        )}
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value)}
-          className="sort-select"
-        >
-          <option value="name">Sort by Name</option>
-          <option value="price">Sort by Price</option>
-          <option value="rating">Sort by Rating</option>
-        </select>
-      </div>
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Image</th>
-            <th>Price</th>
-            <th>Quantity</th>
-            <th>Sales</th> {/* Added Sales column */}
-            <th>Average Rating</th>
-            <th>Description</th>
-            <th>Seller</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredProducts.map((product) => (
-            <tr key={product._id}>
-              <td>{product.name}</td>
-              <td><img src={product.imageUrl} alt={product.name} width="100" /></td>
-              <td>${product.price.toFixed(2)}</td>
-              <td>{product.quantity}</td>
-              <td>{product.sales}</td> {/* Display Sales data */}
-              <td>{product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})</td>
-              <td>{product.description}</td>
-              <td>{product.seller}</td>
-              <td>
-                <button onClick={() => openModal(product.ratings.reviews)}>View Reviews</button>
-                <Link to={`/edit-product/${product._id}`} className="edit-button">Edit</Link>
-                <button
-                  className="edit-button"
-                  onClick={() => toggleArchiveStatus(product._id, product.isArchived)}
-                >
-                  {product.isArchived ? 'Unarchive' : 'Archive'}
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+    <div className="min-h-screen bg-background p-4 md:p-8">
+      <div className="max-w-7xl mx-auto">
+        <div className="flex justify-between items-center mb-6">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center text-gray-600 hover:text-gray-900"
+          >
+            <ArrowLeft className="h-5 w-5 mr-2" />
+            Back
+          </button>
+          <h1 className="text-2xl font-bold">Products</h1>
+          <Link
+            to="/add-product"
+            className="inline-flex items-center px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Add Product
+          </Link>
+        </div>
 
-      {showModal && (
-        <div className="modal">
-          <div className="modal-content">
-            <span className="close" onClick={closeModal}>&times;</span>
-            <h2>Reviews</h2>
-            {selectedReviews.length > 0 ? (
-              <ul>
-                {selectedReviews.map((review, index) => (
-                  <li key={index}>
-                    <strong>Reviewer:</strong> {review.reviewerName} <br />
-                    <strong>Rating:</strong> {review.rating.toFixed(1)} ★ <br />
-                    <strong>Comment:</strong> {review.comment} <br />
-                    <strong>Date:</strong> {formatDate(review.date)}
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <p>No reviews available.</p>
+        <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
+          <div className="flex flex-wrap gap-4">
+            <input
+              type="text"
+              placeholder="Search by name, description, or seller..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            <select
+              value={filterType}
+              onChange={(e) => setFilterType(e.target.value)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="">Select Filter</option>
+              <option value="price">Filter by Max Price</option>
+              <option value="quantity">Filter by Min Quantity</option>
+              <option value="rating">Filter by Min Rating</option>
+            </select>
+            {filterType && (
+              <input
+                type={filterType === 'quantity' ? 'number' : 'text'}
+                placeholder={`Enter ${filterType} value`}
+                value={filterValue}
+                onChange={(e) => setFilterValue(e.target.value)}
+                className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              />
             )}
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+              className="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="name">Sort by Name</option>
+              <option value="price">Sort by Price</option>
+              <option value="rating">Sort by Rating</option>
+            </select>
           </div>
         </div>
-      )}
+
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Image</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Price</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Quantity</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Sales</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Rating</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Description</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Seller</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200">
+                {filteredProducts.map((product) => (
+                  <tr key={product._id}>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.name}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <img src={product.imageUrl} alt={product.name} className="w-20 h-20 object-cover rounded-md" />
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">${product.price.toFixed(2)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.quantity}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.sales}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {product.ratings.averageRating.toFixed(1)} ★ ({product.ratings.totalRatings})
+                    </td>
+                    <td className="px-6 py-4 max-w-xs truncate">{product.description}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">{product.seller}</td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => openModal(product.ratings.reviews)}
+                          className="px-3 py-1 text-sm text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200"
+                        >
+                          Reviews
+                        </button>
+                        <Link
+                          to={`/edit-product/${product._id}`}
+                          className="px-3 py-1 text-sm text-blue-700 bg-blue-100 rounded-md hover:bg-blue-200"
+                        >
+                          Edit
+                        </Link>
+                        <button
+                          onClick={() => toggleArchiveStatus(product._id, product.isArchived)}
+                          className="px-3 py-1 text-sm text-red-700 bg-red-100 rounded-md hover:bg-red-200"
+                        >
+                          {product.isArchived ? 'Unarchive' : 'Archive'}
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {showModal && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+            <div className="bg-white rounded-lg max-w-2xl w-full max-h-[80vh] overflow-y-auto p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">Reviews</h2>
+                <button
+                  onClick={() => setShowModal(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  ×
+                </button>
+              </div>
+              {selectedReviews.length > 0 ? (
+                <div className="space-y-4">
+                  {selectedReviews.map((review, index) => (
+                    <div key={index} className="border-b pb-4">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-semibold">{review.reviewerName}</p>
+                          <div className="flex items-center gap-1 mt-1">
+                            <span className="text-yellow-400">★</span>
+                            <span>{review.rating.toFixed(1)}</span>
+                          </div>
+                        </div>
+                        <span className="text-sm text-gray-500">
+                          {formatDate(review.date)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-gray-600">{review.comment}</p>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-center py-4 text-gray-500">
+                  No reviews available.
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
