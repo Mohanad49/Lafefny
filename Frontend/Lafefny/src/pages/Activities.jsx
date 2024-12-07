@@ -20,7 +20,9 @@ import {
     Palmtree,
     TreePine,
     Camera,
-    Share2
+    Share2,
+    Bookmark,
+    BookmarkCheck
   } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCurrency, currencies } from '../context/CurrencyContext';
@@ -38,6 +40,7 @@ const Activities = () => {
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
   const [bookedActivities, setBookedActivities] = useState(new Set());
+  const [bookmarkedActivities, setBookmarkedActivities] = useState(new Set());
 
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -54,46 +57,60 @@ const Activities = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
-      try {
-        const [activitiesResponse, categoriesResponse] = await Promise.all([
-          axios.get('http://localhost:8000/activities'),
-          axios.get('http://localhost:8000/activityCategory')
-        ]);
-        
-        const touristId = localStorage.getItem('userID');
-        const updatedActivities = activitiesResponse.data.map((activity) => ({
-          ...activity,
-          booked: activity.paidBy?.includes(touristId),
-        }));
-        
-        setActivities(updatedActivities);
-        setCategories(categoriesResponse.data);
-        
-        // Initialize booked activities
-        const booked = new Set(updatedActivities.filter(a => a.booked).map(a => a._id));
-        setBookedActivities(booked);
-        
-        // Set max price based on highest activity price
-        const highestPrice = Math.max(...updatedActivities.map(a => 
-          typeof a.price === 'string' ? 
-            parseFloat(a.price.replace(/[^0-9.-]+/g, "")) : 
-            a.price || 0
-        ));
-        const roundedMaxPrice = Math.ceil(highestPrice / 100) * 100;
-        setMaxPrice(roundedMaxPrice);
-        setPriceRange([0, roundedMaxPrice]);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
+  const fetchBookmarkedActivities = async () => {
+    if (!isLoggedIn || !isTourist) return;
+    
+    try {
+      const userId = localStorage.getItem('userID');
+      const response = await axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-activities`);
+      const bookmarkedIds = new Set(response.data.map(activity => activity._id));
+      setBookmarkedActivities(bookmarkedIds);
+    } catch (error) {
+      console.error('Error fetching bookmarked activities:', error);
+    }
+  };
 
-    fetchData();
-  }, []);
+  const handleBookmark = async (activityId) => {
+    if (!isLoggedIn || !isTourist) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in as a tourist to bookmark activities.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const userId = localStorage.getItem('userID');
+      const response = await axios.post(
+        `http://localhost:8000/tourist/${userId}/bookmark-activity/${activityId}`
+      );
+
+      if (response.data.isBookmarked) {
+        setBookmarkedActivities(prev => new Set([...prev, activityId]));
+        toast({
+          title: "Activity Bookmarked",
+          description: "Activity has been added to your bookmarks.",
+        });
+      } else {
+        setBookmarkedActivities(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(activityId);
+          return newSet;
+        });
+        toast({
+          title: "Bookmark Removed",
+          description: "Activity has been removed from your bookmarks.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to bookmark activity. Please try again.",
+        variant: "destructive"
+      });
+    }
+  };
 
   const checkIfCanCancel = (activityDate) => {
     const today = new Date();
@@ -270,6 +287,51 @@ const Activities = () => {
   };
   const filteredActivities = filterActivities();
 
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true);
+        const [activitiesResponse, categoriesResponse] = await Promise.all([
+          axios.get('http://localhost:8000/activities'),
+          axios.get('http://localhost:8000/activityCategory')
+        ]);
+        
+        const touristId = localStorage.getItem('userID');
+        const updatedActivities = activitiesResponse.data.map((activity) => ({
+          ...activity,
+          booked: activity.paidBy?.includes(touristId),
+        }));
+        
+        setActivities(updatedActivities);
+        setCategories(categoriesResponse.data);
+        
+        // Initialize booked activities
+        const booked = new Set(updatedActivities.filter(a => a.booked).map(a => a._id));
+        setBookedActivities(booked);
+        
+        // Set max price based on highest activity price
+        const highestPrice = Math.max(...updatedActivities.map(a => 
+          typeof a.price === 'string' ? 
+            parseFloat(a.price.replace(/[^0-9.-]+/g, "")) : 
+            a.price || 0
+        ));
+        const roundedMaxPrice = Math.ceil(highestPrice / 100) * 100;
+        setMaxPrice(roundedMaxPrice);
+        setPriceRange([0, roundedMaxPrice]);
+        
+        if (isLoggedIn && isTourist) {
+          await fetchBookmarkedActivities();
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [isLoggedIn, isTourist]);
+
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center">Error: {error}</div>;
 
@@ -370,57 +432,100 @@ const Activities = () => {
                     alt={activity.name}
                     className="w-full h-full object-cover"
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4 bg-white/80 hover:bg-white"
-                    onClick={(e) => handleShare(e, activity)}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedItem(activity);
+                        setIsShareModalOpen(true);
+                      }}
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
                 <CardContent className="p-6">
                   <div className="space-y-4">
-                    <div>
-                      <h3 className="text-xl font-semibold text-primary mb-2">{activity.name}</h3>
-                      <div className="flex items-center text-primary mb-2">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        <span className="text-sm">{activity.location}</span>
+                    <div className="flex justify-between items-start">
+                      <div>
+                        <h3 className="text-xl font-semibold">{activity.name}</h3>
+                        <p className="text-sm text-gray-500">{activity.description}</p>
                       </div>
-                    </div>
-                    
-                    <div className="grid grid-cols-2 gap-4 text-sm text-primary">
-                      <div className="flex items-center">
-                        <Clock className="h-4 w-4 mr-2" />
-                        {activity.time}
-                      </div>
-                      <div className="flex items-center">
-                        {getCategoryIcon(activity.category)}
-                        <span>{activity.category}</span>
-                    </div>
-                    </div>
-                    
-                    <div className="flex items-center justify-between pt-4 border-t border-border">
-                      <div className="flex items-center space-x-1">
-                        <span className="text-primary font-medium">⭐</span>
-                        <span className="font-medium">{activity.ratings?.averageRating?.toFixed(1) || "New"}</span>
-                      </div>
-                      <div className="text-right">
-                        <div className="text-lg font-semibold text-primary">{currencies[currency].symbol}{convertPrice(activity.price).toFixed(2)}</div>
-                        <div className="text-sm text-primary">per person</div>
-                      </div>
-                    </div>
-                    {isLoggedIn && isTourist && (
-                      <Button 
-                        className={`w-full ${bookedActivities.has(activity._id) ? 'bg-red-500 hover:bg-red-600' : ''}`} 
-                        onClick={(e) => { 
-                          e.stopPropagation(); 
-                          handleBookNow(activity._id, activity.date); 
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-transparent"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedItem(activity);
+                          setIsShareModalOpen(true);
                         }}
                       >
-                        {bookedActivities.has(activity._id) ? 'Cancel Booking' : 'Book Now'}
+                        <Share2 className="h-5 w-5" />
                       </Button>
-                    )}
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Clock className="h-4 w-4" />
+                      <span>{activity.time}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <MapPin className="h-4 w-4" />
+                      <span>{activity.location}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {getCategoryIcon(activity.category)}
+                      <span className="text-sm text-gray-600">{activity.category}</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg font-semibold">{currencies[currency].symbol}{convertPrice(activity.price).toFixed(2)}</span>
+                      <span className="text-sm text-gray-500">per person</span>
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      {isLoggedIn && isTourist && (
+                        <>
+                          <Button
+                            className="flex-1"
+                            onClick={(e) => { 
+                              e.stopPropagation(); 
+                              handleBookNow(activity._id, activity.date); 
+                            }}
+                          >
+                            {bookedActivities.has(activity._id) ? 'Cancel Booking' : 'Book Now'}
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="hover:bg-transparent"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleBookmark(activity._id);
+                            }}
+                          >
+                            {bookmarkedActivities.has(activity._id) ? (
+                              <Bookmark className="h-5 w-5 text-yellow-500 fill-current" />
+                            ) : (
+                              <Bookmark className="h-5 w-5" />
+                            )}
+                          </Button>
+                        </>
+                      )}
+                      {(!isLoggedIn || !isTourist) && (
+                        <Button
+                          className="w-full"
+                          onClick={() => navigate('/login')}
+                        >
+                          Login to Book
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </CardContent>
               </Card>

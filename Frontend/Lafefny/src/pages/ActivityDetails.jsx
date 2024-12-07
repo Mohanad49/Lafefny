@@ -4,28 +4,79 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Calendar, Clock, MapPin, Tag, Star, Info } from "lucide-react";
+import { Calendar, Clock, MapPin, Tag, Star, Info, Bookmark, BookmarkCheck } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import axios from 'axios'
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useCurrency, currencies } from '../context/CurrencyContext';
+import { useToast } from "@/components/ui/use-toast";
 
 const ActivityDetails = () => {
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [isBookmarked, setIsBookmarked] = useState(false);
     const { id } = useParams();
     const navigate = useNavigate();
+    const { toast } = useToast();
     const isLoggedIn = !!localStorage.getItem('userID');
+    const isTourist = localStorage.getItem('userRole') === 'Tourist';
 
     const getActivityDetails = async (id) => {
         try {
             const response = await axios.get(`http://localhost:8000/activities/${id}`);
             setActivity(response.data);
             setLoading(false);
+            checkIfBookmarked(response.data._id);
         } catch (error) {
             console.error('Error fetching activity:', error);
             setLoading(false);
+        }
+    };
+
+    const checkIfBookmarked = async (activityId) => {
+        if (!isLoggedIn || !isTourist) return;
+        
+        try {
+            const userId = localStorage.getItem('userID');
+            const response = await axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-activities`);
+            const bookmarkedIds = new Set(response.data.map(activity => activity._id));
+            setIsBookmarked(bookmarkedIds.has(activityId));
+        } catch (error) {
+            console.error('Error checking bookmark status:', error);
+        }
+    };
+
+    const handleBookmark = async () => {
+        if (!isLoggedIn || !isTourist) {
+            toast({
+                title: "Authentication Required",
+                description: "Please log in as a tourist to bookmark activities.",
+                variant: "destructive"
+            });
+            return;
+        }
+
+        try {
+            const userId = localStorage.getItem('userID');
+            const response = await axios.post(
+                `http://localhost:8000/tourist/${userId}/bookmark-activity/${activity._id}`
+            );
+
+            setIsBookmarked(response.data.isBookmarked);
+            toast({
+                title: response.data.isBookmarked ? "Activity Bookmarked" : "Bookmark Removed",
+                description: response.data.isBookmarked 
+                    ? "Activity has been added to your bookmarks."
+                    : "Activity has been removed from your bookmarks.",
+            });
+        } catch (error) {
+            console.error('Error toggling bookmark:', error);
+            toast({
+                title: "Error",
+                description: "Failed to update bookmark. Please try again.",
+                variant: "destructive"
+            });
         }
     };
 
@@ -62,7 +113,7 @@ const ActivityDetails = () => {
       const convertedPrice = numericPrice * currencies[currency].rate;
       return convertedPrice;
     };
-
+    
 
     useEffect(() => {
         getActivityDetails(id);
@@ -184,6 +235,27 @@ const ActivityDetails = () => {
                                             {activity.bookingOpen ? "Booking Open" : "Booking Closed"}
                                         </Badge>
                                     </div>
+                                    <div className="flex gap-2">
+                                        <Button
+                                            className="flex-1"
+                                            onClick={handleBookingClick}
+                                            disabled={!activity.bookingOpen}
+                                        >
+                                            Book Now
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="icon"
+                                            onClick={handleBookmark}
+                                            className={`${isBookmarked ? 'text-yellow-500 hover:text-yellow-600' : 'text-gray-500 hover:text-gray-600'}`}
+                                        >
+                                            {isBookmarked ? (
+                                                <BookmarkCheck className="h-5 w-5 fill-current" />
+                                            ) : (
+                                                <Bookmark className="h-5 w-5" />
+                                            )}
+                                        </Button>
+                                    </div>
                                     {activity.specialDiscounts && (
                                         <div className="bg-accent/10 p-4 rounded-lg">
                                             <p className="text-sm font-medium text-primary">
@@ -195,9 +267,10 @@ const ActivityDetails = () => {
                                         <Button 
                                             className="w-full" 
                                             size="lg"
+                                            variant="secondary"
                                             onClick={handleBookingClick}
                                         >
-                                            Book Now
+                                            Sign In to Book
                                         </Button>
                                     ) : (
                                         <Button 

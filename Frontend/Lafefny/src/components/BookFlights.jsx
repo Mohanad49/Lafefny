@@ -27,8 +27,9 @@ const BookFlights = () => {
   const [flights, setFlights] = useState([]);
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
-  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState('');
   const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
   const [currentUserData, setCurrentUserData] = useState(null);
   const { currency } = useCurrency();
 
@@ -120,47 +121,78 @@ const BookFlights = () => {
   };
 
   const handleBooking = async (flight) => {
-    try {
-      setBookingLoading(true);
-      setError(null);
+  try {
+    setBookingLoading(true);
+    setError(null);
 
-      const userId = localStorage.getItem('userID');
-      if (!userId) {
-        setError('Please log in to book a flight');
-        return;
-      }
-
-      // Create flight booking request
-      const response = await axios.post('http://localhost:8000/tourist/addFlightBooking', {
-        userId,
-        flightDetails: {
-          validatingAirlineCodes: flight.validatingAirlineCodes,
-          itineraries: flight.itineraries,
-          price: flight.price,
-          bookingStatus: 'Confirmed'
-        }
-      });
-
-      setBookingSuccess(true);
-
-      // Wait for 2 seconds before redirecting
-      setTimeout(() => {
-        navigate('/');
-      }, 2000);
-
-    } catch (error) {
-      console.error('Error storing flight booking:', error);
-      setError(error.response?.data?.error || 'Failed to book flight. Please try again.');
-    } finally {
-      setBookingLoading(false);
+    const userId = localStorage.getItem('userID');
+    if (!userId) {
+      setError('Please log in to book a flight');
+      return;
     }
-  };
+
+    const response = await axios.post('http://localhost:8000/tourist/addFlightBooking', {
+      userId,
+      flightDetails: {
+        validatingAirlineCodes: flight.validatingAirlineCodes,
+        itineraries: flight.itineraries,
+        price: flight.price,  
+        bookingStatus: 'Confirmed'
+      }
+    });
+
+    setBookingSuccess(true);
+    setBookingMessage(`Successfully booked flight with ${flight.validatingAirlineCodes[0]} for ${flight.itineraries[0].segments.length} segments!`);
+    
+    // Wait for 2 seconds before redirecting
+    setTimeout(() => {
+      navigate('/touristHome');
+    }, 2000);
+
+  } catch (error) {
+    console.error('Error storing flight booking:', error);
+    setError(error.response?.data?.error || 'Failed to book flight. Please try again.');
+  } finally {
+    setBookingLoading(false);
+  }
+};
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
       <Navigation />
       <div className="container mx-auto px-4 pt-24 pb-8">
         <div className="max-w-7xl mx-auto">
+          {/* Success Message */}
+          {bookingSuccess && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <Card className="w-full max-w-md mx-4 animate-in fade-in zoom-in duration-300">
+                <CardContent className="p-6">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                      <svg
+                        className="w-8 h-8 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900">Booking Successful!</h3>
+                    <p className="text-gray-600">{bookingMessage}</p>
+                    <p className="text-sm text-gray-500">Redirecting to home page...</p>
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent mx-auto"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+
           <div className="flex items-center gap-4 mb-8">
             <div className="flex items-center gap-3">
               <Button
@@ -442,15 +474,6 @@ const BookFlights = () => {
                   <Globe2 className="text-primary h-6 w-6" />
                   <h2 className="text-xl font-semibold text-gray-800">Available Flights</h2>
                 </div>
-
-                {bookingSuccess && (
-                  <div className="mb-6 bg-green-50 border border-green-200 text-green-600 p-4 rounded-lg flex items-center gap-2">
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 bg-green-600 rounded-full animate-pulse" />
-                      Flight booked successfully! Redirecting to home page...
-                    </div>
-                  </div>
-                )}
 
                 {error && (
                   <div className="mb-6 bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg flex items-center gap-2">

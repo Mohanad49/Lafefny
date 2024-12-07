@@ -12,7 +12,7 @@ import About from './pages/About';
 import Destinations from './pages/Destinations';
 import Tours from './pages/Tours';
 import TourDetails from './pages/TourDetails';
-import Activities from './pages/Activities'
+import Activities from './pages/Activities';
 import ActivityDetails from './pages/ActivityDetails';
 import HistoricalPlaces from './pages/HistoricalPlaces'
 import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
@@ -119,8 +119,7 @@ import MyOrders from './components/MyOrders';
 import OrderDetails from './components/OrderDetails';
 import TouristAllPay from './components/TouristAllPay';
 import AddProductPage from './pages/AddProduct';
-
-
+import Bookmarks from './pages/Bookmarks';
 
 const queryClient = new QueryClient();
 
@@ -149,6 +148,7 @@ const App = () => {
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
           <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
           <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
 
           {/* Admin Routes */}
           <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />

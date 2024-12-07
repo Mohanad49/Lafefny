@@ -1079,4 +1079,59 @@ router.post('/:touristId/add-wallet', async (req, res) => {
   }
 });
 
+// Bookmark activity
+router.post('/:userId/bookmark-activity/:activityId', async (req, res) => {
+  try {
+    const { userId, activityId } = req.params;
+
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Check if activity exists
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    // Check if already bookmarked
+    const isBookmarked = tourist.bookmarkedActivities.includes(activityId);
+    
+    if (isBookmarked) {
+      // Remove bookmark
+      tourist.bookmarkedActivities = tourist.bookmarkedActivities.filter(
+        id => id.toString() !== activityId
+      );
+      await tourist.save();
+      res.json({ message: "Activity removed from bookmarks", isBookmarked: false });
+    } else {
+      // Add bookmark
+      tourist.bookmarkedActivities.push(activityId);
+      await tourist.save();
+      res.json({ message: "Activity bookmarked successfully", isBookmarked: true });
+    }
+  } catch (error) {
+    console.error('Error bookmarking activity:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get bookmarked activities
+router.get('/:userId/bookmarked-activities', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate('bookmarkedActivities');
+    
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.json(tourist.bookmarkedActivities);
+  } catch (error) {
+    console.error('Error fetching bookmarked activities:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 module.exports=router
