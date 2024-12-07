@@ -1,194 +1,165 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { getProducts } from '../services/productService';
-import '../styles/productList.css';
-import { fetchExchangeRates } from '../services/currencyService';
-import { addProductReview, checkProductPurchase, addToWishlist, addToCart } from '../services/productService';
-import ReviewForm from './ReviewForm';
+import axios from 'axios';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Search, Filter, SortAsc, Star, ShoppingCart, Heart, ArrowLeft } from 'lucide-react';
 import Navigation from './Navigation';
-import { ArrowLeft, Search, Filter, SortAsc, Star, ShoppingCart, Heart, ChevronDown } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
-import { Button } from "./ui/button";
+import '../styles/productList.css';
+import ReviewForm from './ReviewForm';
 
-const ProductList = () => {
+const TouristProductList = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('');
-  const [filterValue, setFilterValue] = useState('');
+  const [filterType, setFilterType] = useState('none');
   const [sortBy, setSortBy] = useState('name');
-  const [showModal, setShowModal] = useState(false);
-  const [selectedReviews, setSelectedReviews] = useState([]);
-  const [currency, setCurrency] = useState('EGP');
-  const [conversionRates, setConversionRates] = useState(null);
-  const [ratesLoading, setRatesLoading] = useState(true);
-  const [ratesError, setRatesError] = useState(null);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [currency] = useState('USD');
   const [touristName, setTouristName] = useState('');
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
+  const [wishlistedProducts, setWishlistedProducts] = useState(new Set());
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
 
-  const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    const date = new Date(dateString);
-    if (isNaN(date.getTime())) return 'Invalid Date';
-    return date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
-  };
-
   useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const response = await axios.get('http://localhost:8000/products');
+        // Filter out archived products and ensure imageUrl exists
+        const activeProducts = response.data
+          .filter(product => !product.isArchived)
+          .map(product => ({
+            ...product,
+            imageUrl: product.imageUrl || product.image // Handle both fields for compatibility
+          }));
+        setProducts(activeProducts);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+        setError('Failed to load products');
+        setLoading(false);
+      }
+    };
+  
     fetchProducts();
   }, []);
 
   useEffect(() => {
-    const getRates = async () => {
-      try {
-        const rates = await fetchExchangeRates();
-        setConversionRates(rates);
-      } catch (error) {
-        setRatesError('Failed to load currency rates');
-      } finally {
-        setRatesLoading(false);
-      }
-    };
-    getRates();
-  }, []);
-
-  useEffect(() => {
     const userID = localStorage.getItem('userID');
+    if (userID) {
+      const fetchWishlist = async () => {
+        try {
+          const response = await axios.get(`http://localhost:8000/tourist/${userID}/wishlist`);
+          const data = response.data;
+          setWishlistedProducts(new Set(data.map(item => item._id)));
+        } catch (error) {
+          console.error('Error fetching wishlist:', error);
+        }
+      };
+      fetchWishlist();
+    }
   }, []);
 
-  const fetchProducts = async () => {
+  const convertPrice = (price) => price.toFixed(2);
+
+  const handleAddToWishlist = async (productId) => {
+    if (!isLoggedIn) {
+      alert('Please log in to add items to your wishlist');
+      return;
+    }
+
+    setIsAddingToWishlist(true);
     try {
-      const response = await getProducts();
-      // Filter out archived products
-      const activeProducts = response.filter(product => !product.isArchived);
-      console.log('Fetched active products:', activeProducts); // For debugging
-      setProducts(activeProducts);
+      const userId = localStorage.getItem('userID');
+      // Use the same endpoint format as TouristWishlist.jsx
+      if (wishlistedProducts.has(productId)) {
+        // Remove from wishlist
+        await axios.delete(`http://localhost:8000/tourist/${userId}/wishlist/${productId}`);
+      } else {
+        // Add to wishlist
+        await axios.post(`http://localhost:8000/products/wishlist/${userId}`, {
+          productId: productId
+        });
+      }
+      
+      setWishlistedProducts(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(productId)) {
+          newSet.delete(productId);
+        } else {
+          newSet.add(productId);
+        }
+        return newSet;
+      });
+      
     } catch (error) {
-      console.error('Error fetching products:', error);
-      setProducts([]);
+      console.error('Error updating wishlist:', error);
+      alert('Failed to update wishlist');
+    } finally {
+      setIsAddingToWishlist(false);
     }
   };
 
-  const handleSearch = (event) => {
-    setSearchTerm(event.target.value);
-  };
+  const handleAddToCart = async (productId) => {
+    if (!isLoggedIn) {
+      alert('Please log in to add items to your cart');
+      return;
+    }
 
-  const convertPrice = (price) => {
-    if (!conversionRates || !price) return price;
-    // Convert from EGP to USD first
-    const priceInUSD = price / conversionRates.EGP;
-    // Then convert to target currency
-    return (priceInUSD * conversionRates[currency]).toFixed(2);
+    setIsAddingToCart(true);
+    try {
+      const userId = localStorage.getItem('userID');
+      await axios.post(`http://localhost:8000/products/cart/${userId}`, { productId, quantity: 1 });
+      alert('Added to cart successfully!');
+    } catch (error) {
+      console.error('Error adding to cart:', error);
+      alert('Failed to add item to cart');
+    } finally {
+      setIsAddingToCart(false);
+    }
   };
-
-  const handleCurrencyChange = (event) => {
-    setCurrency(event.target.value);
-  };
-
-  const openModal = (reviews) => {
-    setSelectedReviews(reviews);
-    setShowModal(true);
-  };
-
-  const closeModal = () => {
-    setShowModal(false);
-    setSelectedReviews([]);
-  };
-
-  // Filter and sort products
-  const filteredProducts = products
-    .filter(product => !product.isArchived)
-    .filter(product => 
-      product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      product.seller.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter(product => {
-      if (filterType === 'price' && filterValue) {
-        return product.price <= parseFloat(filterValue);
-      }
-      if (filterType === 'quantity' && filterValue) {
-        return product.quantity >= parseInt(filterValue);
-      }
-      if (filterType === 'rating' && filterValue) {
-        return product.ratings.averageRating >= parseFloat(filterValue);
-      }
-      return true;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'name') return a.name.localeCompare(b.name);
-      if (sortBy === 'price') return a.price - b.price;
-      if (sortBy === 'rating') return b.ratings.averageRating - a.ratings.averageRating;
-      return 0;
-    });
 
   const handleReviewClick = async (product) => {
-    try {
-      const userID = localStorage.getItem('userID');
-      if (!userID) {
-        alert('Please log in to submit a review');
-        return;
-      }
+    if (!isLoggedIn) {
+      alert('Please log in to review products');
+      return;
+    }
 
-      console.log('Attempting to check purchase with:', {
+    const userID = localStorage.getItem('userID');
+    try {
+      const response = await axios.post('http://localhost:8000/check-product-purchase', {
         userID,
         productId: product._id
       });
 
-      const response = await checkProductPurchase(userID, product._id);
-      console.log('Response from checkProductPurchase:', response);
-      
-      if (!response.hasPurchased) {
+      if (!response.data.hasPurchased) {
         alert('You can only review products you have purchased.');
         return;
       }
 
-      setTouristName(response.touristName);
+      setTouristName(response.data.touristName);
       setSelectedProduct(product);
       setShowReviewModal(true);
     } catch (error) {
-      console.error('Error in handleReviewClick:', error);
-      if (error.response) {
-        console.error('Error response data:', error.response.data);
-        alert(`Error checking purchase history: ${error.response.data.message}`);
-      } else {
-        console.error('No response in error:', error.message);
-        alert('Error checking purchase history');
-      }
+      console.error('Error checking product purchase:', error);
+      alert('Failed to verify purchase status');
     }
   };
 
-  const closeReviewModal = () => {
-    setShowReviewModal(false);
-    setSelectedProduct(null);
-  };
-
-  const handleReviewSubmit = async ({ rating, comment }) => {
-    if (!rating || !comment) {
-      alert('Please provide both rating and comment');
-      return;
-    }
-
-    const review = {
-      reviewerName: touristName,
-      rating: parseInt(rating),
-      comment,
-      date: new Date()
-    };
+  const handleReviewSubmit = async (review) => {
+    if (!selectedProduct) return;
 
     try {
-      const response = await addProductReview(selectedProduct._id, review);
+      const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, review);
       
-      // Update the products list with the new review
       setProducts(prevProducts => 
         prevProducts.map(product => 
           product._id === selectedProduct._id 
@@ -197,215 +168,223 @@ const ProductList = () => {
         )
       );
 
+      setShowReviewModal(false);
+      setSelectedProduct(null);
       alert('Review submitted successfully!');
-      closeReviewModal();
     } catch (error) {
       console.error('Error submitting review:', error);
-      alert(`Failed to submit review: ${error.response?.data?.message || error.message}`);
+      alert('Failed to submit review');
     }
   };
 
-  const handleAddToWishlist = async (productId) => {
-    try {
-      setIsAddingToWishlist(true);
-      const userId = localStorage.getItem('userID');
-      if (!userId) {
-        alert('Please log in to add items to your wishlist');
-        return;
+  // Filter and sort products
+  const filteredProducts = products
+    .filter(product => {
+      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      
+                          if (!matchesSearch) return false;
+    
+                          // Then apply type filter
+                          switch (filterType) {
+                            case 'price':
+                              return typeof product.price === 'number' && product.price > 0;
+                            case 'quantity':
+                              return typeof product.quantity === 'number' && product.quantity > 0;
+                            case 'rating':
+                              return product.ratings && 
+                                     typeof product.ratings.averageRating === 'number' && 
+                                     product.ratings.averageRating > 0;
+                            case 'none':
+                            default:
+                              return true;
+                          }
+                        })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price':
+          return a.price - b.price;
+        case 'rating':
+          return (b.ratings?.averageRating || 0) - (a.ratings?.averageRating || 0);
+        case 'name':
+        default:
+          return a.name.localeCompare(b.name);
       }
-      await addToWishlist(userId, productId);
-      alert('Added to wishlist successfully!');
-    } catch (error) {
-      console.error('Error adding to wishlist:', error);
-      alert('Failed to add to wishlist');
-    } finally {
-      setIsAddingToWishlist(false);
-    }
-  };
-
-  const handleAddToCart = async (productId) => {
-    try {
-      setIsAddingToCart(true);
-      const userId = localStorage.getItem('userID');
-      if (!userId) {
-        alert('Please log in to add items to your cart');
-        return;
-      }
-      await addToCart(userId, productId, 1);
-      alert('Added to cart successfully!');
-    } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('Failed to add to cart');
-    } finally {
-      setIsAddingToCart(false);
-    }
-  };
+    });
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
       
       <main className="container mx-auto px-4 pt-24 pb-16">
-        <div className="flex gap-6">
-          {/* Sidebar */}
-          {isLoggedIn && (
-            <aside className="hidden lg:block w-64 space-y-6">
-              <div className="bg-card rounded-xl p-6 shadow-sm border border-border">
-                <h3 className="font-semibold mb-4">Wishlist</h3>
-                <nav className="space-y-2">
-                  <Link
-                    to="/tourist/wishlist"
-                    className="flex items-center gap-2 text-muted-foreground hover:text-primary transition-colors"
-                  >
-                    <Heart className="h-4 w-4" />
-                    View Wishlist
-                  </Link>
-                </nav>
-              </div>
-            </aside>
-          )}
+        {/* Back Button */}
+        <button 
+          onClick={() => navigate(-1)}
+          className="flex items-center text-primary hover:text-primary/80 mb-6"
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back
+        </button>
 
-          {/* Main Content */}
-          <div className="flex-1">
-            {/* Back Button */}
-            <button 
-              onClick={() => navigate(-1)}
-              className="flex items-center text-primary hover:text-primary/80 mb-6"
-            >
-              <ArrowLeft className="h-5 w-5 mr-2" />
-              Back
-            </button>
+        {/* Header */}
+        <div className="text-center mb-12">
+          <h1 className="text-4xl font-bold tracking-tight text-primary mb-4">
+            Our Products
+          </h1>
+          <p className="text-muted-foreground max-w-2xl mx-auto">
+            Discover and shop our curated collection of authentic products from local artisans and sellers
+          </p>
+        </div>
 
-            {/* Header */}
-            <div className="text-center mb-12">
-              <h1 className="text-4xl font-bold tracking-tight text-primary mb-4">
-                Our Products
-              </h1>
-              <p className="text-muted-foreground">
-                Discover and shop our curated collection of authentic products
-              </p>
+        {/* Search and Filters */}
+        <Card className="mb-8">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+              <Input
+                type="text"
+                placeholder="Search products..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
 
-            {/* Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-                <input
-                  type="text"
-                  placeholder="Search products..."
-                  value={searchTerm}
-                  onChange={handleSearch}
-                  className="w-full pl-10 pr-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-                />
+            <Select value={filterType} onValueChange={setFilterType}>
+              <SelectTrigger>
+                <SelectValue placeholder="Filter by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">All Products</SelectItem>
+                <SelectItem value="price">By Price</SelectItem>
+                <SelectItem value="quantity">By Quantity</SelectItem>
+                <SelectItem value="rating">By Rating</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Select value={sortBy} onValueChange={setSortBy}>
+              <SelectTrigger>
+                <SelectValue placeholder="Sort by..." />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="name">Sort by Name</SelectItem>
+                <SelectItem value="price">Sort by Price</SelectItem>
+                <SelectItem value="rating">Sort by Rating</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </Card>
+
+        {/* Loading State */}
+        {loading && (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-muted-foreground">Loading...</div>
+          </div>
+        )}
+
+        {/* Error State */}
+        {error && (
+          <div className="flex justify-center items-center h-64">
+            <div className="text-lg text-destructive">{error}</div>
+          </div>
+        )}
+
+        {/* Products Grid */}
+        {!loading && !error && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredProducts.length === 0 ? (
+              <div className="col-span-full text-center py-12">
+                <ShoppingCart className="h-16 w-16 mx-auto mb-4 text-muted-foreground/50" />
+                <p className="text-lg text-muted-foreground mb-6">No products available matching your criteria</p>
+                <Button onClick={() => {
+                  setSearchTerm('');
+                  setFilterType('none');
+                  setSortBy('name');
+                }}>
+                  Clear Filters
+                </Button>
               </div>
-
-              <select
-                value={filterType}
-                onChange={(e) => setFilterType(e.target.value)}
-                className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="">Filter by...</option>
-                <option value="price">Price</option>
-                <option value="quantity">Quantity</option>
-                <option value="rating">Rating</option>
-              </select>
-
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value)}
-                className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-              >
-                <option value="name">Sort by Name</option>
-                <option value="price">Sort by Price</option>
-                <option value="rating">Sort by Rating</option>
-              </select>
-
-              {!ratesLoading && !ratesError && (
-                <select
-                  value={currency}
-                  onChange={handleCurrencyChange}
-                  className="rounded-lg border border-border bg-background px-4 py-2 focus:outline-none focus:ring-2 focus:ring-primary/20"
-                >
-                  {Object.keys(conversionRates).map(code => (
-                    <option key={code} value={code}>{code}</option>
-                  ))}
-                </select>
-              )}
-            </div>
-
-            {/* Products Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProducts.length === 0 ? (
-                <div className="col-span-full text-center py-12 text-muted-foreground">
-                  No products available matching your criteria
-                </div>
-              ) : (
-                filteredProducts.map((product) => (
-                  <div key={product._id} className="bg-card rounded-xl shadow-sm border border-border overflow-hidden transition-all hover:shadow-md">
+            ) : (
+              filteredProducts.map((product) => (
+                <Card key={product._id} className="flex flex-col overflow-hidden">
+                  <div className="relative w-full pt-[75%]">
                     <img
-                      src={product.image || 'https://via.placeholder.com/300x200'}
+                      src={product.imageUrl || 'https://via.placeholder.com/400x300'}
                       alt={product.name}
-                      className="w-full h-48 object-cover"
+                      className="absolute inset-0 w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = 'https://via.placeholder.com/400x300?text=Product+Image';
+                      }}
                     />
-                    <div className="p-4">
-                      <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-1">{product.name}</h3>
-                      <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <span className="text-lg font-bold text-primary">
-                          {currency} {convertPrice(product.price)}
-                        </span>
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 text-amber-400" />
-                          <span>{product.ratings.averageRating.toFixed(1)}</span>
-                        </div>
-                      </div>
+                    {isLoggedIn && (
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => handleAddToWishlist(product._id)}
+                        disabled={isAddingToWishlist}
+                        className="absolute top-4 right-4 bg-background/80 backdrop-blur-sm hover:bg-background transition-colors"
+                      >
+                        <Heart 
+                          className={`h-5 w-5 ${wishlistedProducts.has(product._id) ? 'text-red-500 fill-red-500' : 'text-foreground'}`}
+                        />
+                      </Button>
+                    )}
+                  </div>
 
-                      <div className="flex items-center gap-2 mt-4 pt-4 border-t border-border">
-                        {isLoggedIn && (
-                          <>
-                            <button
-                              onClick={() => handleAddToCart(product._id)}
-                              disabled={isAddingToCart}
-                              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 text-sm font-medium transition-colors"
-                            >
-                              <ShoppingCart className="h-4 w-4" />
-                              Cart
-                            </button>
-                            
-                            <button
-                              onClick={() => handleAddToWishlist(product._id)}
-                              disabled={isAddingToWishlist}
-                              className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-accent text-accent-foreground hover:bg-accent/90 text-sm font-medium transition-colors"
-                            >
-                              <Heart className="h-4 w-4" />
-                              Wishlist
-                            </button>
-                          </>
-                        )}
-                        
-                        <button
-                          onClick={() => handleReviewClick(product)}
-                          className="flex-1 flex items-center justify-center gap-2 py-2 rounded-lg bg-secondary text-secondary-foreground hover:bg-secondary/90 text-sm font-medium transition-colors"
-                        >
-                          <Star className="h-4 w-4" />
-                          Review
-                        </button>
+                  <div className="flex-1 p-6">
+                    <h3 className="text-lg font-semibold text-primary mb-2 line-clamp-1">{product.name}</h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">{product.description}</p>
+                    
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-lg font-bold text-primary">
+                        ${convertPrice(product.price)}
+                      </span>
+                      <div className="flex items-center gap-1">
+                        <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                        <span>{product.ratings?.averageRating?.toFixed(1) || '0.0'}</span>
                       </div>
                     </div>
+
+                    <div className="flex items-center gap-2 mt-auto">
+                      {isLoggedIn && (
+                        <Button
+                          onClick={() => handleAddToCart(product._id)}
+                          disabled={isAddingToCart}
+                          className="flex-1"
+                        >
+                          <ShoppingCart className="h-4 w-4 mr-2" />
+                          Add to Cart
+                        </Button>
+                      )}
+                      
+                      <Button
+                        variant="secondary"
+                        onClick={() => handleReviewClick(product)}
+                        className="flex-1"
+                      >
+                        <Star className="h-4 w-4 mr-2" />
+                        Review
+                      </Button>
+                    </div>
                   </div>
-                ))
-              )}
-            </div>
+                </Card>
+              ))
+            )}
           </div>
-        </div>
+        )}
       </main>
 
       {/* Review Modal */}
       {showReviewModal && selectedProduct && (
         <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
           <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-lg bg-card p-6 shadow-lg border border-border">
-            <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onClick={() => setShowReviewModal(false)}>×</button>
+            <button 
+              className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" 
+              onClick={() => setShowReviewModal(false)}
+            >
+              ×
+            </button>
             <ReviewForm
               productId={selectedProduct._id}
               touristName={touristName}
@@ -415,39 +394,8 @@ const ProductList = () => {
           </div>
         </div>
       )}
-
-      {/* Reviews Modal */}
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-background/80 backdrop-blur-sm">
-          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-lg bg-card p-6 shadow-lg border border-border">
-            <button className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2" onClick={closeModal}>×</button>
-            <h2 className="text-xl font-semibold mb-4">Product Reviews</h2>
-            {selectedReviews.map((review, index) => (
-              <div key={index} className="mb-4 p-4 bg-accent rounded-lg">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-medium">{review.touristName}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatDate(review.date)}
-                  </span>
-                </div>
-                <div className="flex items-center mb-2">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className={`h-4 w-4 ${
-                        i < review.rating ? 'text-amber-400' : 'text-muted-foreground'
-                      }`}
-                    />
-                  ))}
-                </div>
-                <p className="text-sm">{review.comment}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
-export default ProductList;
+export default TouristProductList;

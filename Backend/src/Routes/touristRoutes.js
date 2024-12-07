@@ -935,6 +935,37 @@ router.post('/addFlightBooking', async (req, res) => {
   }
 });
 
+// Add hotel booking
+router.post("/addHotelBooking", async (req, res) => {
+  try {
+    const { userId, hotelDetails } = req.body;
+
+    // Validate required fields
+    if (!userId || !hotelDetails) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Find the tourist
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Add the hotel booking
+    tourist.hotelBookings.push(hotelDetails);
+    await tourist.save();
+
+    res.status(200).json({ 
+      message: "Hotel booking added successfully",
+      booking: tourist.hotelBookings[tourist.hotelBookings.length - 1]
+    });
+
+  } catch (error) {
+    console.error("Error adding hotel booking:", error);
+    res.status(500).json({ error: "Failed to add hotel booking" });
+  }
+});
+
 // Update wallet balance route to use existing wallet field
 router.get('/:userId/wallet-balance', async (req, res) => {
   try {
