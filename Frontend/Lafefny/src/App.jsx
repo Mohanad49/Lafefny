@@ -80,22 +80,15 @@ import MapMarker from './components/Map';
 
 import UpdateTouristInfo from './components/EditTouristInfo';
 import TouristInfo from './components/GetTouristInfo';
-import AddTourGuideInfo from './components/AddTourGuideInfo';
 import UpdateTourGuideInfo from './components/EditTourGuideInfo';
-import AddSellerInfo from './components/AddSellerInfo';
 import UpdateSellerInfo from './components/EditSellerInfo';
 import SellerInfo from './components/SellerInfo';
-import AddAdvertiserInfo from './components/AddAdvertiserInfo';
 import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
-import AdvertiserInfo from './components/AdvertiserInfo';
 import ChangePassword from './components/ChangePassword';
 import TouristHistory from './components/TouristHistory';
 import TouristComplaintList from './components/TouristComplaintList';
 
 import './styles/styles.css'
-import UploadTourGuidePhoto from './components/EditTourGuidePhoto';
-import UploadSellerLogo from './components/EditSellerLogo';
-import UploadAdvertiserLogo from './components/EditAdvertiserLogo';
 import UploadAdvertiserDocs from './components/UploadAdvertiserDocs';
 import UploadSellerDocs from './components/UploadSellerDocs';
 import UploadTourGuideDocs from './components/UploadTourGuideDocs';
@@ -105,7 +98,6 @@ import AdminActivityList from './components/Admin-ActivityList';
 import SellerDelete from './components/Sellerdelete';
 import DeleteAccount from './components/DeleteAccount';
 
-import TourGuideInfo from './components/TourGuideInfo';
 
 import TransportationBooking from './components/TransportationBooking';
 import BookHotels from './components/BookHotels';
@@ -151,7 +143,7 @@ const App = () => {
           <Route path="/tours" element={<Tours />} />
           <Route path="/tours/:id" element={<TourDetails />} />
           <Route path="/guestHome" element={<Home />} />
-          <Route path="/forgot-Password" element={<ForgotPassword />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
           <Route path="/activities" element={<Activities />} />
           <Route path="/activities/:id" element={<ActivityDetails />} />
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
@@ -197,19 +189,14 @@ const App = () => {
           {/* Tour Guide Routes */}
           <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />
           <Route path="/guide-tourist-Itineraries" element={<ProtectedRoute allowedRoles={['TourGuide']}><GuideTouristItineraryList /></ProtectedRoute>} />
-          <Route path="/addTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddTourGuideInfo /></ProtectedRoute>} />
           <Route path="/editTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><UpdateTourGuideInfo /></ProtectedRoute>} />
-          <Route path="/viewTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideInfo /></ProtectedRoute>} />
-          <Route path="/editProfilePhoto" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuidePhoto /></ProtectedRoute>} />
           <Route path="/uploadTourGuideDocs" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuideDocs /></ProtectedRoute>} />
 
           {/* Seller Routes */}
           <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
-          <Route path="/addSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><AddSellerInfo /></ProtectedRoute>} />
           <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
-          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><SellerInfo /></ProtectedRoute>} />
+          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
           <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
-          <Route path="/editSellerLogo" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerLogo /></ProtectedRoute>} />
           <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
           <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
           <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProduct /></ProtectedRoute>} />
@@ -219,10 +206,7 @@ const App = () => {
 
           {/* Advertiser Routes */}
           <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
-          <Route path="/addAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddAdvertiserInfo /></ProtectedRoute>} />
           <Route path="/editAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
-          <Route path="/viewAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserInfo /></ProtectedRoute>} />
-          <Route path="/editAdvertiserPhoto" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserLogo /></ProtectedRoute>} />
           <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
           <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
           <Route path="/add-activity" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddActivity /></ProtectedRoute>} />

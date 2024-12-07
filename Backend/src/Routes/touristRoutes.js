@@ -1,7 +1,7 @@
 const express= require("express");
 const Tourist= require("../Models/touristModel");
 const User= require("../Models/User");
-const TouristItinerary = require("../Models/Tourist-Itinerary"); // Adjust the path to your Itinerary model
+const TouristItinerary = require("../Models/Itinerary"); // Adjust the path to your Itinerary model
 const Activity = require("../Models/Activity");
 const { processCardPayment } = require('../Services/payingService');
 const TourGuide = require("../Models/tourGuideModel");
@@ -205,7 +205,7 @@ router.get("/touristHistory/:userID", async (req, res) => {
   
       // Step 3: Filter activities that contain the userID in `touristBookings` and have a future date
       const upcomingActivities = allActivities.filter(activity => 
-        activity.touristBookings.includes(userID) && new Date(activity.date) > new Date()
+        activity.paidBy.includes(userID) && new Date(activity.date) > new Date()
       );
   
       // Step 4: Send the filtered activities in the response

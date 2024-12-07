@@ -36,14 +36,14 @@ router.get("/getTourGuide/:id", async (req, res) => {
 });
 
 router.patch("/updateTourGuideInfo/:id", async (req, res) => {
-  const { mobile, yearsOfExperience, previousWork } = req.body;
+  const { mobile, yearsOfExperience, previousWork, picture } = req.body;
   const userID = req.params.id;
   if (!mongoose.isValidObjectId(userID)) {
     res.status(400).json({ error: "invalid tour guide" });
   }
   const tourGuide = await TourGuide.findOneAndUpdate(
     { userID },
-    { mobile, yearsOfExperience, previousWork }
+    { mobile, yearsOfExperience, previousWork, picture } 
   );
   if (!tourGuide) {
     res.status(404).json({ error: "tour guide is not found" });

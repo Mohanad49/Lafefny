@@ -1,42 +1,117 @@
 /* eslint-disable no-unused-vars */
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { ArrowLeft, UserPlus } from 'lucide-react';
 import { addAdmin } from '../services/adminService';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/components/ui/use-toast";
 
 const AddAdmin = () => {
   const [userData, setUserData] = useState({
     username: '',
     password: '',
   });
+  const navigate = useNavigate();
+  const { toast } = useToast();
 
-  const handleAddAdmin = async () => {
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setUserData({
+      ...userData,
+      [name]: value,
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!userData.username || !userData.password) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please fill in all fields."
+      });
+      return;
+    }
+
     try {
       await addAdmin(userData);
-      alert('Admin added successfully');
+      toast({
+        title: "Success",
+        description: "Admin added successfully."
+      });
+      setUserData({
+        username: '',
+        password: '',
+      });
     } catch (error) {
-      
-      alert('Failed to add Admin');
+      console.error('Error adding Admin:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add Admin."
+      });
     }
   };
 
   return (
-    <div>
-      <h2>Admin Panel</h2>
-      {/* Add Admin */}
-      <div>
-        <h3>Add Admin</h3>
-        <input
-          type="text"
-          placeholder="Username"
-          value={userData.username}
-          onChange={(e) => setUserData({ ...userData, username: e.target.value })}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={userData.password}
-          onChange={(e) => setUserData({ ...userData, password: e.target.value })}
-        />
-        <button onClick={handleAddAdmin}>Add Admin</button>
+    <div className="container relative h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-1 lg:px-0">
+      <button
+        onClick={() => navigate(-1)}
+        className="absolute left-4 top-4 flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm"
+      >
+        <ArrowLeft className="h-4 w-4" />
+        Back
+      </button>
+
+      <div className="lg:p-8">
+        <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px]">
+          <div className="flex flex-col space-y-2 text-center">
+            <h1 className="text-2xl font-semibold tracking-tight">
+              Add Admin
+            </h1>
+            <p className="text-sm text-muted-foreground">
+              Create a new admin account
+            </p>
+          </div>
+
+          <div className="grid gap-6">
+            <form onSubmit={handleSubmit}>
+              <div className="grid gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="username">Username</Label>
+                  <Input
+                    id="username"
+                    type="text"
+                    name="username"
+                    value={userData.username}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <div className="grid gap-2">
+                  <Label htmlFor="password">Password</Label>
+                  <Input
+                    id="password"
+                    type="password"
+                    name="password"
+                    value={userData.password}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
+
+                <Button type="submit">
+                  <UserPlus className="h-4 w-4 mr-2" />
+                  Add Admin
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </div>
   );
