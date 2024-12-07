@@ -276,16 +276,13 @@ const Tours = () => {
         }
         return i;
       }));
-
+      
       // Close the date selection dialog
       setIsDateDialogOpen(false);
       setSelectedDate("");
 
-      // Show success message
-      toast({
-        title: "Booking Successful!",
-        description: "Your tour has been booked successfully."
-      });
+      
+      
 
       // Navigate to payment page
       navigate(`/tourist/AllPay`, { 

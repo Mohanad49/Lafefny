@@ -8,7 +8,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
+import { useNavigate } from "react-router-dom";
 
 const stripePromise = loadStripe('pk_test_51QP8ZuEtF2Lqtv9O8kg1FunK3YF9xXxeVt1oSsxe07QZHIZUOShRYHBjTYUrFcY61iQzfljEA6AT3ozj44mfPM9I00c9XZdQuA');
 
@@ -24,7 +25,8 @@ const TouristItineraryPay = () => {
   const [notification, setNotification] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
-
+  const { toast } = useToast();
+  const navigate = useNavigate(); 
   // Fetch booking details
   useEffect(() => {
     const fetchBooking = async () => {
@@ -74,7 +76,11 @@ const TouristItineraryPay = () => {
 
     if (error) {
       console.error(error);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment failed",
+        description: error.message
+      });
       return;
     }
 
@@ -85,10 +91,18 @@ const TouristItineraryPay = () => {
         touristId,
         amount: discountedPrice, // Send the discounted price
       });
-      setNotification({ type: 'success', message: 'Payment successful' });
+      toast({
+        title: "Payment Successful",
+        description: "Your tour has been booked successfully!"
+      });
+      setTimeout(() => navigate('/tours'), 1500);
     } catch (err) {
       console.error('Payment error:', err);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment failed",
+        description: "An error occurred while processing your payment."
+      });
     }
   };
 
@@ -101,10 +115,18 @@ const TouristItineraryPay = () => {
         amount: discountedPrice, // Send the discounted price
       });
       const { remainingBalance } = response.data;
-      setNotification({ type: 'success', message: `Payment successful. Remaining balance: ${remainingBalance} EGP` });
+      toast({
+        title: "Payment Successful",
+        description: `Your tour has been booked successfully! Remaining balance: ${remainingBalance} EGP`
+      });
+      setTimeout(() => navigate('/tours'), 1500);
     } catch (err) {
       console.error('Wallet payment error:', err);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment failed",
+        description: "An error occurred while processing your payment."
+      });
     }
   };
 
@@ -162,15 +184,6 @@ const TouristItineraryPay = () => {
         </div>
       </main>
       <Footer />
-      {notification && (
-        <Dialog open={!!notification} onOpenChange={() => setNotification(null)}>
-          <DialogContent>
-            <DialogTitle>{notification.type === 'success' ? 'Success' : 'Error'}</DialogTitle>
-            <DialogDescription>{notification.message}</DialogDescription>
-            <Button onClick={() => setNotification(null)}>Close</Button>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };
