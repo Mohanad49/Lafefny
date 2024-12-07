@@ -11,8 +11,8 @@ import Footer from './Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
-import { SalesOverview } from './SalesOverview';
 import axios from 'axios';
+import SalesReport from './SalesReport';
 
 const AdvertiserHome = () => {
   const [activities, setActivities] = useState([]);
@@ -96,9 +96,6 @@ const AdvertiserHome = () => {
               </div>
             </div>
           </section>
-          
-          {/* Sales Overview Section */}
-          <SalesOverview />
 
           {/* Featured Activities Section */}
           <div>
@@ -140,6 +137,11 @@ const AdvertiserHome = () => {
               ))}
             </div>
           </div>
+
+          <section className="bg-white p-6 rounded-lg shadow-sm">
+            <h2 className="text-2xl font-bold mb-6">Sales Report</h2>
+            <SalesReport />
+          </section>
 
           {/* Quick Actions Grid */}
           <section>
