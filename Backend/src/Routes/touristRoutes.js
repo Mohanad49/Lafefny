@@ -1,7 +1,8 @@
 const express= require("express");
 const Tourist= require("../Models/touristModel");
 const User= require("../Models/User");
-const TouristItinerary = require("../Models/Itinerary"); // Adjust the path to your Itinerary model
+const TouristItinerary = require("../Models/Tourist-Itinerary");
+const Itinerary = require("../Models/Itinerary"); // Adjust the path to your Itinerary model
 const Activity = require("../Models/Activity");
 const { processCardPayment } = require('../Services/payingService');
 const TourGuide = require("../Models/tourGuideModel");
@@ -619,7 +620,7 @@ router.post('/:itineraryId/payment', async (req, res) => {
     console.log('paymentMethodId:', paymentMethodId);
     console.log('touristId:', touristId);
 
-    const itinerary = await TouristItinerary.findById(itineraryId);
+    const itinerary = await Itinerary.findById(itineraryId);
     if (!itinerary) {
       console.error('Itinerary not found');
       return res.status(404).json({ error: 'Itinerary not found' });
@@ -629,7 +630,7 @@ router.post('/:itineraryId/payment', async (req, res) => {
     if (itinerary.paidBy.includes(touristId)) {
       return res.status(400).json({ error: 'You have already paid for this itinerary' });
     }
-
+    
     let tourist;
     if (method === 'card') {
       const paymentResult = await processCardPayment(paymentMethodId, itinerary.price);

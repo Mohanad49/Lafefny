@@ -11,6 +11,9 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import ShareModal from "@/components/ui/share-modal";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
 
 const Tours = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -28,32 +31,30 @@ const Tours = () => {
   const [sortBy, setSortBy] = useState("default");
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
-
-  const preferences = [
-    "Historic Areas",
-    "Beaches",
-    "Family-Friendly",
-    "Shopping",
-    "Nature",
-    "Cultural",
-    "Adventure",
-    "Relaxation"
-  ];
-
-  const languages = [
-    "English",
-    "Arabic",
-    "French",
-    "Spanish",
-    "German",
-    "Italian"
-  ];
+  const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [currentItinerary, setCurrentItinerary] = useState(null);
+  const [availableDates, setAvailableDates] = useState([]);
+  const [bookedItineraries, setBookedItineraries] = useState(new Set());
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
         const response = await axios.get('http://localhost:8000/itineraries');
-        setItineraries(response.data);
+        const touristId = localStorage.getItem('userID');
+        
+        // Update itineraries with booking status
+        const updatedItineraries = response.data.map((itinerary) => ({
+          ...itinerary,
+          booked: itinerary.paidBy?.includes(touristId),
+        }));
+        
+        setItineraries(updatedItineraries);
+        
+        // Initialize booked itineraries
+        const booked = new Set(updatedItineraries.filter(i => i.booked).map(i => i._id));
+        setBookedItineraries(booked);
         
         const highestPrice = Math.max(...response.data.map(i => 
           typeof i.price === 'string' ? 
@@ -77,9 +78,237 @@ const Tours = () => {
     navigate(`/tours/${itineraryId}`);
   };
 
-  const handleBookNow = (itineraryId) => {
+  const checkIfCanCancel = (bookedDate) => {
+    const today = new Date();
+    const bookingDate = new Date(bookedDate);
+  
+    today.setHours(0, 0, 0, 0);
+    bookingDate.setHours(0, 0, 0, 0);
+  
+    const diffTime = bookingDate.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+  
+    return diffDays >= 2;
+  };
+
+  const handleCancelBooking = async (itineraryId) => {
     const touristId = localStorage.getItem('userID');
-    navigate(`/tourist/AllPay`, { state: { touristId, itineraryId } });
+    if (!touristId) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in as a tourist to cancel bookings."
+      });
+      return;
+    }
+
+    try {
+      const itinerary = itineraries.find(i => i._id === itineraryId);
+      if (!itinerary) {
+        toast({
+          variant: "destructive",
+          title: "Itinerary Not Found",
+          description: "Could not find the tour you're trying to cancel."
+        });
+        return;
+      }
+
+      // Check if user has actually booked this itinerary
+      if (!itinerary.paidBy?.includes(touristId)) {
+        toast({
+          variant: "destructive",
+          title: "Booking Not Found",
+          description: "You don't have an active booking for this tour."
+        });
+        return;
+      }
+
+      const booking = itinerary.touristBookings?.find(
+        b => b.tourist === touristId
+      );
+      
+      if (!booking || !booking.bookedDate) {
+        toast({
+          variant: "destructive",
+          title: "Booking Not Found",
+          description: "Could not find your booking details for this tour."
+        });
+        return;
+      }
+
+      if (!checkIfCanCancel(booking.bookedDate)) {
+        toast({
+          variant: "destructive",
+          title: "Cancellation Failed",
+          description: "Cancellation is not allowed less than 2 days before the tour date."
+        });
+        return;
+      }
+
+      const response = await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { 
+        userId: touristId 
+      });
+
+      // Update local state
+      setBookedItineraries(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(itineraryId);
+        return newSet;
+      });
+
+      // Update itineraries state to reflect cancellation
+      setItineraries(prev => prev.map(i => {
+        if (i._id === itineraryId) {
+          return {
+            ...i,
+            paidBy: i.paidBy.filter(id => id !== touristId),
+            touristBookings: i.touristBookings.filter(b => b.tourist !== touristId)
+          };
+        }
+        return i;
+      }));
+
+      toast({
+        title: "Booking Cancelled Successfully!",
+        description: `Refunded amount: ${response.data.refundedAmount} EGP. New wallet balance: ${response.data.newWalletBalance} EGP`
+      });
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Cancellation Failed",
+        description: error.response?.data?.error || "An error occurred while cancelling the booking."
+      });
+    }
+  };
+
+  const handleNewBooking = async (itineraryId) => {
+    const touristId = localStorage.getItem('userID');
+    if (!touristId) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in as a tourist to make bookings."
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.get(`http://localhost:8000/itineraries/${itineraryId}/availableDates`);
+      const dates = response.data.availableDates.map(date => format(new Date(date), 'yyyy-MM-dd'));
+      setAvailableDates(dates);
+      setCurrentItinerary(itineraryId);
+      setIsDateDialogOpen(true);
+    } catch (error) {
+      console.error("Error fetching available dates:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to fetch available dates",
+        description: error.response?.data?.message || "Please try again later."
+      });
+    }
+  };
+
+  const handleBookNow = async (itineraryId, e) => {
+    e.stopPropagation();
+    
+    if (bookedItineraries.has(itineraryId)) {
+      await handleCancelBooking(itineraryId);
+    } else {
+      await handleNewBooking(itineraryId);
+    }
+  };
+
+  const handleDateConfirm = async () => {
+    if (!selectedDate) {
+      toast({
+        variant: "destructive",
+        title: "Date Required",
+        description: "Please select a date for your tour"
+      });
+      return;
+    }
+
+    const touristId = localStorage.getItem('userID');
+    if (!touristId) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in to continue"
+      });
+      return;
+    }
+
+    try {
+      const response = await axios.post(`http://localhost:8000/itineraries/${currentItinerary}/book`, { 
+        userId: touristId, 
+        selectedDate 
+      });
+
+      // Update local state to reflect the new booking
+      setBookedItineraries(prev => {
+        const newSet = new Set(prev);
+        newSet.add(currentItinerary);
+        return newSet;
+      });
+
+      // Update itineraries state to include the new booking
+      setItineraries(prev => prev.map(i => {
+        if (i._id === currentItinerary) {
+          // Add the user to paidBy array if not already there
+          const newPaidBy = i.paidBy || [];
+          if (!newPaidBy.includes(touristId)) {
+            newPaidBy.push(touristId);
+          }
+
+          // Add the new tourist booking
+          const newTouristBookings = i.touristBookings || [];
+          newTouristBookings.push({
+            tourist: touristId,
+            bookedDate: selectedDate
+          });
+
+          return {
+            ...i,
+            paidBy: newPaidBy,
+            touristBookings: newTouristBookings
+          };
+        }
+        return i;
+      }));
+
+      // Close the date selection dialog
+      setIsDateDialogOpen(false);
+      setSelectedDate("");
+
+      // Show success message
+      toast({
+        title: "Booking Successful!",
+        description: "Your tour has been booked successfully."
+      });
+
+      // Navigate to payment page
+      navigate(`/tourist/AllPay`, { 
+        state: { 
+          touristId, 
+          itineraryId: currentItinerary,
+          selectedDate 
+        } 
+      });
+    } catch (error) {
+      console.error("Error confirming booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Booking Failed",
+        description: error.response?.data?.error || "Failed to confirm your booking. Please try again."
+      });
+    }
+  };
+
+  const handleShare = (event, item) => {
+    event.stopPropagation();
+    setSelectedItem(item);
+    setIsShareModalOpen(true);
   };
 
   const convertPrice = (price) => {
@@ -144,12 +373,6 @@ const Tours = () => {
     return filtered;
   };
 
-  const handleShare = (event, item) => {
-    event.stopPropagation();
-    setSelectedItem(item);
-    setIsShareModalOpen(true);
-  };
-
   const filteredItineraries = filterItineraries();
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
@@ -184,7 +407,7 @@ const Tours = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Preferences</SelectItem>
-                  {preferences.map((pref) => (
+                  {["Historic Areas", "Beaches", "Family-Friendly", "Shopping", "Nature", "Cultural", "Adventure", "Relaxation"].map((pref) => (
                     <SelectItem key={pref} value={pref}>
                       {pref}
                     </SelectItem>
@@ -198,7 +421,7 @@ const Tours = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Languages</SelectItem>
-                  {languages.map((lang) => (
+                  {["English", "Arabic", "French", "Spanish", "German", "Italian"].map((lang) => (
                     <SelectItem key={lang} value={lang}>
                       {lang}
                     </SelectItem>
@@ -293,7 +516,12 @@ const Tours = () => {
                       </div>
                     </div>
                     {isLoggedIn && isTourist && (
-                      <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(itinerary._id); }}>Book Now</Button>
+                      <Button 
+                        className={`w-full ${bookedItineraries.has(itinerary._id) ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                        onClick={(e) => handleBookNow(itinerary._id, e)}
+                      >
+                        {bookedItineraries.has(itinerary._id) ? 'Cancel Booking' : 'Book Now'}
+                      </Button>
                     )}
                   </div>
                 </CardContent>
@@ -311,6 +539,35 @@ const Tours = () => {
           url={`${window.location.origin}/tours/${selectedItem._id}`}
         />
       )}
+      <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Tour Date</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Select value={selectedDate} onValueChange={setSelectedDate}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a date" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDates.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {format(new Date(date), 'MMMM d, yyyy')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsDateDialogOpen(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleDateConfirm} disabled={!selectedDate}>
+              Confirm Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
