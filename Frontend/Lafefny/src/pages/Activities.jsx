@@ -5,6 +5,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
 import { 
     Activity, 
     Clock, 
@@ -36,8 +37,10 @@ const Activities = () => {
   const [categories, setCategories] = useState([]);
   const [isShareModalOpen, setIsShareModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
+  const [bookedActivities, setBookedActivities] = useState(new Set());
 
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   const isLoggedIn = !!localStorage.getItem('userID');
   const isTourist = localStorage.getItem('userRole') === 'Tourist';
@@ -60,11 +63,21 @@ const Activities = () => {
           axios.get('http://localhost:8000/activityCategory')
         ]);
         
-        setActivities(activitiesResponse.data);
+        const touristId = localStorage.getItem('userID');
+        const updatedActivities = activitiesResponse.data.map((activity) => ({
+          ...activity,
+          booked: activity.paidBy?.includes(touristId),
+        }));
+        
+        setActivities(updatedActivities);
         setCategories(categoriesResponse.data);
         
+        // Initialize booked activities
+        const booked = new Set(updatedActivities.filter(a => a.booked).map(a => a._id));
+        setBookedActivities(booked);
+        
         // Set max price based on highest activity price
-        const highestPrice = Math.max(...activitiesResponse.data.map(a => 
+        const highestPrice = Math.max(...updatedActivities.map(a => 
           typeof a.price === 'string' ? 
             parseFloat(a.price.replace(/[^0-9.-]+/g, "")) : 
             a.price || 0
@@ -82,13 +95,76 @@ const Activities = () => {
     fetchData();
   }, []);
 
+  const checkIfCanCancel = (activityDate) => {
+    const today = new Date();
+    const activityDateTime = new Date(activityDate);
+    
+    today.setHours(0, 0, 0, 0);
+    activityDateTime.setHours(0, 0, 0, 0);
+    
+    const diffTime = activityDateTime.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays >= 2;
+  };
+
+  const handleBookNow = async (activityId, activityDate) => {
+    const touristId = localStorage.getItem('userID');
+    
+    if (!touristId) {
+      alert("Please log in to book activities");
+      return;
+    }
+
+    try {
+      if (bookedActivities.has(activityId)) {
+        // Handle cancellation
+        if (!checkIfCanCancel(activityDate)) {
+          toast({
+            variant: "destructive",
+            title: "Cancellation Failed",
+            description: "Cancellation is not allowed less than 2 days before the booked date."
+          });
+          return;
+        }
+        const response = await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
+        setBookedActivities(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(activityId);
+          return newSet;
+        });
+        toast({
+          title: "Booking Cancelled Successfully!",
+          description: `Remaining balance: ${response.data.remainingBalance} EGP`
+        });
+      } else {
+        // Handle booking
+        await axios.post(`http://localhost:8000/activities/${activityId}/book`, { touristId });
+        setBookedActivities(prev => {
+          const newSet = new Set(prev);
+          newSet.add(activityId);
+          return newSet;
+        });
+        navigate(`/tourist/payment`, { state: { touristId, activityId } });
+      }
+    } catch (error) {
+      console.error("Error handling booking:", error);
+      toast({
+        variant: "destructive",
+        title: error.response?.data?.error || (bookedActivities.has(activityId) ? "Failed to cancel the booking." : "Failed to book the activity."),
+        description: "Please try again later."
+      });
+    }
+  };
+
   const handleActivityClick = (activityId) => {
     navigate(`/activities/${activityId}`);
   };
 
-  const handleBookNow = (activityId) => {
-    const touristId = localStorage.getItem('userID');
-    navigate(`/tourist/payment`, { state: { touristId, activityId } });
+  const handleShare = (event, item) => {
+    event.stopPropagation();
+    setSelectedItem(item);
+    setIsShareModalOpen(true);
   };
 
   const { currency } = useCurrency();
@@ -194,12 +270,6 @@ const Activities = () => {
   };
   const filteredActivities = filterActivities();
 
-  const handleShare = (event, item) => {
-    event.stopPropagation();
-    setSelectedItem(item);
-    setIsShareModalOpen(true);
-  };
-
   if (loading) return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   if (error) return <div className="min-h-screen flex items-center justify-center">Error: {error}</div>;
 
@@ -230,7 +300,8 @@ const Activities = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
               />
-              
+　
+　
               <Select value={selectedCategory} onValueChange={setSelectedCategory}>
                 <SelectTrigger className="border-2 border-black">
                   <SelectValue placeholder="Select category" />
@@ -340,7 +411,15 @@ const Activities = () => {
                       </div>
                     </div>
                     {isLoggedIn && isTourist && (
-                      <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(activity._id); }}>Book Now</Button>
+                      <Button 
+                        className={`w-full ${bookedActivities.has(activity._id) ? 'bg-red-500 hover:bg-red-600' : ''}`} 
+                        onClick={(e) => { 
+                          e.stopPropagation(); 
+                          handleBookNow(activity._id, activity.date); 
+                        }}
+                      >
+                        {bookedActivities.has(activity._id) ? 'Cancel Booking' : 'Book Now'}
+                      </Button>
                     )}
                   </div>
                 </CardContent>

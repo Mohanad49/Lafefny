@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useState, useEffect } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { loadStripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
 import axios from 'axios';
@@ -8,12 +8,14 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { useToast } from "@/components/ui/use-toast";
 
 const stripePromise = loadStripe('pk_test_51QP8ZuEtF2Lqtv9O8kg1FunK3YF9xXxeVt1oSsxe07QZHIZUOShRYHBjTYUrFcY61iQzfljEA6AT3ozj44mfPM9I00c9XZdQuA');
 
 const TouristPayment = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const { touristId, activityId } = location.state || {};
   const [booking, setBooking] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -21,7 +23,6 @@ const TouristPayment = () => {
   const [promoCode, setPromoCode] = useState('');
   const [discountedPrice, setDiscountedPrice] = useState(null);
   const [promoError, setPromoError] = useState('');
-  const [notification, setNotification] = useState(null);
   const stripe = useStripe();
   const elements = useElements();
 
@@ -74,7 +75,11 @@ const TouristPayment = () => {
 
     if (error) {
       console.error(error);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment Failed",
+        description: error.message
+      });
       return;
     }
 
@@ -85,10 +90,18 @@ const TouristPayment = () => {
         touristId,
         amount: discountedPrice, // Send discounted price
       });
-      setNotification({ type: 'success', message: 'Payment successful' });
+      toast({
+        title: "Payment Successful",
+        description: "Your activity has been booked successfully!"
+      });
+      setTimeout(() => navigate('/activities'), 1500);
     } catch (err) {
       console.error('Payment error:', err);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment Failed",
+        description: err.response?.data?.message || "An error occurred during payment"
+      });
     }
   };
 
@@ -101,10 +114,18 @@ const TouristPayment = () => {
         amount: discountedPrice, // Send discounted price
       });
       const { remainingBalance } = response.data;
-      setNotification({ type: 'success', message: `Payment successful. Remaining balance: ${remainingBalance} EGP` });
+      toast({
+        title: "Payment Successful",
+        description: `Your activity has been booked successfully! Remaining balance: ${remainingBalance} EGP`
+      });
+      setTimeout(() => navigate('/activities'), 1500);
     } catch (err) {
       console.error('Wallet payment error:', err);
-      setNotification({ type: 'error', message: 'Payment failed' });
+      toast({
+        variant: "destructive",
+        title: "Payment Failed",
+        description: err.response?.data?.message || "An error occurred during payment"
+      });
     }
   };
 
@@ -162,15 +183,6 @@ const TouristPayment = () => {
         </div>
       </main>
       <Footer />
-      {notification && (
-        <Dialog open={!!notification} onOpenChange={() => setNotification(null)}>
-          <DialogContent>
-            <DialogTitle>{notification.type === 'success' ? 'Success' : 'Error'}</DialogTitle>
-            <DialogDescription>{notification.message}</DialogDescription>
-            <Button onClick={() => setNotification(null)}>Close</Button>
-          </DialogContent>
-        </Dialog>
-      )}
     </div>
   );
 };

@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const Tourist= require("../Models/touristModel");
 const Activity = require('../Models/Activity');
 const User = require('../Models/User');
 const { updateLoyaltyPoints, decreaseLoyaltyPoints } = require('./loyaltyPoints');
@@ -188,9 +189,6 @@ router.post('/:activityId/book', async (req, res) => {
       return res.status(400).json({ error: "This activity is not open for booking" });
     }
 
-    if (activity.touristBookings.includes(touristId)) {
-      return res.status(400).json({ error: "Tourist has already booked this activity" });
-    }
 
     activity.touristBookings.push(touristId);
     await activity.save();
@@ -208,21 +206,33 @@ router.post('/:activityId/book', async (req, res) => {
 router.post('/:id/cancel', async (req, res) => {
   try {
     const { touristId } = req.body;
-
+    tourist = await Tourist.findOne({ userID: touristId });
     const activity = await Activity.findById(req.params.id);
     if (!activity) {
       return res.status(404).json({ error: "Activity not found" });
     }
 
     const bookingIndex = activity.touristBookings.indexOf(touristId);
-    if (bookingIndex === -1) {
+    const paidByIndex = activity.paidBy.indexOf(touristId);
+
+    if (bookingIndex === -1 && paidByIndex === -1) {
       return res.status(400).json({ error: "Booking not found for this tourist" });
     }
 
-    activity.touristBookings.splice(bookingIndex, 1);
+    if (bookingIndex !== -1) {
+      activity.touristBookings.splice(bookingIndex, 1);
+    }
+
+    if (paidByIndex !== -1) {
+      activity.paidBy.splice(paidByIndex, 1);
+    }
+
     await activity.save();
+    tourist.wallet += activity.price;
+    await tourist.save();
+    const remainingBalance = tourist.wallet;
     decreaseLoyaltyPoints(touristId, activity.price); // Decrease loyalty points for the tourist
-    res.status(200).json({ message: "Booking canceled successfully", activity });
+    res.status(200).json({ message: "Booking canceled successfully", activity, remainingBalance });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
