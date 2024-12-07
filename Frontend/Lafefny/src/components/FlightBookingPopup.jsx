@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import '../styles/flightBookingPopup.css';
-import { X, Plane, Passport } from 'lucide-react';
+import { X, Plane, BookOpen } from 'lucide-react';
 
 const FlightBookingPopup = ({ flight, onClose, onBookingSuccess, userData }) => {
   const [credentials, setCredentials] = useState({

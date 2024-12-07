@@ -7,10 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Plane, Calendar, Users, ArrowRight, ArrowLeftRight, Search, MapPin, Globe2, ArrowLeft, AlertCircle, Crown, Baby } from 'lucide-react';
-import { useCurrency } from '../context/CurrencyContext';
+import { useCurrency, currencies } from '../context/CurrencyContext';
 import Navigation from './Navigation';
 import '../styles/bookFlights.css';
-import FlightBookingPopup from './FlightBookingPopup';
 import FlightCard from './FlightCard';
 
 const BookFlights = () => {
@@ -25,15 +24,27 @@ const BookFlights = () => {
   const [infants, setInfants] = useState(0);
   const [travelClass, setTravelClass] = useState('ECONOMY');
   const [nonStop, setNonStop] = useState(false);
-  const [currencyCode, setCurrencyCode] = useState('USD');
   const [max, setMax] = useState(10);
   const [flights, setFlights] = useState([]);
-  const [selectedFlight, setSelectedFlight] = useState(null);
   const [error, setError] = useState(null);
-  const [showPopup, setShowPopup] = useState(false);
-  const [currentUserData, setCurrentUserData] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [currentUserData, setCurrentUserData] = useState(null);
   const { currency } = useCurrency();
+
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice.toFixed(2);
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -109,25 +120,40 @@ const BookFlights = () => {
     }
   };
 
-  const handleBooking = () => {
-    if (!selectedFlight) {
-      alert('Please select a flight to book');
-      return;
-    }
-    setShowPopup(true);
-  };
-
-  const handleBookingSuccess = async (bookingData) => {
+  const handleBooking = async (flight) => {
     try {
-      // Remove this since we're handling it in amadeusService now
-      // await axios.post('http://localhost:8000/tourist/addFlightBooking', {
-      //   userId: 'YOUR_TOURIST_ID',
-      //   flightDetails: bookingData,
-      // });
-      
-      navigate('/touristHome');
+      setBookingLoading(true);
+      setError(null);
+
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        setError('Please log in to book a flight');
+        return;
+      }
+
+      // Create flight booking request
+      const response = await axios.post('http://localhost:8000/tourist/addFlightBooking', {
+        userId,
+        flightDetails: {
+          validatingAirlineCodes: flight.validatingAirlineCodes,
+          itineraries: flight.itineraries,
+          price: flight.price,
+          bookingStatus: 'Confirmed'
+        }
+      });
+
+      setBookingSuccess(true);
+
+      // Wait for 2 seconds before redirecting
+      setTimeout(() => {
+        navigate('/');
+      }, 2000);
+
     } catch (error) {
-      console.error('Error storing flight details:', error);
+      console.error('Error storing flight booking:', error);
+      setError(error.response?.data?.error || 'Failed to book flight. Please try again.');
+    } finally {
+      setBookingLoading(false);
     }
   };
 
@@ -417,29 +443,36 @@ const BookFlights = () => {
                   <Globe2 className="text-primary h-6 w-6" />
                   <h2 className="text-xl font-semibold text-gray-800">Available Flights</h2>
                 </div>
-                <div className="grid grid-cols-1 gap-6">
+
+                {bookingSuccess && (
+                  <div className="mb-6 bg-green-50 border border-green-200 text-green-600 p-4 rounded-lg flex items-center gap-2">
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 bg-green-600 rounded-full animate-pulse" />
+                      Flight booked successfully! Redirecting to home page...
+                    </div>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="mb-6 bg-red-50 border border-red-200 text-red-600 p-4 rounded-lg flex items-center gap-2">
+                    <AlertCircle size={18} />
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-4">
                   {flights.map((flight, index) => (
                     <FlightCard
                       key={index}
                       flight={flight}
-                      isSelected={selectedFlight === flight}
-                      onSelect={setSelectedFlight}
-                      onBook={handleBooking}
+                      onBook={(flight) => handleBooking(flight)}
+                      isBooking={bookingLoading}
+                      convertPrice={convertPrice}
                     />
                   ))}
                 </div>
               </CardContent>
             </Card>
-          )}
-
-          {showPopup && selectedFlight && (
-            <FlightBookingPopup
-              flight={selectedFlight}
-              onClose={() => setShowPopup(false)}
-              onBookingSuccess={handleBookingSuccess}
-              userData={currentUserData}
-              currency={currency}
-            />
           )}
         </div>
       </div>

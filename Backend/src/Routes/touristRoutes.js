@@ -898,7 +898,42 @@ router.post('/:userId/orders', async (req, res) => {
   }
 });
 
+// Add flight booking
+router.post('/addFlightBooking', async (req, res) => {
+  try {
+    const { userId, flightDetails } = req.body;
 
+    // Find the tourist
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Create flight booking object
+    const flightBooking = {
+      airline: flightDetails.validatingAirlineCodes[0],
+      flightNumber: flightDetails.itineraries[0].segments[0].number,
+      departureDate: flightDetails.itineraries[0].segments[0].departure.at,
+      arrivalDate: flightDetails.itineraries[0].segments[0].arrival.at,
+      departureAirport: flightDetails.itineraries[0].segments[0].departure.iataCode,
+      arrivalAirport: flightDetails.itineraries[0].segments[0].arrival.iataCode,
+      bookingStatus: 'Confirmed', // Fixed to match schema enum
+      price: flightDetails.price.total
+    };
+
+    // Add to tourist's flight bookings
+    tourist.flightBookings.push(flightBooking);
+    await tourist.save();
+
+    res.status(201).json({ 
+      message: "Flight booked successfully",
+      flightBooking 
+    });
+  } catch (error) {
+    console.error('Error booking flight:', error);
+    res.status(500).json({ error: error.message || "Failed to book flight" });
+  }
+});
 
 // Update wallet balance route to use existing wallet field
 router.get('/:userId/wallet-balance', async (req, res) => {
