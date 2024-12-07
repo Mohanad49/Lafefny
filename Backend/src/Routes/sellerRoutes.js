@@ -102,13 +102,30 @@ router.get("/getPDF/:id", async(req,res)=>{
 });
 
 // Seller Sales Report Route
-router.get('/seller/sales-report', async (req, res) => {
+router.get('/sales-report/:userId', async (req, res) => {
     try {
       const { startDate, endDate, productId, month, year } = req.query;
+      const { userId } = req.params;
+
+      if (!userId) {
+        return res.status(400).json({
+          success: false,
+          message: 'User ID is required'
+        });
+      }
+
       if (!startDate || !endDate) {
         return res.status(400).json({
           success: false,
           message: 'Start date and end date are required'
+        });
+      }
+
+      const seller = await Seller.findOne({ userID: userId });
+      if (!seller) {
+        return res.status(404).json({
+          success: false,
+          message: 'Seller not found'
         });
       }
   
@@ -118,7 +135,7 @@ router.get('/seller/sales-report', async (req, res) => {
         year
       };
   
-      const report = await userSalesReportService.getSellerSalesReport(req.user._id, startDate, endDate, filters);
+      const report = await userSalesReportService.getSellerSalesReport(userId, startDate, endDate, filters);
       res.json({
         success: true,
         data: report

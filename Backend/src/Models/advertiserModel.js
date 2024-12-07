@@ -5,8 +5,7 @@ const Schema = mongoose.Schema;
 
 const AdvertiserSchema = new Schema({
   hotline:{
-    type: Number,
-    unique: true,
+    type: Number
   },
   company:{
     type: String,

@@ -18,6 +18,7 @@ const Tours = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
+  const isTourist = localStorage.getItem('userRole') === 'Tourist';
   const { currency } = useCurrency();
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPreference, setSelectedPreference] = useState("all");
@@ -291,7 +292,7 @@ const Tours = () => {
                         <div className="text-sm text-primary">per person</div>
                       </div>
                     </div>
-                    {isLoggedIn && (
+                    {isLoggedIn && isTourist && (
                       <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(itinerary._id); }}>Book Now</Button>
                     )}
                   </div>

@@ -189,12 +189,7 @@ const TouristHome = () => {
             <div className="grid gap-8">
               {/* Recommendations */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="h-5 w-5 text-primary" />
-                    <h2 className="text-2xl font-bold">Recommended for You</h2>
-                  </div>
-                </div>
+                
                 <div className="grid md:grid-cols-3 gap-6">
                   {recommendations.slice(0, 3).map((item) => (
                     <Link
@@ -223,12 +218,7 @@ const TouristHome = () => {
 
               {/* Recently Viewed */}
               <div>
-                <div className="flex items-center justify-between mb-6">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-5 w-5 text-primary" />
-                    <h2 className="text-2xl font-bold">Recently Viewed</h2>
-                  </div>
-                </div>
+                
                 <div className="grid md:grid-cols-4 gap-4">
                   {recentlyViewed.slice(0, 4).map((item) => (
                     <Link

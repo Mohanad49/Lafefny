@@ -302,7 +302,7 @@ router.put('/promo-codes/:id/deactivate', async (req, res) => {
 
 // Create User
 router.post('/signup', async (req, res) => {
-  const { username, email, password, dateOfBirth, mobileNumber, nationality, job, role, termsAccepted } = req.body;
+  const { username, email, password, dateOfBirth, mobileNumber, nationality, job, role, termsAccepted, isAccepted } = req.body;
 
   try {
     const existingUser = await User.findOne({ email });
@@ -310,7 +310,7 @@ router.post('/signup', async (req, res) => {
       return res.status(400).json({ message: 'User already exists' });
     }
 
-    const newUser = new User({ username, email, password, dateOfBirth, mobileNumber, nationality, job, role });
+    const newUser = new User({ username, email, password, dateOfBirth, mobileNumber, nationality, job, role, termsAccepted, isAccepted });
     await newUser.save();
     
     const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, { expiresIn: '24h' });

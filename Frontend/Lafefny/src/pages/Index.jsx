@@ -3,10 +3,10 @@ import { ArrowRight, Check, ChevronDown } from "lucide-react";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
-
+import { useNavigate } from "react-router-dom";
 const Index = () => {
   const [activeAccordion, setActiveAccordion] = useState(null);
-
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -40,10 +40,10 @@ const Index = () => {
                   Experience unforgettable journeys and create lasting memories with our curated travel experiences.
                 </p>
                 <div className="flex justify-center gap-4">
-                  <button className="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors">
+                  <button className="px-6 py-3 bg-primary text-white rounded-full hover:bg-primary/90 transition-colors" onClick={() => navigate('/sign')}>
                     Plan Your Trip
                   </button>
-                  <button className="px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors flex items-center gap-2 text-white">
+                  <button className="px-6 py-3 bg-white/10 backdrop-blur-sm rounded-full hover:bg-white/20 transition-colors flex items-center gap-2 text-white" onClick={() => navigate('/destinations')}>
                     View Destinations <ArrowRight className="w-4 h-4" />
                   </button>
                 </div>

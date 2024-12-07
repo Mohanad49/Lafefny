@@ -199,7 +199,7 @@ const App = () => {
           <Route path="/guide-tourist-Itineraries" element={<ProtectedRoute allowedRoles={['TourGuide']}><GuideTouristItineraryList /></ProtectedRoute>} />
           <Route path="/addTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddTourGuideInfo /></ProtectedRoute>} />
           <Route path="/editTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><UpdateTourGuideInfo /></ProtectedRoute>} />
-          <Route path="/getTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideInfo /></ProtectedRoute>} />
+          <Route path="/viewTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideInfo /></ProtectedRoute>} />
           <Route path="/editProfilePhoto" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuidePhoto /></ProtectedRoute>} />
           <Route path="/uploadTourGuideDocs" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuideDocs /></ProtectedRoute>} />
 
@@ -207,7 +207,7 @@ const App = () => {
           <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
           <Route path="/addSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><AddSellerInfo /></ProtectedRoute>} />
           <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
-          <Route path="/sellerinfo" element={<ProtectedRoute allowedRoles={['Seller']}><SellerInfo /></ProtectedRoute>} />
+          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><SellerInfo /></ProtectedRoute>} />
           <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
           <Route path="/editSellerLogo" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerLogo /></ProtectedRoute>} />
           <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
@@ -220,8 +220,8 @@ const App = () => {
           {/* Advertiser Routes */}
           <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
           <Route path="/addAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddAdvertiserInfo /></ProtectedRoute>} />
-          <Route path="/updateAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
-          <Route path="/getAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserInfo /></ProtectedRoute>} />
+          <Route path="/editAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
+          <Route path="/viewAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserInfo /></ProtectedRoute>} />
           <Route path="/editAdvertiserPhoto" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserLogo /></ProtectedRoute>} />
           <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
           <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
@@ -254,8 +254,8 @@ const App = () => {
           <Route path="/room-details/:hotelId" element={<ProtectedRoute allowedRoles={['Tourist']}><RoomDetails /></ProtectedRoute>} />
 
           {/* Reports (Admin only) */}
-          <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin']}><ItineraryReport /></ProtectedRoute>} />
-          <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin']}><ActivityReport /></ProtectedRoute>} />
+          <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin','TourGuide']}><ItineraryReport /></ProtectedRoute>} />
+          <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin','Advertiser']}><ActivityReport /></ProtectedRoute>} />
         </Routes>
       </Router>
       </TooltipProvider>
