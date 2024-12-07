@@ -11,6 +11,7 @@ import Footer from './Footer';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
+import { SalesOverview } from './SalesOverview';
 import axios from 'axios';
 
 const AdvertiserHome = () => {
@@ -95,6 +96,9 @@ const AdvertiserHome = () => {
               </div>
             </div>
           </section>
+          
+          {/* Sales Overview Section */}
+          <SalesOverview />
 
           {/* Featured Activities Section */}
           <div>
