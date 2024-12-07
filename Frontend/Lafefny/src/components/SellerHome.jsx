@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/components/ui/use-toast";
-import { Plus, Eye, List, Loader2 } from "lucide-react";
+import { Plus, Loader2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,7 +18,6 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Line } from "react-chartjs-2";
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -29,7 +28,6 @@ import {
   Tooltip,
   Legend
 } from 'chart.js';
-import axios from "axios";
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { useNavigate } from "react-router-dom";
 
@@ -45,8 +43,6 @@ ChartJS.register(
 
 const SellerHome = () => {
   const [products, setProducts] = useState([]);
-  const [salesData, setSalesData] = useState(null);
-  const [viewMode, setViewMode] = useState("grid");
   const [isLoading, setIsLoading] = useState(true);
   const [showAllProducts, setShowAllProducts] = useState(false);
   const { toast } = useToast();
@@ -69,44 +65,7 @@ const SellerHome = () => {
 
   useEffect(() => {
     fetchProducts();
-    fetchSalesReport();
   }, []);
-
-  const fetchSalesReport = async () => {
-    try {
-      const userId = localStorage.getItem('userID');
-
-      if (!userId) {
-        toast({
-          title: "Error",
-          description: "User not authenticated. Please login again.",
-          variant: "destructive",
-        });
-        return;
-      }
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`http://localhost:8000/seller/sales-report/${userId}`, {
-        params: {
-          startDate: new Date(new Date().setMonth(new Date().getMonth() - 6)).toISOString(),
-          endDate: new Date().toISOString()
-        },
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-      
-     
-        setSalesData(response.data.data);
-      
-    } catch (error) {
-      console.error('Sales report error:', error);
-      toast({
-        title: "Error",
-        description: error.response?.data?.message || "Failed to fetch sales report",
-        variant: "destructive",
-      });
-    }
-  };
 
   const fetchProducts = async () => {
     try {
@@ -170,57 +129,6 @@ const SellerHome = () => {
     }
   };
 
-  const SalesChart = ({ data }) => {
-    if (!data) return null;
-
-    const chartData = {
-      labels: data.salesData.map(item => 
-        `${item._id.month}/${item._id.year}`
-      ),
-      datasets: [{
-        label: 'Revenue',
-        data: data.salesData.map(item => item.revenue),
-        borderColor: 'rgb(99, 102, 241)',
-        tension: 0.1
-      }]
-    };
-    
-
-    return (
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h2 className="text-xl font-semibold mb-4">Sales Overview</h2>
-        <Line 
-          data={chartData}
-          options={{
-            responsive: true,
-            scales: {
-              y: {
-                beginAtZero: true,
-                ticks: {
-                  callback: value => `${currencies[currency].symbol}${convertPrice(value).toFixed(3)}`
-                }
-              }
-            }
-          }}
-        />
-        <div className="grid grid-cols-3 gap-4 mt-4">
-          <div className="text-center">
-            <p className="text-sm text-gray-500">Total Revenue</p>
-            <p className="text-xl font-semibold">{currencies[currency].symbol}{convertPrice(data.summary.totalRevenue).toFixed(2)}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-500">Total Orders</p>
-            <p className="text-xl font-semibold">{data.summary.totalOrders}</p>
-          </div>
-          <div className="text-center">
-            <p className="text-sm text-gray-500">Items Sold</p>
-            <p className="text-xl font-semibold">{data.summary.totalQuantitySold}</p>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background">
@@ -240,8 +148,7 @@ const SellerHome = () => {
 
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto space-y-8">
-          {/* Sales Chart Section */}
-          <SalesChart data={salesData} />
+         
 
           {/* Featured Products Section */}
           <div>

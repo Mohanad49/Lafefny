@@ -12,11 +12,10 @@ import About from './pages/About';
 import Destinations from './pages/Destinations';
 import Tours from './pages/Tours';
 import TourDetails from './pages/TourDetails';
-import Activities from './pages/Activities'
+import Activities from './pages/Activities';
 import ActivityDetails from './pages/ActivityDetails';
 import HistoricalPlaces from './pages/HistoricalPlaces'
 import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
-import Profile from './pages/Profile';
 import Home from './components/GuestHome';
 import { CurrencyProvider } from './context/CurrencyContext';
 
@@ -120,8 +119,7 @@ import MyOrders from './components/MyOrders';
 import OrderDetails from './components/OrderDetails';
 import TouristAllPay from './components/TouristAllPay';
 import AddProductPage from './pages/AddProduct';
-
-
+import Bookmarks from './pages/Bookmarks';
 
 const queryClient = new QueryClient();
 
@@ -150,6 +148,7 @@ const App = () => {
           <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
           <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
           <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
 
           {/* Admin Routes */}
           <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />
@@ -207,7 +206,7 @@ const App = () => {
 
           {/* Advertiser Routes */}
           <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
-          <Route path="/editAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
+          <Route path="/viewAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
           <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
           <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
           <Route path="/add-activity" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddActivity /></ProtectedRoute>} />
@@ -215,12 +214,12 @@ const App = () => {
 
           {/* Tourism Governor Routes */}
           <Route path="/TourismGovernorHome" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><TourismGovernorHome /></ProtectedRoute>} />
-          <Route path="/edit-category/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><EditActivityCategory /></ProtectedRoute>} />
-          <Route path="/add-activityCategory" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddActivityCategory /></ProtectedRoute>} />
-          <Route path="/add-preferenceTag" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddPreferenceTag /></ProtectedRoute>} />
-          <Route path="/activityCategories" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><ActivityCategoryList /></ProtectedRoute>} />
-          <Route path="/preferenceTags" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><PreferenceTagList /></ProtectedRoute>} />
-          <Route path="/edit-tag/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><EditPreferenceTag /></ProtectedRoute>} />
+          <Route path="/edit-category/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditActivityCategory /></ProtectedRoute>} />
+          <Route path="/add-activityCategory" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddActivityCategory /></ProtectedRoute>} />
+          <Route path="/add-preferenceTag" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddPreferenceTag /></ProtectedRoute>} />
+          <Route path="/activityCategories" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><ActivityCategoryList /></ProtectedRoute>} />
+          <Route path="/preferenceTags" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><PreferenceTagList /></ProtectedRoute>} />
+          <Route path="/edit-tag/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditPreferenceTag /></ProtectedRoute>} />
           <Route path="/add-museum-tag" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseumTag /></ProtectedRoute>} />
 
           {/* Shared Protected Routes (accessible by all authenticated users) */}
@@ -228,7 +227,7 @@ const App = () => {
           <Route path="/itineraries/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ItineraryDetail /></ProtectedRoute>} />
           <Route path="/museums/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MuseumDetail /></ProtectedRoute>} />
           <Route path="/complaints" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><ComplaintForm /></ProtectedRoute>} />
-          <Route path="/changepassword" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ChangePassword /></ProtectedRoute>} />
+          <Route path="/changePassword" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ChangePassword /></ProtectedRoute>} />
           <Route path="/delete-account" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><DeleteAccount /></ProtectedRoute>} />
           <Route path="/map" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MapMarker /></ProtectedRoute>} />
 

@@ -156,7 +156,7 @@ const TouristHome = () => {
                   <Calendar className="h-5 w-5 text-primary" />
                   <h3 className="font-semibold">Upcoming Activities</h3>
                 </div>
-                <Link to="/touristActivities" className="text-sm text-primary hover:underline">
+                <Link to="/Activities" className="text-sm text-primary hover:underline">
                   View All
                 </Link>
               </div>
@@ -250,7 +250,7 @@ const TouristHome = () => {
         <section className="py-12 px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="grid md:grid-cols-4 gap-6">
-              <Link to="/touristActivities" 
+              <Link to="/activities" 
                 className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
                 <Globe className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
                 <h3 className="text-xl font-semibold">Activities</h3>

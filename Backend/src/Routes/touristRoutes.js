@@ -936,6 +936,37 @@ router.post('/addFlightBooking', async (req, res) => {
   }
 });
 
+// Add hotel booking
+router.post("/addHotelBooking", async (req, res) => {
+  try {
+    const { userId, hotelDetails } = req.body;
+
+    // Validate required fields
+    if (!userId || !hotelDetails) {
+      return res.status(400).json({ error: "Missing required fields" });
+    }
+
+    // Find the tourist
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Add the hotel booking
+    tourist.hotelBookings.push(hotelDetails);
+    await tourist.save();
+
+    res.status(200).json({ 
+      message: "Hotel booking added successfully",
+      booking: tourist.hotelBookings[tourist.hotelBookings.length - 1]
+    });
+
+  } catch (error) {
+    console.error("Error adding hotel booking:", error);
+    res.status(500).json({ error: "Failed to add hotel booking" });
+  }
+});
+
 // Update wallet balance route to use existing wallet field
 router.get('/:userId/wallet-balance', async (req, res) => {
   try {
@@ -1046,6 +1077,61 @@ router.post('/:touristId/add-wallet', async (req, res) => {
   } catch (error) {
     console.error('Error updating wallet:', error);
     res.status(500).json({ error: 'Failed to update wallet' });
+  }
+});
+
+// Bookmark activity
+router.post('/:userId/bookmark-activity/:activityId', async (req, res) => {
+  try {
+    const { userId, activityId } = req.params;
+
+    const tourist = await Tourist.findOne({ userID: userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Check if activity exists
+    const activity = await Activity.findById(activityId);
+    if (!activity) {
+      return res.status(404).json({ error: "Activity not found" });
+    }
+
+    // Check if already bookmarked
+    const isBookmarked = tourist.bookmarkedActivities.includes(activityId);
+    
+    if (isBookmarked) {
+      // Remove bookmark
+      tourist.bookmarkedActivities = tourist.bookmarkedActivities.filter(
+        id => id.toString() !== activityId
+      );
+      await tourist.save();
+      res.json({ message: "Activity removed from bookmarks", isBookmarked: false });
+    } else {
+      // Add bookmark
+      tourist.bookmarkedActivities.push(activityId);
+      await tourist.save();
+      res.json({ message: "Activity bookmarked successfully", isBookmarked: true });
+    }
+  } catch (error) {
+    console.error('Error bookmarking activity:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get bookmarked activities
+router.get('/:userId/bookmarked-activities', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate('bookmarkedActivities');
+    
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.json(tourist.bookmarkedActivities);
+  } catch (error) {
+    console.error('Error fetching bookmarked activities:', error);
+    res.status(500).json({ error: error.message });
   }
 });
 

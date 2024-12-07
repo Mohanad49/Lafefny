@@ -1,26 +1,42 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import { Card, CardContent } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Building2, Calendar, Users, Search, AlertCircle, Bed, MapPin, ArrowLeft } from 'lucide-react';
+import { useCurrency, currencies } from '../context/CurrencyContext';
+import Navigation from './Navigation';
 import "../styles/bookHotels.css";
-import { useCookies } from "react-cookie";
 
 const BookHotel = () => {
+  const navigate = useNavigate();
   const [cityCode, setCityCode] = useState("");
   const [checkInDate, setCheckInDate] = useState("");
   const [checkOutDate, setCheckOutDate] = useState("");
-  const [adults, setAdults] = useState(1); // New state for adults count
-  const [roomQuantity, setRoomQuantity] = useState(1); // New state for room quantity
+  const [adults, setAdults] = useState(1);
+  const [roomQuantity, setRoomQuantity] = useState(1);
   const [hotelOffers, setHotelOffers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [selectedOffer, setSelectedOffer] = useState(null);
-  const [cookies] = useCookies(["userType", "username"]);
-  const username = localStorage.getItem('currentUserName');
-  const userID = localStorage.getItem('userID');
-  const [formErrors, setFormErrors] = useState({});
-  const [showSuccessPopup, setShowSuccessPopup] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const offersPerPage = 10;
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingSuccess, setBookingSuccess] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState('');
+  const { currency } = useCurrency();
+
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice.toFixed(2);
+  };
 
   const validateForm = () => {
     const errors = {};
@@ -28,333 +44,428 @@ const BookHotel = () => {
     const checkIn = new Date(checkInDate);
     const checkOut = new Date(checkOutDate);
 
+    if (!cityCode) {
+      setError("Please enter a city code");
+      return false;
+    }
+    if (!checkInDate) {
+      setError("Please select a check-in date");
+      return false;
+    }
+    if (!checkOutDate) {
+      setError("Please select a check-out date");
+      return false;
+    }
     if (checkIn < today) {
-      errors.checkIn = "Check-in date cannot be in the past";
+      setError("Check-in date cannot be in the past");
+      return false;
     }
     if (checkOut <= checkIn) {
-      errors.checkOut = "Check-out date must be after check-in date";
-    }
-    if (cityCode.length !== 3) {
-      errors.cityCode = "City code must be 3 characters";
+      setError("Check-out date must be after check-in date");
+      return false;
     }
     if (adults < 1) {
-      errors.adults = "There must be at least one adult";
+      setError("There must be at least one adult");
+      return false;
     }
     if (roomQuantity < 1 || roomQuantity > adults) {
-      errors.roomQuantity =
-        "Room quantity must be between 1 and the number of adults";
+      setError("Room quantity must be between 1 and the number of adults");
+      return false;
     }
 
-    setFormErrors(errors);
-    return Object.keys(errors).length === 0;
+    setError(null);
+    return true;
   };
 
   const handleSearch = async (e) => {
     e.preventDefault();
-    setError(null);
     if (!validateForm()) return;
 
     setLoading(true);
+    setError(null);
     try {
-      const requestBody = {
+      const response = await axios.post('http://localhost:8000/amadeusHotel', {
         cityCode: cityCode.toUpperCase(),
         checkInDate,
         checkOutDate,
         adults: parseInt(adults),
         roomQuantity: parseInt(roomQuantity),
-        currency: "EUR",
-        countryOfResidence: "US"
-      };
-
-      console.log('Sending request with body:', requestBody);
-
-      const response = await axios({
-        method: 'POST',
-        url: 'http://localhost:8000/amadeusHotel',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        data: requestBody
+        currency: currency
       });
 
-      console.log('Raw API response:', response.data);
-
       if (response.data?.data) {
-        console.log('Number of offers before filtering:', response.data.data.length);
-        const validOffers = response.data.data.filter(offer => {
-          const isValid = offer?.hotel?.hotelId && offer?.offers?.[0];
-          if (!isValid) {
-            console.log('Filtered out offer:', offer);
-          }
-          return isValid;
-        });
-        console.log('Number of valid offers after filtering:', validOffers.length);
+        const validOffers = response.data.data.filter(offer => 
+          offer?.hotel?.hotelId && offer?.offers?.[0]
+        );
         setHotelOffers(validOffers);
-        setCurrentPage(1);
       } else {
-        console.log('No data in response:', response.data);
-        setError('No hotel offers found');
+        setError('No hotel offers found for the selected criteria');
       }
     } catch (err) {
-      console.error("Hotel search error:", err);
-      const errorMessage = err.response?.data?.error || err.message || "Failed to fetch hotel offers";
-      console.error("Error details:", errorMessage);
-      setError(errorMessage);
+      setError(err.response?.data?.error || 'Failed to fetch hotel offers');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleOfferSelection = (offer) => {
-    setSelectedOffer((current) => (current === offer ? null : offer));
-  };
-
-  const handleBookHotel = async () => {
-    if (!selectedOffer) {
-      setError("Please select a hotel to book");
-      return;
-    }
-
+  const handleBooking = async (hotel) => {
     try {
-      setLoading(true);
-      
-      // Extract booking details from the selected offer
-      const hotelOffer = selectedOffer.offers[0];
+      setBookingLoading(true);
+      setError(null);
+      setBookingMessage('');
+
+      const userId = localStorage.getItem('userID');
+      if (!userId) {
+        setError('Please log in to book a hotel');
+        return;
+      }
+
       const bookingDetails = {
-        userID,
-        hotelBooking: {
-          hotelName: selectedOffer.hotel.name,
-          roomType: hotelOffer.room.type || 'Standard',
-          checkInDate: checkInDate,
-          checkOutDate: checkOutDate,
-          numberOfGuests: adults,
+        userId,
+        hotelDetails: {
+          hotelName: hotel?.hotel?.name || 'Unknown Hotel',
+          roomType: hotel?.offers?.[0]?.room?.type || 'Standard Room',
+          checkInDate: hotel?.offers?.[0]?.checkInDate || new Date(),
+          checkOutDate: hotel?.offers?.[0]?.checkOutDate || new Date(),
+          numberOfGuests: hotel?.offers?.[0]?.guests?.adults || 1,
           bookingStatus: 'Confirmed',
-          price: parseFloat(hotelOffer.price.total) || 0,
-          hotelId: selectedOffer.hotel.hotelId
+          price: hotel?.offers?.[0]?.price?.total || 0
         }
       };
 
-      console.log('Sending booking details:', bookingDetails);
+      const response = await axios.post('http://localhost:8000/tourist/addHotelBooking', bookingDetails);
 
-      const response = await axios.put(
-        "http://localhost:8000/amadeusHotel/bookHotels",
-        bookingDetails
-      );
+      if (response.data && response.data.message) {
+        setBookingSuccess(true);
+        setBookingMessage(`Successfully booked ${hotel?.hotel?.name} for ${hotel?.offers?.[0]?.guests?.adults} guests!`);
+        
+        // Wait for 2 seconds before redirecting
+        setTimeout(() => {
+          navigate('/touristHome');
+        }, 2000);
+      }
 
-      setSuccessMessage(response.data.message || "Hotel booked successfully!");
-      setShowSuccessPopup(true);
-      setSelectedOffer(null);
-    } catch (err) {
-      console.error("Booking error:", err.response?.data || err);
-      setError(err.response?.data?.message || "Failed to book hotel");
+    } catch (error) {
+      console.error('Error booking hotel:', error);
+      setError(error.response?.data?.error || 'Failed to book hotel. Please try again.');
     } finally {
-      setLoading(false);
+      setBookingLoading(false);
     }
   };
 
-  const formatPolicies = (policies) => {
-    if (!policies) return "Not available";
-    const { cancellations, guarantee, paymentType } = policies;
-    const formattedCancellations = cancellations
-      ? cancellations
-          .map((c) => `Cancel by ${new Date(c.deadline).toLocaleString()}`)
-          .join(", ")
-      : "No cancellations";
-    const formattedGuarantee = guarantee
-      ? `Accepted Payments: ${guarantee.acceptedPayments.methods.join(", ")}`
-      : "No guarantee (No payment required to hold the reservation)";
-    const formattedPaymentType =
-      paymentType === "guarantee"
-        ? "Payment Type: guarantee (Payment required to hold the reservation)"
-        : `Payment Type: ${paymentType}`;
-    return (
-      <>
-        <strong>Room Policies:</strong> <br />
-        {formattedCancellations}. <br />
-        {formattedGuarantee}. <br />
-        {formattedPaymentType}
-      </>
-    );
-  };
-
-  // Pagination logic
-  const indexOfLastOffer = currentPage * offersPerPage;
-  const indexOfFirstOffer = indexOfLastOffer - offersPerPage;
-  const currentOffers = hotelOffers.slice(indexOfFirstOffer, indexOfLastOffer);
-
-  const paginate = (pageNumber) => setCurrentPage(pageNumber);
-
   return (
-    <div className="book-hotel-container">
-      <h1>Search for Hotels</h1>
-      <div className="form-card">
-        <form className="hotel-form" onSubmit={handleSearch}>
-          <div className="search-section">
-            <div className="form-row">
-              <div className="form-group">
-                <label>City Code</label>
-                <input
-                  type="text"
-                  value={cityCode}
-                  onChange={(e) => setCityCode(e.target.value.toUpperCase())}
-                  required
-                  placeholder="e.g. PAR, NYC, LON"
-                />
-                {formErrors.cityCode && (
-                  <span className="error-message">{formErrors.cityCode}</span>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Check-in Date</label>
-                <input
-                  type="date"
-                  value={checkInDate}
-                  onChange={(e) => setCheckInDate(e.target.value)}
-                  required
-                />
-                {formErrors.checkIn && (
-                  <span className="error-message">{formErrors.checkIn}</span>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Check-out Date</label>
-                <input
-                  type="date"
-                  value={checkOutDate}
-                  onChange={(e) => setCheckOutDate(e.target.value)}
-                  required
-                />
-                {formErrors.checkOut && (
-                  <span className="error-message">{formErrors.checkOut}</span>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Adults</label>
-                <input
-                  type="number"
-                  value={adults}
-                  onChange={(e) => setAdults(e.target.value)}
-                  required
-                  min="1"
-                />
-                {formErrors.adults && (
-                  <span className="error-message">{formErrors.adults}</span>
-                )}
-              </div>
-              <div className="form-group">
-                <label>Room Quantity</label>
-                <input
-                  type="number"
-                  value={roomQuantity}
-                  onChange={(e) => setRoomQuantity(e.target.value)}
-                  required
-                  min="1"
-                  max={adults}
-                />
-                {formErrors.roomQuantity && (
-                  <span className="error-message">
-                    {formErrors.roomQuantity}
-                  </span>
-                )}
-              </div>
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100">
+      <Navigation />
+      <div className="container mx-auto px-4 pt-24 pb-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Back button and title */}
+          <div className="flex items-center gap-4 mb-8">
+            <div className="flex items-center gap-3">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="hover:bg-white/80 rounded-full transition-colors"
+              >
+                <ArrowLeft size={24} />
+              </Button>
+              <h1 className="text-3xl font-bold text-gray-900">Book Hotels</h1>
             </div>
           </div>
 
-          <div className="button-group">
-            <button className="search-button" type="submit" disabled={loading}>
-              {loading ? "Searching..." : "Search Hotels"}
-            </button>
-            <button
-              className="book-button"
-              type="button"
-              onClick={handleBookHotel}
-              disabled={!selectedOffer || loading}
-            >
-              {loading ? "Processing..." : "Book Selected Hotel"}
-            </button>
-          </div>
-        </form>
-      </div>
+          {/* Success Message */}
+          {bookingSuccess && (
+            <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+              <Card className="w-full max-w-md mx-4 animate-in fade-in zoom-in duration-300">
+                <CardContent className="p-6">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto">
+                      <svg
+                        className="w-8 h-8 text-green-600"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                    </div>
+                    <h3 className="text-xl font-semibold text-gray-900">Booking Successful!</h3>
+                    <p className="text-gray-600">{bookingMessage}</p>
+                    <p className="text-sm text-gray-500">Redirecting to home page...</p>
+                    <div className="animate-spin rounded-full h-6 w-6 border-2 border-primary border-t-transparent mx-auto"></div>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
 
-      {loading && (
-        <div className="loading-overlay">
-          <div className="loading-spinner">
-            <div className="spinner"></div>
-            <p className="loading-text">Processing your request...</p>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-8 p-4 bg-destructive/10 text-destructive rounded-lg flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 flex-shrink-0" />
+              <p>{error}</p>
+            </div>
+          )}
+
+          {/* Search Form */}
+          <Card className="mb-8 shadow-lg hover:shadow-xl transition-all duration-300 border-0 bg-white/80 backdrop-blur-sm">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between mb-8">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-primary/10 rounded-full">
+                    <Building2 className="text-primary h-6 w-6" />
+                  </div>
+                  <h2 className="text-xl font-semibold text-gray-800">Find Your Perfect Stay</h2>
+                </div>
+              </div>
+
+              <form onSubmit={handleSearch} className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {/* City Code */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">City Code</label>
+                    <div className="relative">
+                      <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      <Input
+                        type="text"
+                        value={cityCode}
+                        onChange={(e) => {
+                          const value = e.target.value.toUpperCase().slice(0, 3);
+                          setCityCode(value);
+                        }}
+                        className="pl-10"
+                        placeholder="e.g., NYC"
+                        maxLength={3}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Check-in Date */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Check-in Date</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      <Input
+                        type="date"
+                        value={checkInDate}
+                        onChange={(e) => setCheckInDate(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Check-out Date */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Check-out Date</label>
+                    <div className="relative">
+                      <Calendar className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+                      <Input
+                        type="date"
+                        value={checkOutDate}
+                        onChange={(e) => setCheckOutDate(e.target.value)}
+                        className="pl-10"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Adults */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Adults</label>
+                    <div className="relative flex items-center">
+                      <Users className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                      <Input
+                        type="number"
+                        min="1"
+                        value={adults}
+                        onChange={(e) => setAdults(Math.max(1, parseInt(e.target.value)))}
+                        className="pl-10 pr-4 text-right"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Rooms */}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">Rooms</label>
+                    <div className="relative flex items-center">
+                      <Bed className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                      <Input
+                        type="number"
+                        min="1"
+                        max={adults}
+                        value={roomQuantity}
+                        onChange={(e) => setRoomQuantity(Math.min(adults, Math.max(1, parseInt(e.target.value))))}
+                        className="pl-10 pr-4 text-right"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Search Button */}
+                  <div className="space-y-2 flex items-end">
+                    <Button 
+                      type="submit" 
+                      className="w-full bg-primary hover:bg-primary/90 text-white font-semibold py-2 h-10"
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <div className="flex items-center gap-2">
+                          <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+                          <span>Searching...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <Search className="h-4 w-4" />
+                          <span>Search Hotels</span>
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                </div>
+              </form>
+            </CardContent>
+          </Card>
+
+          {/* Hotel Results */}
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+            {hotelOffers.map((hotel, index) => (
+              <HotelCard
+                key={`${hotel.hotel.hotelId}-${index}`}
+                hotel={hotel}
+                onBook={() => handleBooking(hotel)}
+                isBooking={bookingLoading}
+                convertPrice={convertPrice}
+                currency={currency}
+              />
+            ))}
           </div>
         </div>
-      )}
-      {error && <div className="error-banner">{String(error)}</div>}
-
-      <div className="hotel-offers">
-        {currentOffers.map((offer, index) => (
-          <div
-            key={offer.hotel.hotelId || index}
-            className={`hotel-offer-card ${
-              selectedOffer === offer ? "selected" : ""
-            }`}
-            onClick={() => handleOfferSelection(offer)}
-          >
-            <div className="hotel-offer-header">
-              <h3>{offer.hotel.name}</h3>
-              <div className="hotel-rating">{offer.hotel.rating} ★</div>
-            </div>
-            <div className="hotel-offer-details">
-              <p className="price">${offer.offers[0].price.total} per night</p>
-              {offer.hotel.geoCode && (
-                <p className="location">
-                  <strong>Location:</strong> Lat:{" "}
-                  {offer.hotel.geoCode.latitude.toFixed(2)}, Long:{" "}
-                  {offer.hotel.geoCode.longitude.toFixed(2)}
-                </p>
-              )}
-              <p className="room-details">
-                <strong>Rooms:</strong>{" "}
-                {offer.offers[0].room.typeEstimated.category} -{" "}
-              </p>
-              <p className="room-policies">
-                {formatPolicies(offer.offers[0].policies)}
-              </p>
-              <p className="guests">
-                <strong>Guests:</strong> {offer.offers[0].guests.adults} Adults
-              </p>
-            </div>
-            <div className="hotel-offer-amenities">
-              {offer.hotel.amenities?.map((amenity, i) => (
-                <span key={i} className="amenity-tag">
-                  {amenity}
-                </span>
-              ))}
-            </div>
-          </div>
-        ))}
       </div>
-
-      <div className="pagination">
-        {Array.from(
-          { length: Math.ceil(hotelOffers.length / offersPerPage) },
-          (_, i) => (
-            <button
-              key={i + 1}
-              onClick={() => paginate(i + 1)}
-              className={currentPage === i + 1 ? "active" : ""}
-            >
-              {i + 1}
-            </button>
-          )
-        )}
-      </div>
-
-      {showSuccessPopup && (
-        <div className="popup">
-          <div className="popup-content">
-            <h3>{successMessage}</h3>
-            <button onClick={() => setShowSuccessPopup(false)}>Close</button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
 
+const HotelCard = ({ hotel, onBook, isBooking, convertPrice, currency }) => {
+  const offer = hotel?.offers?.[0];
+  const hotelInfo = hotel?.hotel;
+  
+  if (!offer || !hotelInfo) return null;
+
+  const amenities = [
+    hotelInfo?.amenities?.includes('SWIMMING_POOL') && { icon: '🏊‍♂️', label: 'Pool' },
+    hotelInfo?.amenities?.includes('RESTAURANT') && { icon: '🍽️', label: 'Restaurant' },
+    hotelInfo?.amenities?.includes('WIFI') && { icon: '📶', label: 'WiFi' },
+    hotelInfo?.amenities?.includes('FITNESS_CENTER') && { icon: '💪', label: 'Gym' },
+    hotelInfo?.amenities?.includes('SPA') && { icon: '💆‍♀️', label: 'Spa' },
+    hotelInfo?.amenities?.includes('PARKING') && { icon: '🅿️', label: 'Parking' }
+  ].filter(Boolean);
+
+  // Convert API rating to stars (assuming rating is out of 5)
+  const rating = Math.round(parseFloat(hotelInfo?.rating || 0));
+  const stars = '⭐'.repeat(Math.min(5, Math.max(0, rating)));
+
+  // Format location
+  const location = [
+    hotelInfo?.address?.lines?.[0],
+    hotelInfo?.address?.cityName,
+    hotelInfo?.address?.stateCode,
+    hotelInfo?.address?.countryCode
+  ].filter(Boolean).join(', ');
+
+  return (
+    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm">
+      <div className="relative h-48 overflow-hidden">
+        <div 
+          className="absolute inset-0 bg-cover bg-center"
+          style={{ 
+            backgroundImage: `url(${hotelInfo?.media?.[0]?.uri || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'})`
+          }}
+        />
+        <div className="absolute inset-0 bg-black/20" />
+        <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 text-white rounded-full text-sm flex items-center gap-1">
+          {stars || 'Unrated'}
+        </div>
+      </div>
+
+      <CardContent className="p-6">
+        <div className="space-y-4">
+          {/* Hotel Name and Location */}
+          <div>
+            <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
+              {hotelInfo?.name || 'Hotel Name Unavailable'}
+            </h3>
+            <div className="mt-2 flex items-start gap-1">
+              <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
+              <p className="text-sm text-gray-500 line-clamp-2">{location || 'Location unavailable'}</p>
+            </div>
+            {rating > 0 && (
+              <div className="mt-1 text-sm text-gray-500">
+                Rating: {rating}/5
+              </div>
+            )}
+          </div>
+
+          {/* Room Details */}
+          <div className="space-y-2">
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Room Type</span>
+              <span className="font-medium">{offer?.room?.type || 'Standard Room'}</span>
+            </div>
+            <div className="flex items-center justify-between text-sm">
+              <span className="text-gray-600">Board Type</span>
+              <span className="font-medium">{offer?.boardType || 'Room Only'}</span>
+            </div>
+          </div>
+
+          {/* Amenities */}
+          {amenities.length > 0 && (
+            <div className="flex flex-wrap gap-2">
+              {amenities.map((amenity, index) => (
+                <div 
+                  key={index}
+                  className="px-2 py-1 bg-primary/5 text-primary rounded-full text-xs flex items-center gap-1"
+                >
+                  <span>{amenity.icon}</span>
+                  <span>{amenity.label}</span>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Cancellation Policy */}
+          <div className="text-xs text-gray-500">
+            {offer?.policies?.cancellation?.description || 'Cancellation policy details unavailable'}
+          </div>
+
+          {/* Price and Book Button */}
+          <div className="flex items-end justify-between pt-4 border-t border-gray-100">
+            <div>
+              <p className="text-sm text-gray-500">Per night</p>
+              <p className="text-2xl font-bold text-primary">
+                {currencies[currency].symbol}{convertPrice(offer?.price?.total)}
+              </p>
+            </div>
+            <Button
+              onClick={() => onBook(hotel)}
+              disabled={isBooking}
+              className="bg-primary hover:bg-primary/90"
+            >
+              {isBooking ? (
+                <div className="flex items-center gap-2">
+                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                  <span>Booking...</span>
+                </div>
+              ) : (
+                'Book Now'
+              )}
+            </Button>
+          </div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+};
 export default BookHotel;

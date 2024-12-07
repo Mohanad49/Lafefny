@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import { Package, ArrowLeft, MapPin, CreditCard, XCircle } from 'lucide-react';
+import Navigation from './Navigation';
+import { ArrowLeft, Package, Calendar, MapPin, CreditCard, Clock, ShoppingBag, Box, Truck, Receipt } from 'lucide-react';
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 
 const OrderDetails = () => {
   const [order, setOrder] = useState(null);
@@ -18,6 +22,7 @@ const OrderDetails = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.get(`http://localhost:8000/tourist/${userId}/orders/${orderId}`);
+      console.log('Fetched order details:', response.data);
       setOrder(response.data);
       setLoading(false);
     } catch (error) {
@@ -35,6 +40,7 @@ const OrderDetails = () => {
 
       const userId = localStorage.getItem('userID');
       await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
+      
       await fetchOrderDetails();
       alert('Order cancelled successfully');
     } catch (error) {
@@ -44,130 +50,187 @@ const OrderDetails = () => {
   };
 
   const getStatusColor = (status) => {
-    const statusColors = {
-      'Processing': 'bg-blue-100 text-blue-800',
-      'Cancelled': 'bg-red-100 text-red-800',
-      'Delivered': 'bg-green-100 text-green-800',
-      'Shipped': 'bg-purple-100 text-purple-800'
-    };
-    return statusColors[status] || 'bg-gray-100 text-gray-800';
+    switch (status.toLowerCase()) {
+      case 'processing':
+        return 'bg-blue-100 text-blue-800';
+      case 'completed':
+        return 'bg-green-100 text-green-800';
+      case 'cancelled':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-gray-600">Loading...</div>
-      </div>
-    );
-  }
+  const formatOrderId = (orderId) => {
+    return orderId.slice(-5).toUpperCase();
+  };
 
-  if (error) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-red-600">{error}</div>
-      </div>
-    );
-  }
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
 
-  if (!order) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-xl text-gray-600">Order not found</div>
+  if (loading) return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-24 pb-16 px-6">
+        <div className="max-w-7xl mx-auto text-center">Loading order details...</div>
       </div>
-    );
-  }
+    </div>
+  );
+
+  if (error) return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-24 pb-16 px-6">
+        <div className="max-w-7xl mx-auto text-center text-red-500">{error}</div>
+      </div>
+    </div>
+  );
+
+  if (!order) return (
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-24 pb-16 px-6">
+        <div className="max-w-7xl mx-auto text-center">Order not found</div>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8 flex items-center justify-between">
-          <button
-            onClick={() => navigate('/my-orders')}
-            className="inline-flex items-center text-gray-600 hover:text-gray-900 transition-colors"
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="pt-24 pb-16 px-6">
+        <div className="max-w-7xl mx-auto">
+          <Button
+            onClick={() => navigate(-1)}
+            variant="ghost"
+            className="flex items-center gap-2 mb-6"
           >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back to Orders
-          </button>
-          <div className="flex items-center gap-2">
-            <Package className="h-6 w-6 text-primary" />
-            <h1 className="text-2xl font-bold">Order Details</h1>
-          </div>
-        </div>
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
-          <div className="flex justify-between items-start mb-6">
-            <div>
-              <p className="text-sm text-gray-500">Order ID</p>
-              <p className="font-medium">{order.orderID}</p>
+          <div className="space-y-6">
+            <div className="flex items-center gap-2">
+              <Receipt className="h-6 w-6 text-primary" />
+              <h1 className="text-2xl font-semibold text-primary">Order Details</h1>
             </div>
-            <div className="flex flex-col items-end">
-              <span className={`px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.orderStatus)}`}>
-                {order.orderStatus}
-              </span>
-              <p className="text-sm text-gray-500 mt-2">
-                {new Date(order.orderDate).toLocaleString()}
-              </p>
-            </div>
-          </div>
 
-          <div className="border-t border-gray-200 pt-6">
-            <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
-            <div className="space-y-4">
-              {order.products.map((product, index) => (
-                <div key={index} className="flex justify-between items-center">
-                  <div className="flex-1">
-                    <p className="font-medium">{product.productId?.name || 'Product'}</p>
-                    <p className="text-sm text-gray-500">Quantity: {product.quantity}</p>
+            <Card className="overflow-hidden">
+              <CardContent className="p-6">
+                <div className="flex flex-col space-y-6">
+                  {/* Header with Order ID and Status */}
+                  <div className="flex justify-between items-start">
+                    <div className="flex items-center gap-2">
+                      <Package className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Order #{formatOrderId(order._id)}</span>
+                    </div>
+                    <Badge className={getStatusColor(order.orderStatus) + " px-3 py-1 rounded-full"}>
+                      {order.orderStatus}
+                    </Badge>
                   </div>
-                  <div className="text-right">
-                    <p className="font-medium">${(product.price * product.quantity).toFixed(2)}</p>
-                    <p className="text-sm text-gray-500">${product.price.toFixed(2)} each</p>
+
+                  {/* Order Information Grid */}
+                  <div className="grid md:grid-cols-2 gap-6">
+                    {/* Left Column - Order Details */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          Ordered on {formatDate(order.orderDate)}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <CreditCard className="h-4 w-4 text-gray-500" />
+                        <span className="text-sm text-gray-600">
+                          Payment Method: {order.paymentMethod}
+                        </span>
+                      </div>
+
+                      <div className="flex items-start gap-2">
+                        <MapPin className="h-4 w-4 text-gray-500 mt-1" />
+                        <div className="text-sm text-gray-600">
+                          <p className="font-medium">Shipping Address:</p>
+                          <p>{order.shippingAddress?.street}</p>
+                          <p>{order.shippingAddress?.city}, {order.shippingAddress?.state}</p>
+                          <p>{order.shippingAddress?.zipCode}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Right Column - Products */}
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-2 mb-3">
+                        <Box className="h-4 w-4 text-gray-500" />
+                        <span className="font-medium">Products</span>
+                      </div>
+                      {order.products.map((product, index) => (
+                        <div key={index} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={product.productId?.imageUrl || 'https://via.placeholder.com/150'}
+                              alt={product.productId?.name || 'Product'}
+                              className="w-12 h-12 object-cover rounded"
+                              onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://via.placeholder.com/150?text=Product+Image';
+                              }}
+                            />
+                            <div>
+                              <p className="font-medium">{product.productId?.name || 'Product'}</p>
+                              <p className="text-sm text-gray-600">Quantity: {product.quantity}</p>
+                            </div>
+                          </div>
+                          <p className="font-medium">{'$' + product.price.toFixed(2)}</p>
+                        </div>
+                      ))}
+
+                      <div className="border-t pt-4 mt-4">
+                        <div className="flex justify-between items-center font-medium">
+                          <span>Total Amount</span>
+                          <span className="text-lg text-primary">{'$' + order.totalAmount.toFixed(2)}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Tracking Status */}
+                  <div className="border-t pt-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Truck className="h-4 w-4 text-gray-500" />
+                      <span className="font-medium">Order Timeline</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Clock className="h-4 w-4 text-gray-500" />
+                      <span className="text-sm text-gray-600">
+                        Last Updated: {formatDate(order.updatedAt)}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex gap-3 pt-4">
+                    {order.orderStatus !== 'Cancelled' && (
+                      <Button
+                        onClick={handleCancelOrder}
+                        variant="destructive"
+                        className="w-full sm:w-auto"
+                      >
+                        Cancel Order
+                      </Button>
+                    )}
                   </div>
                 </div>
-              ))}
-            </div>
-            <div className="border-t border-gray-200 mt-4 pt-4">
-              <div className="flex justify-between items-center">
-                <p className="font-semibold">Total Amount</p>
-                <p className="font-semibold text-xl">${order.totalAmount.toFixed(2)}</p>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold">Delivery Address</h2>
-            </div>
-            <div className="text-gray-600 space-y-1">
-              <p>{order.selectedAddress.street}</p>
-              <p>{order.selectedAddress.city}, {order.selectedAddress.state}</p>
-              <p>{order.selectedAddress.country}, {order.selectedAddress.postalCode}</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center gap-2 mb-4">
-              <CreditCard className="h-5 w-5 text-gray-400" />
-              <h2 className="text-lg font-semibold">Payment Information</h2>
-            </div>
-            <p className="text-gray-600">{order.paymentMethod}</p>
-          </div>
-        </div>
-
-        {order.orderStatus === 'Processing' && (
-          <div className="mt-6 flex justify-end">
-            <button
-              onClick={handleCancelOrder}
-              className="inline-flex items-center px-4 py-2 border border-red-300 rounded-lg text-sm font-medium text-red-700 hover:bg-red-50 transition-colors"
-            >
-              <XCircle className="h-4 w-4 mr-2" />
-              Cancel Order
-            </button>
-          </div>
-        )}
       </div>
     </div>
   );

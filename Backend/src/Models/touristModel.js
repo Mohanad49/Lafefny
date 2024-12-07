@@ -62,7 +62,8 @@ const touristSchema = new mongoose.Schema({
   bookedItineraries: [{ type: mongoose.Schema.Types.ObjectId, ref: 'TouristItinerary', default: [] }],
   purchasedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: [] }],
   orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: [] }], // Reference to orders
-  addresses: { type: [addressSchema], default: [] } // New field for addresses
+  addresses: { type: [addressSchema], default: [] }, // New field for addresses
+  bookmarkedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
 }, { timestamps: true });
 
 const User = mongoose.model('Tourist', touristSchema);

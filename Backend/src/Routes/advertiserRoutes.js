@@ -127,9 +127,11 @@ router.get("/numberOfTourists/:id", async (req, res) => {
 });
 
 // Advertiser Sales Report Route
-router.get('/advertiser/sales-report', async (req, res) => {
+router.get('/sales-report/:userId', async (req, res) => {
   try {
+    const { userId } = req.params;
     const { startDate, endDate, activityId, month, year } = req.query;
+    
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
@@ -143,7 +145,7 @@ router.get('/advertiser/sales-report', async (req, res) => {
       year
     };
 
-    const report = await userSalesReportService.getAdvertiserSalesReport(req.user._id, startDate, endDate, filters);
+    const report = await userSalesReportService.getAdvertiserSalesReport(userId, startDate, endDate, filters);
     res.json({
       success: true,
       data: report
@@ -151,7 +153,7 @@ router.get('/advertiser/sales-report', async (req, res) => {
   } catch (error) {
     console.error('Error in advertiser sales report:', error);
     res.status(500).json({
-      success: false,
+      success: false, 
       message: 'Error generating advertiser sales report',
       error: error.message
     });
