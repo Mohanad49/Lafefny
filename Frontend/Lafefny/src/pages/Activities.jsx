@@ -40,6 +40,7 @@ const Activities = () => {
   const navigate = useNavigate();
 
   const isLoggedIn = !!localStorage.getItem('userID');
+  const isTourist = localStorage.getItem('userRole') === 'Tourist';
 
   const fetchCategories = async () => {
     try {
@@ -338,7 +339,7 @@ const Activities = () => {
                         <div className="text-sm text-primary">per person</div>
                       </div>
                     </div>
-                    {isLoggedIn && (
+                    {isLoggedIn && isTourist && (
                       <Button className="w-full" onClick={(e) => { e.stopPropagation(); handleBookNow(activity._id); }}>Book Now</Button>
                     )}
                   </div>
