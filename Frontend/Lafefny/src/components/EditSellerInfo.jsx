@@ -1,16 +1,26 @@
-/* eslint-disable no-unused-vars */
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { useToast } from "@/components/ui/use-toast";
+import { Pencil, Upload, ArrowLeft } from "lucide-react";
+import Navigation from "../components/Navigation"; 
+import Footer from "../components/Footer";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { Trash2 } from "lucide-react";
+import { useAuth } from "../context/AuthContext";
 const UpdateSellerInfo = () => {
+  const auth = useAuth();
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: "",
     description: "",
     logo: "",
   });
-  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
+  const [isEditing, setIsEditing] = useState(false);
   const navigate = useNavigate();
 
   // Fetch existing seller info
@@ -34,11 +44,19 @@ const UpdateSellerInfo = () => {
             logo: sellerInfo.logo || "",
           });
         } else {
-          setMessage("Error fetching seller information");
+          toast({
+            title: "Error",
+            description: "Error fetching seller information",
+            variant: "destructive",
+          });
         }
       } catch (error) {
         console.error("Error:", error);
-        setMessage("Error connecting to server");
+        toast({
+          title: "Error",
+          description: "Error connecting to server",
+          variant: "destructive",
+        });
       } finally {
         setLoading(false);
       }
@@ -46,6 +64,53 @@ const UpdateSellerInfo = () => {
 
     fetchSellerInfo();
   }, []); // Empty dependency array means this runs once on mount
+
+  const handleRequestDelete = async () => {
+    try {
+      const token = localStorage.getItem('token');
+      const userID = localStorage.getItem('userID');
+  
+      if (!token || !userID) {
+        toast({
+          title: "Error",
+          description: "You must be logged in to delete your account",
+          variant: "destructive", 
+        });
+        navigate('/login');
+        return;
+      }
+  
+      const response = await fetch(
+        `http://localhost:8000/request-deletion/${userID}`,
+        {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          }
+        }
+      );
+  
+      const data = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to submit deletion request');
+      }
+  
+      toast({
+        title: "Success",
+        description: "Account deletion request submitted successfully. An admin will review your request.",
+      });
+      navigate('/sellerHome');
+      
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to submit account deletion request",
+        variant: "destructive", 
+      });
+    }
+  };
 
   const handleChangePhoto = async (e) => {
     const file = e.target.files[0];
@@ -79,124 +144,148 @@ const UpdateSellerInfo = () => {
 
       if (!response.ok) {
         const errorData = await response.json();
-        setMessage(`Error: ${errorData.error}`);
+        toast({
+          title: "Error",
+          description: errorData.error,
+          variant: "destructive",
+        });
       } else {
-        const data = await response.json();
-        setMessage("Seller information updated successfully!");
-        console.log("Updated data:", data);
+        toast({
+          title: "Success",
+          description: "Seller information updated successfully!",
+        });
+        setIsEditing(false);
       }
     } catch (error) {
-      setMessage("An error occurred while updating the seller info.");
+      toast({
+        title: "Error",
+        description: "An error occurred while updating the seller info.",
+        variant: "destructive",
+      });
     }
   };
 
   if (loading) {
-    return <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">Loading seller information...</div>;
+    return <div className="min-h-screen flex items-center justify-center">Loading...</div>;
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8 relative">
-      <Button
-        onClick={() => navigate(-1)}
-        variant="ghost"
-        className="absolute top-4 left-4 flex items-center gap-2 hover:bg-accent/10"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <path d="M19 12H5M12 19l-7-7 7-7" />
-        </svg>
-        Back 
-      </Button>
+    <div className="min-h-screen bg-background flex flex-col">
+      <Navigation />
 
-      <div className="max-w-md w-full space-y-8">
-        <div className="text-center">
-          <h2 className="mt-6 text-3xl font-extrabold text-gray-900">
-            {formData.name} Info
-          </h2>
-        </div>
-          {/* Profile Picture Section */}
-          <div className="absolute top-20 left-10 flex flex-col items-center space-y-4 mb-8">
-                <div className="relative">
-                    <img
-                        src={formData.logo || "https://via.placeholder.com/150"}
-                        alt="Profile"
-                        className="w-40 h-40 rounded-full object-cover border-2 border-gray-200 shadow-sm"
-                    />
-                </div>
-                <input
-                    type="file"
-                    onChange={handleChangePhoto}
-                    accept="image/*"
-                    className="block w-64 text-sm text-gray-500
-                        file:mr-4 file:py-2 file:px-4
-                        file:rounded-full file:border-0
-                        file:text-sm file:font-medium
-                        file:bg-black file:text-white
-                        hover:file:bg-gray-800
-                        file:cursor-pointer cursor-pointer"
-                />
-            </div>
-
-        <form onSubmit={handleSubmit} className="mt-8 space-y-4">
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">
-              Name
-            </label>
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-            />
-          </div>
-          <div className="flex flex-col">
-            <label className="text-sm font-medium text-gray-700 mb-1">
-              Description
-            </label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              required
-              className="appearance-none rounded-md relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-black focus:border-black focus:z-10 sm:text-sm"
-            />
-          </div>
-          <div className="flex gap-4">
-            <button
-                type="button" // Important: type="button" prevents form submission
+      <div className="p-8 pt-24 flex-grow mb-28">
+      <div className="max-w-2xl mx-auto bg-surface rounded-xl shadow-sm p-8">
+        <div className="flex items-center justify-between mb-8">
+        <Button
+                variant="ghost"
                 onClick={() => navigate(-1)}
-                className="w-1/2 py-2 px-4 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors duration-200"
-            >
-                Cancel
-            </button>
-            <button
-                type="submit"
-                className="w-1/2 py-2 px-4 border border-transparent text-sm font-medium rounded-md text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-colors duration-200"
-            >
-                Save
-            </button>
+                className="flex items-center gap-2"
+              > 
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+          <h1 className="text-3xl font-bold text-primary">My Profile</h1>
+          <Button
+            variant="outline"
+            onClick={() => setIsEditing(!isEditing)}
+            className="flex items-center gap-2"
+          >
+            <Pencil className="h-4 w-4" />
+            {isEditing ? "Cancel" : "Edit Profile"}
+          </Button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="flex flex-col items-center space-y-4">
+            <Avatar className="h-32 w-32">
+              <AvatarImage src={formData.logo} />
+              <AvatarFallback className="text-2xl bg-accent text-primary">
+                {formData.name?.charAt(0)}
+              </AvatarFallback>
+            </Avatar>
+            
+            {isEditing && (
+              <div className="flex items-center space-x-2">
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleChangePhoto}
+                  className="hidden"
+                  id="logo-upload"
+                />
+                <Label
+                  htmlFor="logo-upload"
+                  className="flex items-center gap-2 cursor-pointer bg-accent text-primary px-4 py-2 rounded-md hover:bg-accent/90 transition-colors"
+                >
+                  <Upload className="h-4 w-4" />
+                  Upload New Logo
+                </Label>
+              </div>
+            )}
           </div>
 
-          {message && (
-                <div className="mt-4 text-center text-sm text-gray-600">
-                    {message}
-                </div>
-            )}
-        </form>
-      </div>
+          <div className="grid gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="name">Shop Name</Label>
+              <Input
+                id="name"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="description">Description</Label>
+              <Input
+                id="description"
+                name="description"
+                value={formData.description}
+                onChange={handleChange}
+                disabled={!isEditing}
+              />
+            </div>
+          </div>
 
-  
+          {isEditing && (
+            <Button type="submit" className="w-full">
+              Save Changes
+            </Button>
+          )}
+        </form>
+        {/* New danger zone section */}
+        <div className="mt-16 pt-8 border-t border-destructive/20">
+       
+          <p className="text-muted-foreground mb-4">
+            Once you delete your seller account, there is no going back. Please be certain.
+          </p>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" className="flex items-center gap-2">
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action will submit a request to delete your seller account. An admin will review your request. This action cannot be undone.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={handleRequestDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+                  Request Deletion
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      </div>
+    </div>
+    <Footer />
     </div>
   );
 };
