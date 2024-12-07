@@ -31,11 +31,8 @@ const AdvertiserHome = () => {
         <section>
           <h2>Profile Management</h2>
           <div className="link-group">
-            <Link to="/addAdvertiserInfo">Add info</Link>
-            <Link to="/updateAdvertiserInfo">Edit info</Link>
+            <Link to="/editAdvertiserInfo">View info</Link>
             <Link to="/changePassword">Change Password</Link>
-            <Link to="/getAdvertiserInfo">View info</Link>
-            <Link to="/editAdvertiserPhoto">Edit logo</Link>
             <Link to="/delete-account" className="delete-link">Delete Account</Link>
           </div>
         </section>

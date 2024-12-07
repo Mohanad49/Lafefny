@@ -45,12 +45,12 @@ router.get("/getSeller/:id", async(req,res) => {
 });
 
 router.patch("/updateSellerInfo/:id",async(req,res)=>{
-    const { name, description } = req.body;
+    const { name, description, logo } = req.body;
     const userID= req.params.id
     if(!mongoose.isValidObjectId(userID)){
         res.status(400).json({error:"invalid seller"})
     }
-    const seller= await Seller.findOneAndUpdate({userID},{ name, description })
+    const seller= await Seller.findOneAndUpdate({userID},{ name, description, logo })
    if(!seller){
     res.status(404).json({error:"seller is not found"});
    }

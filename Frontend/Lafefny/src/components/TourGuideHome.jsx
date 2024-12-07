@@ -38,11 +38,8 @@ const TourGuideHome = () => {
         <section>
           <h2>Profile Management</h2>
           <div className="link-group">
-            <Link to="/addTourGuideInfo">Add info</Link>
-            <Link to="/editTourGuideInfo">Edit info</Link>
+            <Link to="/editTourGuideInfo">View info</Link>
             <Link to="/changePassword">Change Password</Link>
-            <Link to="/getTourGuideInfo">Get info</Link>
-            <Link to="/editProfilePhoto">Edit Photo</Link>
             <Link to="/delete-account" className="delete-link">Delete Account</Link>
           </div>
         </section>
