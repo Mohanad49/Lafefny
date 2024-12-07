@@ -1,10 +1,11 @@
 /* eslint-disable react/prop-types */
-/* eslint-disable no-unused-vars */
-// New component: FlightCard.jsx
 import React from 'react';
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Plane, Clock, Calendar, MapPin } from 'lucide-react';
 import '../styles/flightCard.css';
 
-const FlightCard = ({ flight, isSelected, onSelect }) => {
+const FlightCard = ({ flight, isSelected, onSelect, onBook }) => {
   const formatDateTime = (dateTime) => {
     return new Date(dateTime).toLocaleString('en-US', {
       weekday: 'short',
@@ -20,58 +21,76 @@ const FlightCard = ({ flight, isSelected, onSelect }) => {
   };
 
   return (
-    <div className={`flight-card ${isSelected ? 'selected' : ''}`} onClick={() => onSelect(flight)}>
+    <Card 
+      className={`flight-card ${isSelected ? 'selected' : ''}`} 
+      onClick={() => onSelect(flight)}
+    >
       <div className="flight-header">
-        <div className="airline">
-          {flight.validatingAirlineCodes[0]}
+        <div className="airline-info">
+          <div className="airline-badge">
+            <Plane className="h-5 w-5 text-primary" />
+          </div>
+          <span className="airline-code">{flight.validatingAirlineCodes[0]}</span>
         </div>
-        <div className="price">
-          {flight.price.total} {flight.price.currency}
+        <div className="price-tag">
+          <span className="currency">{flight.price.currency}</span>
+          <span className="amount">{flight.price.total}</span>
         </div>
       </div>
       
       {flight.itineraries.map((itinerary, idx) => (
         <div key={idx} className="itinerary-section">
-          <h4>{idx === 0 ? 'Outbound' : 'Return'}</h4>
-          <div className="segments">
-            {itinerary.segments.map((segment, segIdx) => (
-              <div key={segIdx} className="segment">
-                <div className="segment-header">
-                  <span className="flight-number">
-                    {segment.carrierCode} {segment.number}
-                  </span>
-                  <span className="duration">
-                    {formatDuration(segment.duration)}
-                  </span>
+          <div className="itinerary-header">
+            <h4>{idx === 0 ? 'Outbound' : 'Return'}</h4>
+            <div className="duration">
+              <Clock className="h-4 w-4" />
+              <span>{formatDuration(itinerary.duration)}</span>
+            </div>
+          </div>
+          
+          {itinerary.segments.map((segment, segIdx) => (
+            <div key={segIdx} className="segment">
+              <div className="segment-details">
+                <div className="location-time">
+                  <div className="time">{formatDateTime(segment.departure.at)}</div>
+                  <div className="location">
+                    <MapPin className="h-4 w-4" />
+                    <span>{segment.departure.iataCode}</span>
+                  </div>
                 </div>
-                <div className="segment-details">
-                  <div className="departure">
-                    <strong>{segment.departure.iataCode}</strong>
-                    <div>{formatDateTime(segment.departure.at)}</div>
+                
+                <div className="flight-line">
+                  <div className="airline-info">
+                    <span className="flight-number">{segment.carrierCode} {segment.number}</span>
                   </div>
-                  <div className="flight-line">
-                    ────✈️────
-                  </div>
-                  <div className="arrival">
-                    <strong>{segment.arrival.iataCode}</strong>
-                    <div>{formatDateTime(segment.arrival.at)}</div>
+                </div>
+                
+                <div className="location-time">
+                  <div className="time">{formatDateTime(segment.arrival.at)}</div>
+                  <div className="location">
+                    <MapPin className="h-4 w-4" />
+                    <span>{segment.arrival.iataCode}</span>
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
       ))}
       
-      <div className="flight-footer">
-        <div className="cabin-class">
-          {flight.travelerPricings[0].fareDetailsBySegment[0].cabin}
-        </div>
-        <div className="seats">
-          {flight.numberOfBookableSeats} seats left
-        </div>
+      <div className="card-actions">
+        <Button 
+          className="book-button" 
+          onClick={(e) => {
+            e.stopPropagation();
+            onBook(flight);
+          }}
+        >
+          <Plane className="h-4 w-4 mr-2" />
+          Book Now
+        </Button>
       </div>
-    </div>
+    </Card>
   );
 };
 
