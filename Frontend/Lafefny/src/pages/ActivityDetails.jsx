@@ -33,12 +33,20 @@ const ActivityDetails = () => {
         return format(new Date(dateString), 'MMMM d, yyyy');
     };
 
-    const handleBookingClick = () => {
+    const handleBookingClick = async () => {
         if (!isLoggedIn) {
-            navigate('/sign');
+          navigate('/sign');
+          return;
         }
-        // Add booking logic here when user is logged in
-    };
+      
+        try {
+          const touristId = localStorage.getItem('userID');
+          navigate(`/tourist/payment`, { state: { touristId, activityId: activity._id } });
+        } catch (error) {
+          console.error('Booking failed:', error);
+          // Optional: Show error toast or modal
+        }
+      };
 
     const { currency } = useCurrency();
     
