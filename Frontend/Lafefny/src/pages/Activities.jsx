@@ -47,6 +47,7 @@ const Activities = () => {
 
   const isLoggedIn = !!localStorage.getItem('userID');
   const isTourist = localStorage.getItem('userRole') === 'Tourist';
+  const isTourismGovernor = localStorage.getItem('userRole') === 'TourismGovernor';
 
   const fetchCategories = async () => {
     try {
@@ -475,35 +476,16 @@ const Activities = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {isLoggedIn && isTourist && (
-                        <>
-                          <Button
-                            className={`flex-1 ${bookedActivities.has(activity._id) ? 'bg-red-500 hover:bg-red-600' : ''}`}
-                            onClick={(e) => { 
-                              e.stopPropagation(); 
-                              handleBookNow(activity._id, activity.date); 
-                            }}
-                          >
-                            {bookedActivities.has(activity._id) ? 'Cancel Booking' : 'Book Now'}
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="hover:bg-transparent"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleBookmark(activity._id);
-                            }}
-                          >
-                            {bookmarkedActivities.has(activity._id) ? (
-                              <Bookmark className="h-5 w-5 text-yellow-500 fill-current" />
-                            ) : (
-                              <Bookmark className="h-5 w-5" />
-                            )}
-                          </Button>
-                        </>
+                      {isTourist && (
+                        <Button
+                          onClick={() => handleBookNow(activity._id, activity.date)}
+                          variant={activity.booked ? "destructive" : "default"}
+                          className="w-full"
+                        >
+                          {activity.booked ? "Cancel Booking" : "Book Now"}
+                        </Button>
                       )}
-                      {(!isLoggedIn || !isTourist) && (
+                      {(!isLoggedIn || (!isTourist && localStorage.getItem('userRole') !== 'TourismGovernor')) && (
                         <Button
                           className="w-full"
                           onClick={() => navigate('/login')}
@@ -511,6 +493,21 @@ const Activities = () => {
                           Login to Book
                         </Button>
                       )}
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hover:bg-transparent"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleBookmark(activity._id);
+                        }}
+                      >
+                        {bookmarkedActivities.has(activity._id) ? (
+                          <Bookmark className="h-5 w-5 text-yellow-500 fill-current" />
+                        ) : (
+                          <Bookmark className="h-5 w-5" />
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </CardContent>

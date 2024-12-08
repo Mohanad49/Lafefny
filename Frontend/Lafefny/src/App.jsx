@@ -76,7 +76,7 @@ import TourismGovernorHome from './components/TourismGovernorHome';
 import AddMuseumTag from './components/AddMuseumTag';
 import EditPreferenceTag from './components/EditPreferenceTag';
 import EditMuseum from './components/EditMuseum';
-import MapMarker from './components/Map';
+import MapMarker from './components/Map'
 
 import UpdateTouristInfo from './components/EditTouristInfo';
 import TouristInfo from './components/GetTouristInfo';
@@ -86,23 +86,23 @@ import SellerInfo from './components/SellerInfo';
 import UpdateAdvertiserInfo from './components/EditAdvertiserInfo';
 import ChangePassword from './components/ChangePassword';
 import TouristHistory from './components/TouristHistory';
-import TouristComplaintList from './components/TouristComplaintList';
+import TouristComplaintList from './components/TouristComplaintList'
 
 import './styles/styles.css'
 import UploadAdvertiserDocs from './components/UploadAdvertiserDocs';
 import UploadSellerDocs from './components/UploadSellerDocs';
-import UploadTourGuideDocs from './components/UploadTourGuideDocs';
+import UploadTourGuideDocs from './components/UploadTourGuideDocs'
 
 import AdminItineraryList from './components/Admin-ItineraryList';
 import AdminActivityList from './components/Admin-ActivityList';
 import SellerDelete from './components/Sellerdelete';
-import DeleteAccount from './components/DeleteAccount';
+import DeleteAccount from './components/DeleteAccount'
 
 
 import TransportationBooking from './components/TransportationBooking';
 import BookHotels from './components/BookHotels';
 import RoomDetails from './components/RoomDetails';
-import BookFlights from './components/BookFlights';
+import BookFlights from './components/BookFlights'
 
 import TouristWishlist from './components/TouristWishlist';
 import TouristCart from './components/TouristCart';
@@ -119,7 +119,8 @@ import MyOrders from './components/MyOrders';
 import OrderDetails from './components/OrderDetails';
 import TouristAllPay from './components/TouristAllPay';
 import AddProductPage from './pages/AddProduct';
-import Bookmarks from './pages/Bookmarks';
+import Bookmarks from './pages/Bookmarks'
+import ManageMuseums from './components/ManageMuseums';
 
 const queryClient = new QueryClient();
 
@@ -149,6 +150,7 @@ const App = () => {
           <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
           <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
           <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/guest-itinerary/:id" element={<TourDetails />} />
 
           {/* Admin Routes */}
           <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />
@@ -221,6 +223,9 @@ const App = () => {
           <Route path="/preferenceTags" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><PreferenceTagList /></ProtectedRoute>} />
           <Route path="/edit-tag/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditPreferenceTag /></ProtectedRoute>} />
           <Route path="/add-museum-tag" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseumTag /></ProtectedRoute>} />
+          <Route path="/add-museum" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseum /></ProtectedRoute>} />
+          <Route path="/manage-museums" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><ManageMuseums /></ProtectedRoute>} />
+          <Route path="/edit-museum/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><EditMuseum /></ProtectedRoute>} />
 
           {/* Shared Protected Routes (accessible by all authenticated users) */}
           <Route path="/activities/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ActivityDetail /></ProtectedRoute>} />
