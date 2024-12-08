@@ -10,15 +10,16 @@ import { Search, Filter, SortAsc, Star, ShoppingCart, Heart, ArrowLeft } from 'l
 import Navigation from './Navigation';
 import '../styles/productList.css';
 import ReviewForm from './ReviewForm';
+import { useCurrency, currencies } from '../context/CurrencyContext';
 
 const TouristProductList = () => {
   const [products, setProducts] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterType, setFilterType] = useState('none');
+  const [filterType, setFilterType] = useState('all');
+  const [filterValue, setFilterValue] = useState('');
   const [sortBy, setSortBy] = useState('name');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [currency] = useState('USD');
   const [touristName, setTouristName] = useState('');
   const [isAddingToCart, setIsAddingToCart] = useState(false);
   const [isAddingToWishlist, setIsAddingToWishlist] = useState(false);
@@ -28,6 +29,7 @@ const TouristProductList = () => {
 
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
+  const { currency } = useCurrency();
 
   useEffect(() => {
     const fetchProducts = async () => {
@@ -68,7 +70,18 @@ const TouristProductList = () => {
     }
   }, []);
 
-  const convertPrice = (price) => price.toFixed(2);
+  const convertPrice = (price, reverse = false) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+      
+    if (reverse) {
+      return numericPrice / currencies[currency].rate;
+    }
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice.toFixed(2);
+  };
 
   const handleAddToWishlist = async (productId) => {
     if (!isLoggedIn) {
@@ -180,30 +193,32 @@ const TouristProductList = () => {
   // Filter and sort products
   const filteredProducts = products
     .filter(product => {
-      const matchesSearch = product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                          product.description.toLowerCase().includes(searchTerm.toLowerCase());
+      // Search filter
+      const searchMatch = 
+        product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        product.description.toLowerCase().includes(searchTerm.toLowerCase());
       
-                          if (!matchesSearch) return false;
-    
-                          // Then apply type filter
-                          switch (filterType) {
-                            case 'price':
-                              return typeof product.price === 'number' && product.price > 0;
-                            case 'quantity':
-                              return typeof product.quantity === 'number' && product.quantity > 0;
-                            case 'rating':
-                              return product.ratings && 
-                                     typeof product.ratings.averageRating === 'number' && 
-                                     product.ratings.averageRating > 0;
-                            case 'none':
-                            default:
-                              return true;
-                          }
-                        })
+      if (!searchMatch) return false;
+
+      // Type and value filter
+      if (filterType !== 'all' && filterValue) {
+        switch (filterType) {
+          case 'price':
+            return parseFloat(convertPrice(product.price, true)) <= parseFloat(filterValue);
+          case 'quantity':
+            return product.quantity >= parseInt(filterValue);
+          case 'rating':
+            return (product.ratings?.averageRating || 0) >= parseFloat(filterValue);
+          default:
+            return true;
+        }
+      }
+      return true;
+    })
     .sort((a, b) => {
       switch (sortBy) {
         case 'price':
-          return a.price - b.price;
+          return parseFloat(convertPrice(a.price, true)) - parseFloat(convertPrice(b.price, true));
         case 'rating':
           return (b.ratings?.averageRating || 0) - (a.ratings?.averageRating || 0);
         case 'name':
@@ -238,40 +253,70 @@ const TouristProductList = () => {
 
         {/* Search and Filters */}
         <Card className="mb-8">
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {/* Search Input */}
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 type="text"
-                placeholder="Search products..."
+                placeholder="Search by name or description..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
             </div>
 
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger>
-                <SelectValue placeholder="Filter by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">All Products</SelectItem>
-                <SelectItem value="price">By Price</SelectItem>
-                <SelectItem value="quantity">By Quantity</SelectItem>
-                <SelectItem value="rating">By Rating</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Filter Type Select */}
+            <div className="w-full">
+              <Select 
+                value={filterType} 
+                onValueChange={(value) => {
+                  setFilterType(value);
+                  setFilterValue('');
+                }}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Filter by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Products</SelectItem>
+                  <SelectItem value="price">By Price</SelectItem>
+                  <SelectItem value="quantity">By Quantity</SelectItem>
+                  <SelectItem value="rating">By Rating</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-            <Select value={sortBy} onValueChange={setSortBy}>
-              <SelectTrigger>
-                <SelectValue placeholder="Sort by..." />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="name">Sort by Name</SelectItem>
-                <SelectItem value="price">Sort by Price</SelectItem>
-                <SelectItem value="rating">Sort by Rating</SelectItem>
-              </SelectContent>
-            </Select>
+            {/* Filter Value Input */}
+            {filterType !== 'all' && (
+              <div className="w-full">
+                <Input
+                  type={filterType === 'quantity' ? 'number' : 'text'}
+                  placeholder={`Enter ${filterType} value...`}
+                  value={filterValue}
+                  onChange={(e) => setFilterValue(e.target.value)}
+                  className="w-full"
+                  min={0}
+                />
+              </div>
+            )}
+
+            {/* Sort Select */}
+            <div className="w-full">
+              <Select 
+                value={sortBy} 
+                onValueChange={setSortBy}
+              >
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Sort by..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="name">Sort by Name</SelectItem>
+                  <SelectItem value="price">Sort by Price</SelectItem>
+                  <SelectItem value="rating">Sort by Rating</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
         </Card>
 
@@ -298,7 +343,8 @@ const TouristProductList = () => {
                 <p className="text-lg text-muted-foreground mb-6">No products available matching your criteria</p>
                 <Button onClick={() => {
                   setSearchTerm('');
-                  setFilterType('none');
+                  setFilterType('all');
+                  setFilterValue('');
                   setSortBy('name');
                 }}>
                   Clear Filters
@@ -338,7 +384,7 @@ const TouristProductList = () => {
                     
                     <div className="flex items-center justify-between mb-4">
                       <span className="text-lg font-bold text-primary">
-                        ${convertPrice(product.price)}
+                        {currencies[currency].symbol}{convertPrice(product.price)} {currency}
                       </span>
                       <div className="flex items-center gap-1">
                         <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
