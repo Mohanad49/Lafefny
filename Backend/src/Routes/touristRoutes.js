@@ -150,46 +150,48 @@ router.post("/addTourist", async (req, res) => {
 });
 
 router.get("/touristHistory/:userID", async (req, res) => {
-    try {
-      const { userID } = req.params;
-      
-  
-      // Step 1: Find the tourist to get the `touristName`
-      const tourist = await User.findOne({ _id: mongoose.Types.ObjectId(userID)});
-      if (!tourist) {
-        
-        return res.status(404).json({ message: 'Tourist not found' });
-      }
-      
-  
-      // Step 2: Fetch all activities
-      const allActivities = await Activity.find();
-      
-      // Step 3: Filter activities that contain the userID in `touristBookings` and have a past date
-      const pastActivities = allActivities.filter(activity => 
-        activity.touristBookings.includes(userID) && new Date(activity.date) < new Date()
-      );
-      
-  
-      // Step 4: Fetch all itineraries
-      const allItineraries = await TouristItinerary.find();
-  
-      // Step 5: Filter itineraries for the tourist's name with a past `endDate`
-      const pastItineraries = allItineraries.filter(itinerary => 
-        itinerary.touristName === tourist.username && new Date(itinerary.endDate) < new Date()
-      );
-      
-  
-      // Step 6: Send the filtered activities and itineraries in the response
-      res.json({
-        pastActivities,
-        pastItineraries,
-        touristName: tourist.username
-      });
-    } catch (error) {
-      console.error("Error fetching tourist history:", error);
-      res.status(500).json({ message: error.message });
+  try {
+    const { userID } = req.params;
+
+    // Step 1: Find the tourist to get the `touristName`
+    const tourist = await User.findOne({ _id: mongoose.Types.ObjectId(userID) });
+    if (!tourist) {
+      console.error('Tourist not found');
+      return res.status(404).json({ message: 'Tourist not found' });
     }
+
+    // Step 2: Fetch all activities
+    const allActivities = await Activity.find();
+    console.log('Fetched all activities:', allActivities.length);
+
+    // Step 3: Filter activities that contain the userID in `paidBy` and have a past date
+    const pastActivities = allActivities.filter(activity =>
+      activity.paidBy.includes(userID) && new Date(activity.date) < new Date()
+    );
+    console.log('Filtered past activities:', pastActivities.length);
+
+    // Step 4: Fetch all itineraries
+    const allItineraries = await Itinerary.find();
+    console.log('Fetched all itineraries:', allItineraries.length);
+
+    // Step 5: Filter itineraries that contain the userID in `paidBy` and have a past `bookedDate`
+    const pastItineraries = allItineraries.filter(itinerary =>
+      itinerary.paidBy.includes(userID) && itinerary.touristBookings.some(booking =>
+        booking.tourist.toString() === userID && new Date(booking.bookedDate) < new Date()
+      )
+    );
+    console.log('Filtered past itineraries:', pastItineraries.length);
+
+    // Step 6: Send the filtered activities and itineraries in the response
+    res.json({
+      pastActivities,
+      pastItineraries,
+      touristName: tourist.username
+    });
+  } catch (error) {
+    console.error("Error fetching tourist history:", error);
+    res.status(500).json({ message: error.message });
+  }
   });
   router.get("/upcomingActivities/:userID", async (req, res) => {
     try {

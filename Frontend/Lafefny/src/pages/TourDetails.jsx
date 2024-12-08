@@ -1,4 +1,5 @@
 // TourDetails.jsx
+import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -10,22 +11,42 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from 'react';
 import { getItineraryById } from '../services/itineraryService';
 import { useCurrency, currencies } from '../context/CurrencyContext';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { format } from "date-fns";
+import { useToast } from "@/components/ui/use-toast";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+
 
 const TourDetails = () => {
-  const [tour, setTour] = useState(null);
-  const [loading, setLoading] = useState(true);
   const { id } = useParams();
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
   const { currency } = useCurrency();
+  const [tour, setTour] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [isDateDialogOpen, setIsDateDialogOpen] = useState(false);
+  const [selectedDate, setSelectedDate] = useState("");
+  const [availableDates, setAvailableDates] = useState([]);
+  const [bookedTours, setBookedTours] = useState(new Set());
+  const { toast } = useToast();
 
   const getTourDetails = async (id) => {
     try {
       const response = await getItineraryById(id);
-      setTour(response.data);
+      const touristId = localStorage.getItem('userID');
+      const updatedTour = {
+        ...response.data,
+        booked: response.data.paidBy?.includes(touristId),
+      };
+      setTour(updatedTour);
+      if (updatedTour.booked) {
+        setBookedTours(new Set([updatedTour._id]));
+      }
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tour:', error);
+      setError('Error fetching tour details');
       setLoading(false);
     }
   };
@@ -36,11 +57,119 @@ const TourDetails = () => {
     return date.toLocaleDateString('en-US', options);
   };
 
-  const handleBookingClick = () => {
+  const checkIfCanCancel = (tourDate) => {
+    const today = new Date();
+    const tourDateTime = new Date(tourDate);
+    
+    today.setHours(0, 0, 0, 0);
+    tourDateTime.setHours(0, 0, 0, 0);
+    
+    const diffTime = tourDateTime.getTime() - today.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    
+    return diffDays >= 2;
+  };
+
+  const handleNewBooking = async () => {
     if (!isLoggedIn) {
       navigate('/sign');
+      return;
     }
-    // Add booking logic here
+  
+    try {
+      const touristId = localStorage.getItem('userID');
+      const response = await axios.get(`http://localhost:8000/itineraries/${tour._id}/availableDates`);
+      const dates = response.data.availableDates.map(date => format(new Date(date), 'yyyy-MM-dd'));
+      setAvailableDates(dates);
+      setIsDateDialogOpen(true);
+    } catch (error) {
+      console.error("Error fetching available dates:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to fetch available dates",
+        description: error.response?.data?.message || "Please try again later."
+      });
+    }
+  };
+  
+  const handleCancelBooking = async () => {
+    if (!isLoggedIn) {
+      navigate('/sign');
+      return;
+    }
+  
+    try {
+      const touristId = localStorage.getItem('userID');
+      const booking = tour.touristBookings.find(b => b.tourist.toString() === touristId.toString());
+      if (!booking || !checkIfCanCancel(booking.bookedDate)) {
+        toast({
+          variant: "destructive",
+          title: "Cancellation Failed",
+          description: "Cancellation is not allowed less than 2 days before the booked date."
+        });
+        return;
+      }
+      const response = await axios.post(`http://localhost:8000/itineraries/${tour._id}/cancel`, { userId: touristId });
+      setTour(prev => ({ ...prev, booked: false }));
+      setBookedTours(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(tour._id);
+        return newSet;
+      });
+      toast({
+        title: "Booking Cancelled Successfully!",
+        description: `Remaining balance: ${response.data.newWalletBalance} EGP`
+      });
+    } catch (error) {
+      console.error("Error cancelling booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Failed to cancel the booking.",
+        description: "Please try again later."
+      });
+    }
+  };
+  
+  const handleBookingClick = async () => {
+    if (tour.booked) {
+      await handleCancelBooking();
+    } else {
+      await handleNewBooking();
+    }
+  };
+
+  const handleDateConfirm = async () => {
+    if (!selectedDate) {
+      toast({
+        variant: "destructive",
+        title: "Date Selection Required",
+        description: "Please select a date to book the tour."
+      });
+      return;
+    }
+
+    try {
+      const touristId = localStorage.getItem('userID');
+      await axios.post(`http://localhost:8000/itineraries/${tour._id}/book`, { userId: touristId, selectedDate });
+      setTour(prev => ({ ...prev, booked: true }));
+      setBookedTours(prev => {
+        const newSet = new Set(prev);
+        newSet.add(tour._id);
+        return newSet;
+      });
+      
+      navigate(`/tourist/AllPay`, { state: { touristId, itineraryId: tour._id, selectedDate } });
+    } catch (error) {
+      console.error("Error confirming booking:", error);
+      toast({
+        variant: "destructive",
+        title: "Booking Failed",
+        description: "An error occurred while confirming your booking. Please try again."
+      });
+    } finally {
+      setIsDateDialogOpen(false);
+      setSelectedDate("");
+    }
   };
 
   const convertPrice = (price) => {
@@ -54,7 +183,7 @@ const TourDetails = () => {
   }, [id]);
 
   if (loading) return <div>Loading...</div>;
-  if (!tour) return <div>Tour not found</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="min-h-screen bg-background">
@@ -225,24 +354,12 @@ const TourDetails = () => {
                     </ScrollArea>
                   </div>
 
-                  {isLoggedIn ? (
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      onClick={handleBookingClick}
-                    >
-                      Book Now
-                    </Button>
-                  ) : (
-                    <Button 
-                      className="w-full" 
-                      size="lg"
-                      variant="secondary"
-                      onClick={handleBookingClick}
-                    >
-                      Sign In to Book
-                    </Button>
-                  )}
+                  <Button
+                    className={`w-full ${tour.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                    onClick={handleBookingClick}
+                  >
+                    {tour.booked ? 'Cancel Booking' : 'Book Now'}
+                  </Button>
 
                   <div className="text-sm text-primary">
                     <p>• Instant confirmation</p>
@@ -259,6 +376,36 @@ const TourDetails = () => {
         </div>
       </main>
       <Footer />
+
+      <Dialog open={isDateDialogOpen} onOpenChange={setIsDateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Select Tour Date</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <Select value={selectedDate} onValueChange={setSelectedDate}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a date" />
+              </SelectTrigger>
+              <SelectContent>
+                {availableDates.map((date) => (
+                  <SelectItem key={date} value={date}>
+                    {format(new Date(date), 'MMMM d, yyyy')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setIsDateDialogOpen(false)} variant="outline">
+              Cancel
+            </Button>
+            <Button onClick={handleDateConfirm} disabled={!selectedDate}>
+              Confirm Booking
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

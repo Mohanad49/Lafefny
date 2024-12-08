@@ -424,17 +424,6 @@ router.post('/:id/book', async (req, res) => {
       new Date(booking.bookedDate).toISOString().split('T')[0] === bookingDate.toISOString().split('T')[0]
 
     );
-
-
-
-    if (existingBooking) {
-
-      return res.status(400).json({ error: "You already have a booking for this date" });
-
-    }
-
-
-
     // Add new booking
 
     itinerary.touristBookings.push({

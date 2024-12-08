@@ -451,19 +451,7 @@ const Activities = () => {
                       <div>
                         <h3 className="text-xl font-semibold">{activity.name}</h3>
                         <p className="text-sm text-gray-500">{activity.description}</p>
-                      </div>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="hover:bg-transparent"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedItem(activity);
-                          setIsShareModalOpen(true);
-                        }}
-                      >
-                        <Share2 className="h-5 w-5" />
-                      </Button>
+                      </div>                      
                     </div>
 
                     <div className="flex items-center gap-2 text-sm text-gray-600">
@@ -490,7 +478,7 @@ const Activities = () => {
                       {isLoggedIn && isTourist && (
                         <>
                           <Button
-                            className="flex-1"
+                            className={`flex-1 ${bookedActivities.has(activity._id) ? 'bg-red-500 hover:bg-red-600' : ''}`}
                             onClick={(e) => { 
                               e.stopPropagation(); 
                               handleBookNow(activity._id, activity.date); 

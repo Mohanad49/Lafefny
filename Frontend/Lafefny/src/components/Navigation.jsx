@@ -206,7 +206,7 @@ const Navigation = () => {
                       <div className="border-b pb-4">
                         <h3 className="text-sm font-medium text-muted-foreground mb-4">Activities & Itineraries</h3>
                         <div className="space-y-4">
-                          <Link to="/touristActivities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                          <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                             <Activity className="h-5 w-5" />
                             View Activities
                           </Link>
@@ -214,11 +214,11 @@ const Navigation = () => {
                             <Calendar className="h-5 w-5" />
                             My Itineraries
                           </Link>
-                          <Link to="/touristAll-Itineraries" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                          <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                             <Globe className="h-5 w-5" />
                             Browse Itineraries  
                           </Link>
-                          <Link to="/touristMuseums" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                          <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                             <Landmark className="h-5 w-5" />
                             Museums & History
                           </Link>

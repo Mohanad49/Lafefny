@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Calendar, Clock, MapPin, Tag, Star, Info, Bookmark, BookmarkCheck } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import axios from 'axios'
+import axios from 'axios';
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useCurrency, currencies } from '../context/CurrencyContext';
@@ -15,21 +15,32 @@ import { useToast } from "@/components/ui/use-toast";
 const ActivityDetails = () => {
     const [activity, setActivity] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
     const [isBookmarked, setIsBookmarked] = useState(false);
+    const [bookedActivities, setBookedActivities] = useState(new Set());
     const { id } = useParams();
     const navigate = useNavigate();
     const { toast } = useToast();
     const isLoggedIn = !!localStorage.getItem('userID');
     const isTourist = localStorage.getItem('userRole') === 'Tourist';
+    const touristId = localStorage.getItem('userID');
 
     const getActivityDetails = async (id) => {
         try {
             const response = await axios.get(`http://localhost:8000/activities/${id}`);
-            setActivity(response.data);
+            const updatedActivity = {
+                ...response.data,
+                booked: response.data.paidBy?.includes(touristId),
+            };
+            setActivity(updatedActivity);
+            if (updatedActivity.booked) {
+                setBookedActivities(new Set([updatedActivity._id]));
+            }
             setLoading(false);
             checkIfBookmarked(response.data._id);
         } catch (error) {
             console.error('Error fetching activity:', error);
+            setError(error.message);
             setLoading(false);
         }
     };
@@ -84,42 +95,90 @@ const ActivityDetails = () => {
         return format(new Date(dateString), 'MMMM d, yyyy');
     };
 
+    const checkIfCanCancel = (activityDate) => {
+        const today = new Date();
+        const activityDateTime = new Date(activityDate);
+        
+        today.setHours(0, 0, 0, 0);
+        activityDateTime.setHours(0, 0, 0, 0);
+        
+        const diffTime = activityDateTime.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        return diffDays >= 2;
+    };
+
     const handleBookingClick = async () => {
         if (!isLoggedIn) {
-          navigate('/sign');
-          return;
+            navigate('/sign');
+            return;
         }
-      
+
         try {
-          const touristId = localStorage.getItem('userID');
-          navigate(`/tourist/payment`, { state: { touristId, activityId: activity._id } });
+            const touristId = localStorage.getItem('userID');
+            if (activity.booked) {
+                // Handle cancellation
+                if (!checkIfCanCancel(activity.date)) {
+                    toast({
+                        variant: "destructive",
+                        title: "Cancellation Failed",
+                        description: "Cancellation is not allowed less than 2 days before the booked date."
+                    });
+                    return;
+                }
+                const response = await axios.post(`http://localhost:8000/activities/${activity._id}/cancel`, { touristId });
+                setActivity(prev => ({ ...prev, booked: false }));
+                setBookedActivities(prev => {
+                    const newSet = new Set(prev);
+                    newSet.delete(activity._id);
+                    return newSet;
+                });
+                toast({
+                    title: "Booking Cancelled Successfully!",
+                    description: `Remaining balance: ${response.data.remainingBalance} EGP`
+                });
+            } else {
+                // Handle booking
+                await axios.post(`http://localhost:8000/activities/${activity._id}/book`, { touristId });
+                setActivity(prev => ({ ...prev, booked: true }));
+                setBookedActivities(prev => {
+                    const newSet = new Set(prev);
+                    newSet.add(activity._id);
+                    return newSet;
+                });
+                navigate(`/tourist/payment`, { state: { touristId, activityId: activity._id } });
+            }
         } catch (error) {
-          console.error('Booking failed:', error);
-          // Optional: Show error toast or modal
+            console.error("Error handling booking:", error);
+            toast({
+                variant: "destructive",
+                title: error.response?.data?.error || (activity.booked ? "Failed to cancel the booking." : "Failed to book the activity."),
+                description: "Please try again later."
+            });
         }
-      };
+    };
 
     const { currency } = useCurrency();
     
     const convertPrice = (price, reverse = false) => {
-      if (!price) return 0;
-      const numericPrice = typeof price === 'string' ? 
-        parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
-        parseFloat(price);
-        
-      if (reverse) {
-        return numericPrice / currencies[currency].rate;
-      }
-      const convertedPrice = numericPrice * currencies[currency].rate;
-      return convertedPrice;
+        if (!price) return 0;
+        const numericPrice = typeof price === 'string' ? 
+            parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+            parseFloat(price);
+            
+        if (reverse) {
+            return numericPrice / currencies[currency].rate;
+        }
+        const convertedPrice = numericPrice * currencies[currency].rate;
+        return convertedPrice;
     };
-    
 
     useEffect(() => {
         getActivityDetails(id);
     }, [id]);
 
     if (loading) return <div>Loading...</div>;
+    if (error) return <div>Error: {error}</div>;
     if (!activity) return <div>Activity not found</div>;
     return (
         <div className="min-h-screen bg-background">
@@ -237,11 +296,11 @@ const ActivityDetails = () => {
                                     </div>
                                     <div className="flex gap-2">
                                         <Button
-                                            className="flex-1"
+                                            className={`flex-1 ${activity.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
                                             onClick={handleBookingClick}
                                             disabled={!activity.bookingOpen}
                                         >
-                                            Book Now
+                                            {activity.booked ? 'Cancel Booking' : 'Book Now'}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -263,25 +322,7 @@ const ActivityDetails = () => {
                                             </p>
                                         </div>
                                     )}
-                                    {isLoggedIn ? (
-                                        <Button 
-                                            className="w-full" 
-                                            size="lg"
-                                            variant="secondary"
-                                            onClick={handleBookingClick}
-                                        >
-                                            Sign In to Book
-                                        </Button>
-                                    ) : (
-                                        <Button 
-                                            className="w-full" 
-                                            size="lg"
-                                            variant="secondary"
-                                            onClick={handleBookingClick}
-                                        >
-                                            Sign In to Book
-                                        </Button>
-                                    )}
+                                    
                                     <div className="text-sm text-primary">
                                         <p>• Instant confirmation</p>
                                         <p>• Free cancellation up to 24 hours before</p>
