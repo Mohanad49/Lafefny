@@ -25,6 +25,12 @@ const TouristHistory = () => {
   const { toast } = useToast();
   const { currency } = useCurrency();
 
+  const convertPrice = (priceInEGP) => {
+    if (!priceInEGP) return 0;
+    const price = typeof priceInEGP === 'string' ? parseFloat(priceInEGP) : priceInEGP;
+    return Math.round(price * currencies[currency].rate);
+  };
+
   useEffect(() => {
     const fetchBookings = async () => {
       try {
@@ -35,8 +41,24 @@ const TouristHistory = () => {
         }
 
         const response = await getTouristBookings(userID);
+        console.log('Tourist Bookings Response:', response.data);
+        
+        // Process itineraries to ensure all required fields are present
+        const processedItineraries = response.data.pastItineraries.map(itinerary => ({
+          ...itinerary,
+          image: itinerary.image || "https://via.placeholder.com/400x300",
+          locations: Array.isArray(itinerary.locations) ? itinerary.locations : [],
+          duration: Array.isArray(itinerary.duration) ? itinerary.duration : [itinerary.duration],
+          language: itinerary.language || 'Not specified',
+          price: Number(itinerary.price) || 0,
+          ratings: {
+            averageRating: itinerary.ratings?.averageRating || 0,
+            totalRatings: itinerary.ratings?.totalRatings || 0
+          }
+        }));
+        
         setBookedActivities(response.data.pastActivities || []);
-        setBookedItineraries(response.data.pastItineraries || []);
+        setBookedItineraries(processedItineraries);
         setTouristName(response.data.touristName);
       } catch (error) {
         console.error('Error fetching bookings:', error);
@@ -118,15 +140,6 @@ const TouristHistory = () => {
     }
   };
 
-  const convertPrice = (price) => {
-    if (!price) return currencies[currency].symbol + "0.00";
-    const numericPrice = typeof price === 'string' ? 
-      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
-      parseFloat(price);
-    const convertedPrice = numericPrice * currencies[currency].rate;
-    return `${currencies[currency].symbol}${convertedPrice.toFixed(2)}`;
-  };
-
   const tabs = ['Activities', 'Itineraries'];
 
   if (loading) return (
@@ -141,6 +154,16 @@ const TouristHistory = () => {
       
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <Button
+              variant="ghost"
+              className="flex items-center gap-2 hover:bg-transparent hover:text-primary"
+              onClick={() => navigate(-1)}
+            >
+              <ArrowLeft className="h-5 w-5" />
+              Back
+            </Button>
+          </div>
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center p-3 bg-accent/10 rounded-full mb-6">
               <Clock className="h-8 w-8 text-primary" />
@@ -264,25 +287,31 @@ const TouristHistory = () => {
                 bookedItineraries.map((itinerary) => (
                   <Card 
                     key={itinerary._id} 
-                    className="overflow-hidden hover:shadow-lg transition-shadow group"
+                    className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => navigate(`/tours/${itinerary._id}`)}
                   >
                     <div className="relative h-64">
                       <img
                         src={itinerary.image || "https://via.placeholder.com/400x300"}
                         alt={itinerary.name}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
-                      />
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="absolute top-4 right-4 bg-white/80 hover:bg-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleShare({ ...itinerary, type: 'Itinerary' });
+                        className="w-full h-full object-cover"
+                        onError={(e) => {
+                          e.target.src = '/placeholder-tour.jpg';
                         }}
-                      >
-                        <Share2 className="h-4 w-4" />
-                      </Button>
+                      />
+                      <div className="absolute top-4 right-4 flex gap-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleShare({ ...itinerary, type: 'Itinerary' });
+                          }}
+                        >
+                          <Share2 className="h-5 w-5" />
+                        </Button>
+                      </div>
                     </div>
                     <CardContent className="p-6">
                       <div className="space-y-4">
@@ -291,7 +320,9 @@ const TouristHistory = () => {
                           <div className="flex items-center text-primary mb-2">
                             <MapPin className="h-4 w-4 mr-1" />
                             <span className="text-sm">
-                              {itinerary.locations?.[0] || 'Location N/A'}
+                              {Array.isArray(itinerary.locations) && itinerary.locations.length > 0 
+                                ? itinerary.locations[0] 
+                                : 'Location not available'}
                             </span>
                           </div>
                         </div>
@@ -299,15 +330,13 @@ const TouristHistory = () => {
                         <div className="grid grid-cols-2 gap-4 text-sm text-primary">
                           <div className="flex items-center">
                             <Clock className="h-4 w-4 mr-2" />
-                            {Array.isArray(itinerary.duration) && itinerary.duration.length > 0
-                              ? `${itinerary.duration[0]} days`
-                              : itinerary.duration
-                              ? `${itinerary.duration} days`
-                              : 'Duration N/A'}
+                            {itinerary.duration 
+                              ? `${Array.isArray(itinerary.duration) ? itinerary.duration[0] : itinerary.duration} days`
+                              : 'Duration not available'}
                           </div>
                           <div className="flex items-center">
                             <Globe2 className="h-4 w-4 mr-2" />
-                            {itinerary.language || 'Language N/A'}
+                            {itinerary.language || 'Language not available'}
                           </div>
                         </div>
                         
@@ -323,14 +352,17 @@ const TouristHistory = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-semibold text-primary">
-                              {convertPrice(itinerary.price || 0)}
+                              {currencies[currency].symbol}{convertPrice(itinerary.price)}
                             </div>
-                            <div className="text-sm text-muted-foreground">per person</div>
+                            <div className="text-sm text-primary">per person</div>
                           </div>
                         </div>
-                        <Button
+                        <Button 
                           className="w-full"
-                          onClick={() => handleReview({ ...itinerary, type: 'Itinerary' })}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleReview({ ...itinerary, type: 'Itinerary' });
+                          }}
                         >
                           Add Review
                         </Button>

@@ -213,7 +213,12 @@ router.get("/touristHistory/:userID", async (req, res) => {
       price: itinerary.price,
       tourGuideName: itinerary.tourGuideName,
       activities: itinerary.activities,
-      ratings: itinerary.ratings
+      ratings: itinerary.ratings,
+      image: itinerary.image,
+      language: itinerary.language,
+      duration: itinerary.duration,
+      description: itinerary.description,
+      paidBy: itinerary.paidBy
     }));
 
     res.json({
