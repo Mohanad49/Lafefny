@@ -18,7 +18,7 @@ import HistoricalPlaces from './pages/HistoricalPlaces'
 import HistoricalPlaceDetails from './pages/HistoricalPlaceDetails';
 import Home from './components/GuestHome';
 import { CurrencyProvider } from './context/CurrencyContext';
-
+import Tutorial from './components/Tutorial';
 import AdminUserManagement from './components/AdminUserManagement';
 import AddAdmin from './components/AddAdmin';
 import AddTourismGovernor from './components/AddTourismGovernor';
@@ -186,7 +186,7 @@ const App = () => {
           <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['Tourist']}><MyOrders /></ProtectedRoute>} />
           <Route path="/order-details/:orderId" element={<ProtectedRoute allowedRoles={['Tourist']}><OrderDetails /></ProtectedRoute>} />
           <Route path="/tourist/AllPay" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristAllPay /></ProtectedRoute>} />
-
+          <Route path="/tutorial" element={<ProtectedRoute allowedRoles={['Tourist']}><Tutorial /></ProtectedRoute>} />
 
           {/* Tour Guide Routes */}
           <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />

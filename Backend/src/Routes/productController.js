@@ -186,21 +186,17 @@ router.post('/:id/reviews', async (req, res) => {
     if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
-
     const newReview = {
       reviewerName: req.body.reviewerName,
       rating: req.body.rating,
       comment: req.body.comment,
       date: req.body.date
     };
-
     product.ratings.reviews.push(newReview);
-
     // Update average rating
     const totalRating = product.ratings.reviews.reduce((sum, review) => sum + review.rating, 0);
     product.ratings.averageRating = totalRating / product.ratings.reviews.length;
     product.ratings.totalRatings = product.ratings.reviews.length;
-
     await product.save();
     res.json({ ratings: product.ratings });
   } catch (error) {
