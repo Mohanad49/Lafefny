@@ -10,7 +10,9 @@ import { Search, Filter, SortAsc, Star, ShoppingCart, Heart, ArrowLeft } from 'l
 import Navigation from './Navigation';
 import '../styles/productList.css';
 import ReviewForm from './ReviewForm';
+
 import { useCurrency, currencies } from '../context/CurrencyContext';
+import { useToast } from "@/components/ui/use-toast";
 
 const TouristProductList = () => {
   const [products, setProducts] = useState([]);
@@ -30,6 +32,7 @@ const TouristProductList = () => {
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
   const { currency } = useCurrency();
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchTouristName = async () => {
@@ -103,7 +106,11 @@ const TouristProductList = () => {
 
   const handleAddToWishlist = async (productId) => {
     if (!isLoggedIn) {
-      alert('Please log in to add items to your wishlist');
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in to add items to your wishlist"
+      });
       return;
     }
 
@@ -114,10 +121,18 @@ const TouristProductList = () => {
       if (wishlistedProducts.has(productId)) {
         // Remove from wishlist
         await axios.delete(`http://localhost:8000/tourist/${userId}/wishlist/${productId}`);
+        toast({
+          title: "Removed from Wishlist",
+          description: "Item has been removed from your wishlist"
+        });
       } else {
         // Add to wishlist
         await axios.post(`http://localhost:8000/products/wishlist/${userId}`, {
           productId: productId
+        });
+        toast({
+          title: "Added to Wishlist",
+          description: "Item has been added to your wishlist"
         });
       }
       
@@ -133,7 +148,11 @@ const TouristProductList = () => {
       
     } catch (error) {
       console.error('Error updating wishlist:', error);
-      alert('Failed to update wishlist');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update wishlist. Please try again."
+      });
     } finally {
       setIsAddingToWishlist(false);
     }
@@ -141,7 +160,11 @@ const TouristProductList = () => {
 
   const handleAddToCart = async (productId) => {
     if (!isLoggedIn) {
-      alert('Please log in to add items to your cart');
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in to add items to your cart"
+      });
       return;
     }
 
@@ -149,20 +172,31 @@ const TouristProductList = () => {
     try {
       const userId = localStorage.getItem('userID');
       await axios.post(`http://localhost:8000/products/cart/${userId}`, { productId, quantity: 1 });
-      alert('Added to cart successfully!');
+      toast({
+        title: "Success",
+        description: "Item has been added to your cart"
+      });
     } catch (error) {
       console.error('Error adding to cart:', error);
-      alert('Failed to add item to cart');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to add item to cart. Please try again."
+      });
     } finally {
       setIsAddingToCart(false);
     }
   };
 
   const handleReviewClick = async (product) => {
-      if (!isLoggedIn) {
-        alert('Please log in to review products');
-        return;
-      }
+    if (!isLoggedIn) {
+      toast({
+        variant: "destructive",
+        title: "Authentication Required",
+        description: "Please log in to review products"
+      });
+      return;
+    }
     
       const userID = localStorage.getItem('userID');
       try {
@@ -170,7 +204,11 @@ const TouristProductList = () => {
         
     
         if (!response.data.hasPurchased) {
-          alert('You can only review products you have purchased.');
+          toast({
+            variant: "destructive",
+            title: "Review Restricted",
+            description: "You can only review products you have purchased"
+          });
           return;
         }
     
@@ -187,43 +225,37 @@ const TouristProductList = () => {
       }
     };
   
-    const handleReviewSubmit = async (review) => {
-      if (!selectedProduct) return;
-  
-      try {
-        const reviewData = {
-          reviewerName: touristName,
-          rating: review.rating,
-          comment: review.comment
-        };
-        
-
-        const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, reviewData);
-        
-        setProducts(prevProducts => 
-          prevProducts.map(product => 
-            product._id === selectedProduct._id 
-              ? { ...product, ratings: response.data.ratings }
-              : product
-          )
-        );
     
-        setShowReviewModal(false);
-        setSelectedProduct(null);
-        alert('Review submitted successfully!');
-      } catch (error) {
-        console.error('Error submitting review:', error);
-        console.error('Error response:', error.response?.data);
-        console.error('Review data that failed:', {
-          reviewerName: touristName,
-          rating: review.rating,
-          comment: review.comment
-        });
-        alert(error.response?.data?.message || 'Failed to submit review');
-      }
-    };
-  
-  
+
+  const handleReviewSubmit = async (review) => {
+    if (!selectedProduct) return;
+
+    try {
+      const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, review);
+      
+      setProducts(prevProducts => 
+        prevProducts.map(product => 
+          product._id === selectedProduct._id 
+            ? { ...product, ratings: response.data.ratings }
+            : product
+        )
+      );
+
+      setShowReviewModal(false);
+      setSelectedProduct(null);
+      toast({
+        title: "Review Submitted",
+        description: "Your review has been submitted successfully"
+      });
+    } catch (error) {
+      console.error('Error submitting review:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to submit review. Please try again."
+      });
+    }
+  };
 
   // Filter and sort products
   const filteredProducts = products

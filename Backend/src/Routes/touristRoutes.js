@@ -1033,7 +1033,36 @@ router.get('/:userId/wallet-balance', async (req, res) => {
     }
     res.json({ balance: tourist.wallet });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error fetching wallet balance:', error);
+    res.status(500).json({ error: "Failed to fetch wallet balance" });
+  }
+});
+
+// Deduct from wallet
+router.post('/:userId/wallet/deduct', async (req, res) => {
+  try {
+    const { amount } = req.body;
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    if (tourist.wallet < amount) {
+      return res.status(400).json({ error: "Insufficient wallet balance" });
+    }
+
+    tourist.wallet -= amount;
+    await tourist.save();
+
+    res.json({ 
+      success: true, 
+      message: "Amount deducted successfully",
+      newBalance: tourist.wallet 
+    });
+  } catch (error) {
+    console.error('Error deducting from wallet:', error);
+    res.status(500).json({ error: "Failed to process wallet payment" });
   }
 });
 

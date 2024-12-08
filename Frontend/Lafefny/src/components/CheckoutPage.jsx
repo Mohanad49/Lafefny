@@ -15,13 +15,15 @@ import Footer from '../components/Footer';
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { Button } from "./ui/button";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
+import { useToast } from "@/components/ui/use-toast";
 const stripePromise = loadStripe('pk_test_51QP7WoG4UGkAwtrqHrV9BgIvG1T8ZNjqOpbKq9W8kD4xwUcmNCegaX0jOnKzU1JNckplg9MIomiIhdGEt3e1FFHn007MSX3aFl');
 
-const StripePaymentForm = ({ onPaymentSuccess, total, selectedAddress }) => {
+const StripePaymentForm = ({ onPaymentSuccess, total, currencySymbol, selectedAddress }) => {
   const stripe = useStripe();
   const elements = useElements();
   const [processing, setProcessing] = useState(false);
   const [error, setError] = useState(null);
+  const { toast } = useToast();
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -107,7 +109,7 @@ const StripePaymentForm = ({ onPaymentSuccess, total, selectedAddress }) => {
         disabled={!stripe || processing}
         className="stripe-submit-button"
       >
-        {processing ? 'Processing...' : `Pay $${total.toFixed(2)}`}
+        {processing ? 'Processing...' : `Pay ${currencySymbol}${total.toFixed(2)}`}
       </button>
     </form>
   );
@@ -124,6 +126,7 @@ const CheckoutPage = () => {
   const [showStripePayment, setShowStripePayment] = useState(false);
   const [processing, setProcessing] = useState(false);
   const [walletBalance, setWalletBalance] = useState(0);
+  const { toast } = useToast();
   const [newAddress, setNewAddress] = useState({
     street: '',
     city: '',
@@ -198,7 +201,11 @@ const CheckoutPage = () => {
 
   const handleWalletPayment = async () => {
     if (walletBalance < total) {
-      alert('Insufficient wallet balance');
+      toast({
+        variant: "destructive",
+        title: "Insufficient Balance",
+        description: "Your wallet balance is not enough for this purchase."
+      });
       return;
     }
 
@@ -206,6 +213,14 @@ const CheckoutPage = () => {
       setProcessing(true);
       const userId = localStorage.getItem('userID');
       
+
+      const deductResponse = await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
+        amount: total
+      });
+  
+      if (!deductResponse.data.success) {
+        throw new Error(deductResponse.data.error || 'Failed to process wallet payment');
+      }
       // Create order with wallet payment
       const orderResponse = await axios.post(
         `http://localhost:8000/tourist/${userId}/orders`,
@@ -220,17 +235,23 @@ const CheckoutPage = () => {
           selectedAddress: addresses[selectedAddress]
         }
       );
-
       // Deduct from wallet
-      await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
-        amount: total
-      });
+      // await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
+      //   amount: total
+      // });
 
-      alert('Order placed successfully!');
+      toast({
+        title: "Order Placed Successfully",
+        description: "Your order has been placed and payment processed."
+      });
       navigate('/touristHome');
     } catch (error) {
       console.error('Wallet payment error:', error);
-      alert(error.response?.data?.message || 'Failed to process wallet payment');
+    toast({
+      variant: "destructive",
+      title: "Payment Failed",
+      description: error.response?.data?.error || 'Failed to process wallet payment'
+    });
     } finally {
       setProcessing(false);
     }
@@ -238,17 +259,29 @@ const CheckoutPage = () => {
 
   const handlePlaceOrder = async () => {
     if (selectedAddress === null || selectedAddress < 0) {
-      alert('Please select a delivery address');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select a delivery address."
+      });
       return;
     }
 
     if (!addresses[selectedAddress]) {
-      alert('Selected address is invalid');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Selected address is invalid."
+      });
       return;
     }
 
     if (cartItems.length === 0) {
-      alert('Your cart is empty');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Your cart is empty."
+      });
       return;
     }
 
@@ -269,7 +302,11 @@ const CheckoutPage = () => {
       }
     } catch (error) {
       console.error('Order error:', error);
-      alert(error.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message 
+      });
     } finally {
       setProcessing(false);
     }
@@ -280,7 +317,12 @@ const CheckoutPage = () => {
     try {
       if (!newAddress.street || !newAddress.city || !newAddress.state || 
           !newAddress.country || !newAddress.postalCode) {
-        alert('Please fill in all fields');
+          toast({
+              variant: "destructive",
+              title: "Error",
+              description: "Please fill in all fields"
+          });
+        
         return;
       }
 
@@ -317,7 +359,11 @@ const CheckoutPage = () => {
       
     } catch (error) {
       console.error('Error adding address:', error);
-      alert(error.response?.data?.message || 'Failed to add address');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.response?.data?.message ||"Failed to add address"
+      });
     } finally {
       setProcessing(false);
     }
@@ -342,7 +388,10 @@ const CheckoutPage = () => {
       };
 
       await axios.post(`http://localhost:8000/tourist/${userId}/orders`, orderData);
-      alert('Order placed successfully!');
+      toast({
+        title: "Success",
+        description: "Order placed successfully!"
+      });
       navigate('/touristHome');
     } catch (error) {
       console.error('Cash order error:', error);
@@ -386,7 +435,10 @@ const CheckoutPage = () => {
 
       if (response.data && response.data.order) {
         console.log('Order created successfully:', response.data);
-        alert('Order placed successfully!');
+        toast({
+          title: "Success",
+          description: "Order placed successfully!"
+        });
         navigate('/touristHome');
       } else {
         throw new Error('Invalid response from server');
@@ -403,7 +455,11 @@ const CheckoutPage = () => {
         errorMessage += 'Please contact support.';
       }
       
-      alert(errorMessage);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: errorMessage
+      });
     }
   };
 
@@ -688,7 +744,8 @@ const CheckoutPage = () => {
             <Elements stripe={stripePromise}>
               <StripePaymentForm
                 onPaymentSuccess={handlePaymentSuccess}
-                total={total}
+                total={convertPrice(total)}
+                currencySymbol={currencies[currency].symbol}
                 selectedAddress={addresses[selectedAddress]}
               />
             </Elements>
