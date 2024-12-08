@@ -32,6 +32,24 @@ const TouristProductList = () => {
   const { currency } = useCurrency();
 
   useEffect(() => {
+    const fetchTouristName = async () => {
+      const userID = localStorage.getItem('userID');
+      if (!userID) return;
+      
+      try {
+        const response = await axios.get(`http://localhost:8000/users/${userID}`);
+        if (response.data.tourist && response.data.tourist.name) {
+          setTouristName(response.data.tourist.name);
+        }
+      } catch (error) {
+        console.error('Error fetching tourist name:', error);
+      }
+    };
+
+    fetchTouristName();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:8000/products');
@@ -141,54 +159,71 @@ const TouristProductList = () => {
   };
 
   const handleReviewClick = async (product) => {
-    if (!isLoggedIn) {
-      alert('Please log in to review products');
-      return;
-    }
-
-    const userID = localStorage.getItem('userID');
-    try {
-      const response = await axios.post('http://localhost:8000/check-product-purchase', {
-        userID,
-        productId: product._id
-      });
-
-      if (!response.data.hasPurchased) {
-        alert('You can only review products you have purchased.');
+      if (!isLoggedIn) {
+        alert('Please log in to review products');
         return;
       }
+    
+      const userID = localStorage.getItem('userID');
+      try {
+        const response = await axios.get(`http://localhost:8000/products/check-purchase/${userID}/${product._id}`);
+        
+    
+        if (!response.data.hasPurchased) {
+          alert('You can only review products you have purchased.');
+          return;
+        }
+    
+        const userResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userID}`);
+        const touristName = userResponse.data[0]?.username;
+        
+    
+        setTouristName(touristName);
+        setSelectedProduct(product);
+        setShowReviewModal(true);
+      } catch (error) {
+        console.error('Error checking product purchase:', error);
+        alert('Failed to verify purchase status');
+      }
+    };
+  
+    const handleReviewSubmit = async (review) => {
+      if (!selectedProduct) return;
+  
+      try {
+        const reviewData = {
+          reviewerName: touristName,
+          rating: review.rating,
+          comment: review.comment
+        };
+        
 
-      setTouristName(response.data.touristName);
-      setSelectedProduct(product);
-      setShowReviewModal(true);
-    } catch (error) {
-      console.error('Error checking product purchase:', error);
-      alert('Failed to verify purchase status');
-    }
-  };
-
-  const handleReviewSubmit = async (review) => {
-    if (!selectedProduct) return;
-
-    try {
-      const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, review);
-      
-      setProducts(prevProducts => 
-        prevProducts.map(product => 
-          product._id === selectedProduct._id 
-            ? { ...product, ratings: response.data.ratings }
-            : product
-        )
-      );
-
-      setShowReviewModal(false);
-      setSelectedProduct(null);
-      alert('Review submitted successfully!');
-    } catch (error) {
-      console.error('Error submitting review:', error);
-      alert('Failed to submit review');
-    }
-  };
+        const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, reviewData);
+        
+        setProducts(prevProducts => 
+          prevProducts.map(product => 
+            product._id === selectedProduct._id 
+              ? { ...product, ratings: response.data.ratings }
+              : product
+          )
+        );
+    
+        setShowReviewModal(false);
+        setSelectedProduct(null);
+        alert('Review submitted successfully!');
+      } catch (error) {
+        console.error('Error submitting review:', error);
+        console.error('Error response:', error.response?.data);
+        console.error('Review data that failed:', {
+          reviewerName: touristName,
+          rating: review.rating,
+          comment: review.comment
+        });
+        alert(error.response?.data?.message || 'Failed to submit review');
+      }
+    };
+  
+  
 
   // Filter and sort products
   const filteredProducts = products
@@ -432,7 +467,7 @@ const TouristProductList = () => {
               ×
             </button>
             <ReviewForm
-              productId={selectedProduct._id}
+              title={selectedProduct.name}
               touristName={touristName}
               onSubmit={handleReviewSubmit}
               onClose={() => setShowReviewModal(false)}

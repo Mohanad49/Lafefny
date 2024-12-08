@@ -8,13 +8,17 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const ReviewForm = ({ onClose, onSubmit, title }) => {
+const ReviewForm = ({ onClose, onSubmit, title, touristName }) => {
   const [rating, setRating] = useState('');
   const [comment, setComment] = useState('');
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    onSubmit({ rating: parseInt(rating), comment });
+    onSubmit({
+      reviewerName: touristName,
+      rating: parseInt(rating),
+      comment
+    });
     onClose();
   };
 
@@ -28,7 +32,7 @@ const ReviewForm = ({ onClose, onSubmit, title }) => {
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-background rounded-lg p-6 w-full max-w-md">
+      <div className="bg-background rounded-lg p-6 w-full max-w-md ">
         <h2 className="text-2xl font-bold mb-4">Add Review for {title}</h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>

@@ -932,6 +932,14 @@ router.post('/:userId/orders', async (req, res) => {
     tourist.orders = tourist.orders || [];
     tourist.orders.push(savedOrder._id);
     tourist.cart = []; // Empty the cart after placing the order
+
+    // Add productId to purchasedProducts array
+    req.body.products.forEach(product => {
+      if (!tourist.purchasedProducts.includes(product.productId)) {
+        tourist.purchasedProducts.push(product.productId);
+      }
+    });
+
     await tourist.save();
 
     // Send the response with order details and updated wallet balance
