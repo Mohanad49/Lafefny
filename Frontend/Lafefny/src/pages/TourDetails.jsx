@@ -6,7 +6,7 @@ import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Clock, MapPin, Star, Info, Users } from "lucide-react";
+import { Clock, MapPin, Star, Info, Users, Bookmark, BookmarkCheck } from "lucide-react";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useState, useEffect } from 'react';
 import { getItineraryById } from '../services/itineraryService';
@@ -16,11 +16,11 @@ import { format } from "date-fns";
 import { useToast } from "@/components/ui/use-toast";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
-
 const TourDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const isLoggedIn = !!localStorage.getItem('userID');
+  const isTourist = localStorage.getItem('userRole') === 'Tourist';
   const { currency } = useCurrency();
   const [tour, setTour] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -29,7 +29,18 @@ const TourDetails = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [availableDates, setAvailableDates] = useState([]);
   const [bookedTours, setBookedTours] = useState(new Set());
+  const [isBookmarked, setIsBookmarked] = useState(false);
   const { toast } = useToast();
+
+  const checkIfBookmarked = async (touristId, tourId) => {
+    try {
+      const response = await axios.get(`http://localhost:8000/tourist/${touristId}/bookmarked-tours`);
+      return response.data.some(tour => tour._id === tourId);
+    } catch (error) {
+      console.error('Error checking bookmark status:', error);
+      return false;
+    }
+  };
 
   const getTourDetails = async (id) => {
     try {
@@ -43,6 +54,12 @@ const TourDetails = () => {
       if (updatedTour.booked) {
         setBookedTours(new Set([updatedTour._id]));
       }
+      
+      if (isLoggedIn && isTourist) {
+        const bookmarked = await checkIfBookmarked(touristId, id);
+        setIsBookmarked(bookmarked);
+      }
+      
       setLoading(false);
     } catch (error) {
       console.error('Error fetching tour:', error);
@@ -135,6 +152,36 @@ const TourDetails = () => {
       await handleCancelBooking();
     } else {
       await handleNewBooking();
+    }
+  };
+
+  const handleBookmark = async () => {
+    if (!isLoggedIn || !isTourist) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in as a tourist to bookmark tours.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const userId = localStorage.getItem('userID');
+      const response = await axios.post(
+        `http://localhost:8000/tourist/${userId}/bookmark-tour/${tour._id}`
+      );
+
+      setIsBookmarked(response.data.isBookmarked);
+      toast({
+        title: response.data.isBookmarked ? "Tour Bookmarked" : "Bookmark Removed",
+        description: response.data.message,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to bookmark tour. Please try again.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -275,7 +322,7 @@ const TourDetails = () => {
                 {/* What's Included/Excluded */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   <Card className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">What&apos;s Included</h3>
+                    <h3 className="text-xl font-semibold mb-4">What's Included</h3>
                     <ul className="space-y-2">
                       {tour.included.map((item, index) => (
                         <li key={index} className="flex items-start">
@@ -354,12 +401,29 @@ const TourDetails = () => {
                     </ScrollArea>
                   </div>
 
-                  <Button
-                    className={`w-full ${tour.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
-                    onClick={handleBookingClick}
-                  >
-                    {tour.booked ? 'Cancel Booking' : 'Book Now'}
-                  </Button>
+                  <div className="flex flex-col gap-4">
+                    {isLoggedIn && isTourist && (
+                      <div className="flex gap-4">
+                        <Button 
+                          className={`flex-1 ${tour.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                          onClick={handleBookingClick}
+                        >
+                          {tour.booked ? 'Cancel Booking' : 'Book Now'}
+                        </Button>
+                        <Button
+                          variant="outline"
+                          className="w-12"
+                          onClick={handleBookmark}
+                        >
+                          {isBookmarked ? (
+                            <BookmarkCheck className="h-5 w-5 text-yellow-500 fill-current" />
+                          ) : (
+                            <Bookmark className="h-5 w-5" />
+                          )}
+                        </Button>
+                      </div>
+                    )}
+                  </div>
 
                   <div className="text-sm text-primary">
                     <p>• Instant confirmation</p>

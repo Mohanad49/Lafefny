@@ -1137,4 +1137,53 @@ router.get('/:userId/bookmarked-activities', async (req, res) => {
   }
 });
 
+// Get bookmarked tours
+router.get('/:userId/bookmarked-tours', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId })
+      .populate('bookmarkedTours');
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    res.json(tourist.bookmarkedTours);
+  } catch (error) {
+    console.error('Error fetching bookmarked tours:', error);
+    res.status(500).json({ error: "Failed to fetch bookmarked tours" });
+  }
+});
+
+// Bookmark tour
+router.post('/:userId/bookmark-tour/:tourId', async (req, res) => {
+  try {
+    const { userId, tourId } = req.params;
+    const tourist = await Tourist.findOne({ userID: userId });
+
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+
+    // Check if already bookmarked
+    const isBookmarked = tourist.bookmarkedTours.includes(tourId);
+
+    if (isBookmarked) {
+      // Remove bookmark
+      tourist.bookmarkedTours = tourist.bookmarkedTours.filter(
+        id => id.toString() !== tourId
+      );
+      await tourist.save();
+      res.json({ message: "Tour removed from bookmarks", isBookmarked: false });
+    } else {
+      // Add bookmark
+      tourist.bookmarkedTours.push(tourId);
+      await tourist.save();
+      res.json({ message: "Tour bookmarked successfully", isBookmarked: true });
+    }
+  } catch (error) {
+    console.error('Error bookmarking tour:', error);
+    res.status(500).json({ error: "Failed to bookmark tour" });
+  }
+});
+
 module.exports=router

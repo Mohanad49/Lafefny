@@ -18,6 +18,8 @@ const touristSchema = new mongoose.Schema({
   loyaltyPoints: { type: Number, default: 0 },
   level: { type: Number, default: 1 },
   badge: { type: String, default: 'Bronze' },
+  bookmarkedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity', default: [] }],
+  bookmarkedTours: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Itinerary', default: [] }],
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: [] }],
   cart: [{
     productId: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
@@ -63,7 +65,6 @@ const touristSchema = new mongoose.Schema({
   purchasedProducts: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product', default: [] }],
   orders: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Order', default: [] }], // Reference to orders
   addresses: { type: [addressSchema], default: [] }, // New field for addresses
-  bookmarkedActivities: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Activity' }]
 }, { timestamps: true });
 
 const User = mongoose.model('Tourist', touristSchema);

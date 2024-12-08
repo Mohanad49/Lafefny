@@ -5,7 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Building2, Calendar, Users, Search, AlertCircle, Bed, MapPin, ArrowLeft } from 'lucide-react';
+import { Building2, Calendar, Users, Search, AlertCircle, Bed, MapPin, ArrowLeft, Star } from 'lucide-react';
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import Navigation from './Navigation';
 import "../styles/bookHotels.css";
@@ -339,6 +339,7 @@ const BookHotel = () => {
                 isBooking={bookingLoading}
                 convertPrice={convertPrice}
                 currency={currency}
+                cityCode={cityCode}
               />
             ))}
           </div>
@@ -348,122 +349,312 @@ const BookHotel = () => {
   );
 };
 
-const HotelCard = ({ hotel, onBook, isBooking, convertPrice, currency }) => {
-  const offer = hotel?.offers?.[0];
-  const hotelInfo = hotel?.hotel;
+const HotelCard = ({ hotel, onBook, isBooking, convertPrice, currency, cityCode }) => {
+  // Early return if hotel data is not properly structured
+  if (!hotel?.hotel || !hotel?.offers?.[0]) {
+    return null;
+  }
+
+  const hotelData = hotel.hotel;
+  const offer = hotel.offers[0];
+
+  // Street name components for random generation
+  const streetTypes = {
+    'PAR': ['Rue', 'Avenue', 'Boulevard', 'Place', 'Quai', 'Passage'],
+    'LON': ['Street', 'Road', 'Lane', 'Square', 'Avenue', 'Place', 'Terrace'],
+    'NYC': ['Street', 'Avenue', 'Boulevard', 'Place', 'Road', 'Drive'],
+    'DXB': ['Street', 'Road', 'Boulevard', 'District', 'Avenue'],
+    'TYO': ['Street', 'Avenue', 'Boulevard', 'Road'],
+    'ROM': ['Via', 'Piazza', 'Corso', 'Viale', 'Lungotevere'],
+    'SYD': ['Street', 'Road', 'Avenue', 'Lane', 'Place', 'Drive'],
+    'HKG': ['Road', 'Street', 'Avenue', 'Boulevard', 'Square']
+  };
+
+  const streetNames = {
+    'PAR': ['Saint-Honoré', 'Rivoli', 'Montaigne', 'Royale', 'Bonaparte', 'Vendôme', 'Madeleine', 'Opera', 'Tuileries', 'Louvre', 'Marais', 'Bastille'],
+    'LON': ['Oxford', 'Regent', 'Bond', 'Baker', 'Piccadilly', 'Kensington', 'Chelsea', 'Mayfair', 'Belgravia', 'Westminster', 'Knightsbridge'],
+    'NYC': ['Broadway', 'Madison', 'Lexington', 'Park', 'Fifth', 'Seventh', 'Columbus', 'Amsterdam', 'Washington', 'Greenwich'],
+    'DXB': ['Al Wasl', 'Sheikh Zayed', 'Jumeirah Beach', 'Al Maktoum', 'Dubai Marina', 'Palm Jumeirah', 'Business Bay', 'Downtown'],
+    'TYO': ['Ginza', 'Shinjuku', 'Shibuya', 'Roppongi', 'Asakusa', 'Ueno', 'Akihabara', 'Harajuku', 'Omotesando'],
+    'ROM': ['Veneto', 'Nazionale', 'del Corso', 'Condotti', 'Cola di Rienzo', 'Tritone', 'Sistina', 'Barberini'],
+    'SYD': ['George', 'Pitt', 'Elizabeth', 'Macquarie', 'Oxford', 'Crown', 'William', 'Liverpool', 'Sussex'],
+    'HKG': ['Nathan', 'Canton', 'Queen\'s', 'Des Voeux', 'Hennessy', 'Victoria', 'Hollywood', 'Aberdeen']
+  };
+
+  const areaNames = {
+    'PAR': ['Champs-Élysées', 'Le Marais', 'Saint-Germain', 'Montmartre', 'Opéra', 'Louvre', 'Trocadéro', 'Bastille'],
+    'LON': ['Mayfair', 'Kensington', 'Chelsea', 'Soho', 'Westminster', 'Covent Garden', 'Notting Hill', 'Knightsbridge'],
+    'NYC': ['Manhattan', 'Upper East Side', 'Upper West Side', 'Tribeca', 'SoHo', 'Chelsea', 'Midtown', 'Financial District'],
+    'DXB': ['Downtown Dubai', 'Palm Jumeirah', 'Dubai Marina', 'Business Bay', 'Jumeirah Beach', 'Al Barsha', 'DIFC', 'Deira'],
+    'TYO': ['Shinjuku', 'Shibuya', 'Ginza', 'Roppongi', 'Asakusa', 'Akihabara', 'Marunouchi', 'Nihonbashi'],
+    'ROM': ['Centro Storico', 'Trastevere', 'Monti', 'Prati', 'Testaccio', 'Esquilino', 'Borgo', 'Trieste'],
+    'SYD': ['The Rocks', 'Darling Harbour', 'Circular Quay', 'Surry Hills', 'Paddington', 'Potts Point', 'Bondi Beach', 'Double Bay'],
+    'HKG': ['Central', 'Tsim Sha Tsui', 'Wan Chai', 'Causeway Bay', 'Admiralty', 'Mong Kok', 'North Point', 'Kennedy Town']
+  };
+
+  // Generate random street number (different ranges for different cities)
+  const generateStreetNumber = (cityCode) => {
+    const ranges = {
+      'PAR': [1, 200],
+      'LON': [1, 300],
+      'NYC': [1, 1000],
+      'DXB': [1, 150],
+      'TYO': [1, 100],
+      'ROM': [1, 200],
+      'SYD': [1, 500],
+      'HKG': [1, 200]
+    };
+    const [min, max] = ranges[cityCode] || [1, 100];
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  };
+
+  // Generate postal code based on city format
+  const generatePostalCode = (cityCode) => {
+    switch(cityCode) {
+      case 'PAR':
+        return `750${Math.floor(Math.random() * 20).toString().padStart(2, '0')}`; // Paris districts 75001-75020
+      case 'LON':
+        return `${['SW', 'W', 'E', 'N', 'NW'][Math.floor(Math.random() * 5)]}${Math.floor(Math.random() * 9) + 1} ${Math.floor(Math.random() * 9)}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}${String.fromCharCode(65 + Math.floor(Math.random() * 26))}`;
+      case 'NYC':
+        return `${Math.floor(Math.random() * 90000) + 10000}`; // 5-digit US format
+      case 'DXB':
+        return `${Math.floor(Math.random() * 90000) + 10000}`; // Dubai postal code format
+      case 'TYO':
+        return `${Math.floor(Math.random() * 900) + 100}-${Math.floor(Math.random() * 9000) + 1000}`; // Japanese postal code format
+      case 'ROM':
+        return `00${Math.floor(Math.random() * 900) + 100}`; // Rome postal code format
+      case 'SYD':
+        return `${Math.floor(Math.random() * 9000) + 1000}`; // Australian postal code format
+      case 'HKG':
+        return ''; // Hong Kong typically doesn't use postal codes
+      default:
+        return `${Math.floor(Math.random() * 90000) + 10000}`;
+    }
+  };
+
+  // Generate a random address for a specific city
+  const generateRandomAddress = (cityCode) => {
+    const number = generateStreetNumber(cityCode);
+    const streetType = streetTypes[cityCode][Math.floor(Math.random() * streetTypes[cityCode].length)];
+    const streetName = streetNames[cityCode][Math.floor(Math.random() * streetNames[cityCode].length)];
+    const area = areaNames[cityCode][Math.floor(Math.random() * areaNames[cityCode].length)];
+    const postalCode = generatePostalCode(cityCode);
+
+    switch(cityCode) {
+      case 'PAR':
+        return `${number} ${streetType} ${streetName}, ${postalCode} Paris, France`;
+      case 'LON':
+        return `${number} ${streetName} ${streetType}, ${area}, London ${postalCode}, UK`;
+      case 'NYC':
+        return `${number} ${streetName} ${streetType}, ${area}, New York, NY ${postalCode}, USA`;
+      case 'DXB':
+        return `${number} ${streetName} ${streetType}, ${area}, Dubai ${postalCode}, UAE`;
+      case 'TYO':
+        return `${number}-${Math.floor(Math.random() * 20) + 1} ${streetName}, ${area}, Tokyo ${postalCode}, Japan`;
+      case 'ROM':
+        return `${streetType} ${streetName} ${number}, ${postalCode} Roma RM, Italy`;
+      case 'SYD':
+        return `${number} ${streetName} ${streetType}, ${area}, Sydney NSW ${postalCode}, Australia`;
+      case 'HKG':
+        return `${number} ${streetName} ${streetType}, ${area}, Hong Kong`;
+      default:
+        return `${number} ${streetName} ${streetType}, ${area}`;
+    }
+  };
+
+  // Get random address for the current city
+  const randomAddress = generateRandomAddress(cityCode || 'PAR');
+
+  // Array of hotel images grouped by type
+  const hotelImages = {
+    luxury: [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070",
+      "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070",
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2049",
+      "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070",
+      "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070",
+      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?q=80&w=2074",
+      "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070",
+      "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=2071",
+      "https://images.unsplash.com/photo-1561501900-3701fa6a0864?q=80&w=2070",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?q=80&w=2074",
+      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=2070",
+      "https://images.unsplash.com/photo-1578991624414-276ef23a534f?q=80&w=2070",
+      "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070"
+    ],
+    business: [
+      "https://images.unsplash.com/photo-1606402179428-a57976d71fa4?q=80&w=2074",
+      "https://images.unsplash.com/photo-1594563703937-fdc640497dcd?q=80&w=2069",
+      "https://images.unsplash.com/photo-1631049552240-59c37f38802b?q=80&w=2070",
+      "https://images.unsplash.com/photo-1582719478250-c89cae4dc85b?q=80&w=2070",
+      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2074",
+      "https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?q=80&w=2072",
+      "https://images.unsplash.com/photo-1587985064135-0366536eab42?q=80&w=2070",
+      "https://images.unsplash.com/photo-1592229505726-ca121723b8ef?q=80&w=2074",
+      "https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=2074",
+      "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=2070",
+      "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069",
+      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=2070"
+    ],
+    resort: [
+      "https://images.unsplash.com/photo-1610641818989-c2051b5e2cfd?q=80&w=2070",
+      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2080",
+      "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070",
+      "https://images.unsplash.com/photo-1573052905904-34ad8c27f0cc?q=80&w=2070",
+      "https://images.unsplash.com/photo-1559599746-c0f1c8b23c11?q=80&w=2069",
+      "https://images.unsplash.com/photo-1613490493576-7fde63acd811?q=80&w=2071",
+      "https://images.unsplash.com/photo-1551918120-9739cb430c6d?q=80&w=2069",
+      "https://images.unsplash.com/photo-1601701119533-fde78d10ac66?q=80&w=2069",
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070",
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070",
+      "https://images.unsplash.com/photo-1561501878-aabd62634533?q=80&w=2070",
+      "https://images.unsplash.com/photo-1615460549969-36fa19521a4f?q=80&w=2074",
+      "https://images.unsplash.com/photo-1594394516093-501ba68a0ba6?q=80&w=2070",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070",
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2049"
+    ],
+    boutique: [
+      "https://images.unsplash.com/photo-1520250497591-112f2f40a3f4?q=80&w=2070",
+      "https://images.unsplash.com/photo-1444201983204-c43cbd584d93?q=80&w=2070",
+      "https://images.unsplash.com/photo-1534612899740-55c821a90129?q=80&w=2070",
+      "https://images.unsplash.com/photo-1596394516093-501ba68a0ba6?q=80&w=2070",
+      "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=2071",
+      "https://images.unsplash.com/photo-1595576508898-0ad5c879a061?q=80&w=2074",
+      "https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?q=80&w=2072",
+      "https://images.unsplash.com/photo-1609949279531-cf48d64a58e7?q=80&w=2070",
+      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?q=80&w=2074",
+      "https://images.unsplash.com/photo-1587985064135-0366536eab42?q=80&w=2070",
+      "https://images.unsplash.com/photo-1592229505726-ca121723b8ef?q=80&w=2074",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070"
+    ],
+    city: [
+      "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070",
+      "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=2071",
+      "https://images.unsplash.com/photo-1518733057094-95b53143d2a7?q=80&w=2074",
+      "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?q=80&w=2070",
+      "https://images.unsplash.com/photo-1512918728675-ed5a9ecdebfd?q=80&w=2070",
+      "https://images.unsplash.com/photo-1590490359683-658d3d23f972?q=80&w=2070",
+      "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070",
+      "https://images.unsplash.com/photo-1611048267451-e6ed903d4a38?q=80&w=2072",
+      "https://images.unsplash.com/photo-1564501049412-61c2a3083791?q=80&w=2070",
+      "https://images.unsplash.com/photo-1444201983204-c43cbd584d93?q=80&w=2070",
+      "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070",
+      "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2049"
+    ]
+  };
+
+  // Get random image category
+  const categories = Object.keys(hotelImages);
+  const randomCategory = categories[Math.floor(Math.random() * categories.length)];
   
-  if (!offer || !hotelInfo) return null;
+  // Get random image from category
+  const randomImage = hotelImages[randomCategory][Math.floor(Math.random() * hotelImages[randomCategory].length)];
+  
+  // Generate a random rating between 3 and 5 with one decimal place
+  const randomRating = (Math.random() * (5 - 3) + 3).toFixed(1);
+  
+  // Generate random number of reviews
+  const randomReviews = Math.floor(Math.random() * (1000 - 100) + 100);
 
+  // Generate random amenities
   const amenities = [
-    hotelInfo?.amenities?.includes('SWIMMING_POOL') && { icon: '🏊‍♂️', label: 'Pool' },
-    hotelInfo?.amenities?.includes('RESTAURANT') && { icon: '🍽️', label: 'Restaurant' },
-    hotelInfo?.amenities?.includes('WIFI') && { icon: '📶', label: 'WiFi' },
-    hotelInfo?.amenities?.includes('FITNESS_CENTER') && { icon: '💪', label: 'Gym' },
-    hotelInfo?.amenities?.includes('SPA') && { icon: '💆‍♀️', label: 'Spa' },
-    hotelInfo?.amenities?.includes('PARKING') && { icon: '🅿️', label: 'Parking' }
-  ].filter(Boolean);
+    "Free WiFi",
+    "Pool",
+    "Spa",
+    "Fitness Center",
+    "Restaurant",
+    "Room Service",
+    "Bar",
+    "Parking",
+    "Business Center",
+    "Airport Shuttle"
+  ];
+  const randomAmenities = amenities
+    .sort(() => 0.5 - Math.random())
+    .slice(0, 4);
 
-  // Convert API rating to stars (assuming rating is out of 5)
-  const rating = Math.round(parseFloat(hotelInfo?.rating || 0));
-  const stars = '⭐'.repeat(Math.min(5, Math.max(0, rating)));
-
-  // Format location
-  const location = [
-    hotelInfo?.address?.lines?.[0],
-    hotelInfo?.address?.cityName,
-    hotelInfo?.address?.stateCode,
-    hotelInfo?.address?.countryCode
-  ].filter(Boolean).join(', ');
+  // Format address with fallback
+  const formatAddress = () => {
+    if (!hotelData.address?.lines && !hotelData.address?.cityName) {
+      return randomAddress;
+    }
+    const addressLines = hotelData.address?.lines || [];
+    const cityName = hotelData.address?.cityName || '';
+    const parts = [...addressLines, cityName].filter(Boolean);
+    return parts.length > 0 ? parts.join(', ') : 'Address not available';
+  };
 
   return (
-    <Card className="overflow-hidden hover:shadow-xl transition-all duration-300 border-0 bg-white/90 backdrop-blur-sm">
+    <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="relative h-48 overflow-hidden">
-        <div 
-          className="absolute inset-0 bg-cover bg-center"
-          style={{ 
-            backgroundImage: `url(${hotelInfo?.media?.[0]?.uri || 'https://images.unsplash.com/photo-1566073771259-6a8506099945?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80'})`
-          }}
+        <img
+          src={randomImage}
+          alt={hotelData.name || 'Hotel Image'}
+          className="w-full h-full object-cover hover:scale-110 transition-transform duration-300"
         />
-        <div className="absolute inset-0 bg-black/20" />
-        <div className="absolute top-4 right-4 px-3 py-1 bg-black/50 text-white rounded-full text-sm flex items-center gap-1">
-          {stars || 'Unrated'}
+        <div className="absolute top-4 right-4 bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full">
+          <div className="flex items-center gap-1">
+            <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+            <span className="font-medium">{randomRating}</span>
+            <span className="text-sm text-gray-600">({randomReviews})</span>
+          </div>
         </div>
       </div>
 
       <CardContent className="p-6">
-        <div className="space-y-4">
-          {/* Hotel Name and Location */}
-          <div>
-            <h3 className="text-xl font-semibold text-gray-900 line-clamp-1">
-              {hotelInfo?.name || 'Hotel Name Unavailable'}
-            </h3>
-            <div className="mt-2 flex items-start gap-1">
-              <MapPin className="h-4 w-4 text-gray-500 mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-gray-500 line-clamp-2">{location || 'Location unavailable'}</p>
-            </div>
-            {rating > 0 && (
-              <div className="mt-1 text-sm text-gray-500">
-                Rating: {rating}/5
-              </div>
-            )}
-          </div>
-
-          {/* Room Details */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Room Type</span>
-              <span className="font-medium">{offer?.room?.type || 'Standard Room'}</span>
-            </div>
-            <div className="flex items-center justify-between text-sm">
-              <span className="text-gray-600">Board Type</span>
-              <span className="font-medium">{offer?.boardType || 'Room Only'}</span>
-            </div>
-          </div>
-
-          {/* Amenities */}
-          {amenities.length > 0 && (
-            <div className="flex flex-wrap gap-2">
-              {amenities.map((amenity, index) => (
-                <div 
-                  key={index}
-                  className="px-2 py-1 bg-primary/5 text-primary rounded-full text-xs flex items-center gap-1"
-                >
-                  <span>{amenity.icon}</span>
-                  <span>{amenity.label}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Cancellation Policy */}
-          <div className="text-xs text-gray-500">
-            {offer?.policies?.cancellation?.description || 'Cancellation policy details unavailable'}
-          </div>
-
-          {/* Price and Book Button */}
-          <div className="flex items-end justify-between pt-4 border-t border-gray-100">
-            <div>
-              <p className="text-sm text-gray-500">Per night</p>
-              <p className="text-2xl font-bold text-primary">
-                {currencies[currency].symbol}{convertPrice(offer?.price?.total)}
-              </p>
-            </div>
-            <Button
-              onClick={() => onBook(hotel)}
-              disabled={isBooking}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {isBooking ? (
-                <div className="flex items-center gap-2">
-                  <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
-                  <span>Booking...</span>
-                </div>
-              ) : (
-                'Book Now'
-              )}
-            </Button>
+        <div className="mb-4">
+          <h3 className="text-xl font-semibold mb-2">{hotelData.name || 'Hotel Name Not Available'}</h3>
+          <div className="flex items-start gap-2 text-gray-600 mb-2">
+            <MapPin className="h-4 w-4 mt-1 flex-shrink-0" />
+            <p className="text-sm">{formatAddress()}</p>
           </div>
         </div>
+
+        <div className="mb-4">
+          <div className="flex flex-wrap gap-2">
+            {randomAmenities.map((amenity, index) => (
+              <span
+                key={index}
+                className="text-xs px-2 py-1 bg-primary/5 text-primary rounded-full"
+              >
+                {amenity}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-center justify-between pt-4 border-t">
+          <div>
+            <p className="text-sm text-gray-600">Starting from</p>
+            <p className="text-2xl font-bold text-primary">
+              {currencies[currency].symbol} {convertPrice(offer.price.total)}
+              <span className="text-sm font-normal text-gray-600">/night</span>
+            </p>
+          </div>
+          <Button
+            onClick={() => onBook(hotel)}
+            disabled={isBooking}
+            className="min-w-[120px]"
+          >
+            {isBooking ? (
+              <div className="flex items-center gap-2">
+                <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent" />
+                <span>Booking...</span>
+              </div>
+            ) : (
+              'Book Now'
+            )}
+          </Button>
+        </div>
+
+        {hotel.available === false && (
+          <div className="mt-2 flex items-center gap-2 text-amber-600">
+            <AlertCircle className="h-4 w-4" />
+            <p className="text-sm">Limited rooms available</p>
+          </div>
+        )}
       </CardContent>
     </Card>
   );

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plane, MapPin, Globe, Calendar, Settings, ShoppingBag,
-  User, Star, Wallet, History, Info, Key, Tag, MessageSquare,  CreditCard, Clock, Sparkles 
+  User, Star, Wallet, History, Info, Key, Tag, MessageSquare,  CreditCard, Clock, Sparkles, Bookmark, Heart, ChevronRight 
 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -13,8 +13,6 @@ import { useCurrency, currencies } from '../context/CurrencyContext';
 
 const TouristHome = () => {
   const [upcomingActivities, setUpcomingActivities] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
-  const [recentlyViewed, setRecentlyViewed] = useState([]);
   const [userPreferences, setUserPreferences] = useState([]);
   const userId = localStorage.getItem('userID');
 
@@ -63,14 +61,6 @@ const TouristHome = () => {
         // Get user preferences
         const prefsResponse = await axios.get(`http://localhost:8000/tourist/getTouristPreferences/${userId}`);
         setUserPreferences(prefsResponse.data.preferences);
-
-        // Get recommendations based on preferences
-        const recsResponse = await axios.get(`http://localhost:8000/tourist/recommendations/${userId}`);
-        setRecommendations(recsResponse.data);
-
-        // Get recently viewed from localStorage or API
-        const recent = JSON.parse(localStorage.getItem('recentlyViewed') || '[]');
-        setRecentlyViewed(recent);
       } catch (error) {
         console.error('Error fetching personalized data:', error);
       }
@@ -100,305 +90,228 @@ const TouristHome = () => {
   };
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-slate-50">
       <Navigation />
       
       <main className="pt-16">
-        {/* Hero Section with Profile Banner */}
-        <section className="relative overflow-hidden px-6 lg:px-8 py-16">
-          <div className="relative mx-auto max-w-7xl">
+        {/* Hero Section */}
+        <section className="bg-gradient-to-b from-primary/5 to-transparent px-6 lg:px-8 py-20">
+          <div className="mx-auto max-w-7xl">
             <div className="text-center">
-              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight mb-6">
+              <h1 className="text-4xl sm:text-6xl font-bold tracking-tight text-primary mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary/80">
                 Welcome Back
-                <span className="block text-2xl sm:text-3xl text-muted-foreground mt-2">
+                <span className="block text-2xl sm:text-3xl text-muted-foreground mt-4 text-slate-600">
                   Plan, Book, and Explore
                 </span>
               </h1>
-              
-              {/* Profile Stats Banner */}
-              <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-4 rounded-lg mt-8">
-                <div className="grid grid-cols-3 gap-4">
-                  <div className="flex items-center gap-2">
-                    <User className="h-5 w-5 text-primary" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Level {profile.level}</p>
-                      <p className="font-medium">{profile.badge}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Star className="h-5 w-5 text-amber-400" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Loyalty Points</p>
-                      <p className="font-medium">{profile.loyaltyPoints.toFixed(2)}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Wallet className="h-5 w-5 text-green-500" />
-                    <div>
-                      <p className="text-sm text-muted-foreground">Wallet Balance</p>
-                      <p className="font-medium">{currencies[currency].symbol} {convertWalletBalance(profile.wallet).toFixed(2)}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              
             </div>
           </div>
         </section>
 
-        {/* Upcoming Activities Section */}
-        <section className="py-8 px-6 lg:px-8">
+        {/* Profile Stats Banner */}
+        <section className="px-6 lg:px-8 -mt-10 mb-8">
           <div className="mx-auto max-w-7xl">
-            <div className="bg-white rounded-xl shadow-sm p-6 mb-8">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold">Upcoming Activities</h3>
+            <div className="bg-white rounded-2xl shadow-lg p-8 backdrop-blur-sm bg-white/50">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <div className="flex items-center gap-4 group">
+                  <div className="p-4 rounded-xl bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                    <User className="h-7 w-7 text-primary" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Level {profile.level}</p>
+                    <p className="text-lg font-semibold text-primary">{profile.badge}</p>
+                  </div>
                 </div>
-                <Link to="/Activities" className="text-sm text-primary hover:underline">
-                  View All
+                <div className="flex items-center gap-4 group">
+                  <div className="p-4 rounded-xl bg-amber-50 group-hover:bg-amber-100 transition-colors">
+                    <Star className="h-7 w-7 text-amber-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Loyalty Points</p>
+                    <p className="text-lg font-semibold text-primary">{profile.loyaltyPoints.toFixed(2)}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-4 group">
+                  <div className="p-4 rounded-xl bg-green-50 group-hover:bg-green-100 transition-colors">
+                    <Wallet className="h-7 w-7 text-green-500" />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-500">Wallet Balance</p>
+                    <p className="text-lg font-semibold text-primary">
+                      {currencies[currency].symbol} {convertWalletBalance(profile.wallet)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Quick Actions Grid */}
+        <section className="px-6 lg:px-8 py-12">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="text-2xl font-bold text-primary mb-8">Quick Actions</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+              {[
+                { to: "/activities", icon: Globe, label: "Activities" },
+                { to: "/book-flights", icon: Plane, label: "Flights" },
+                { to: "/book-hotels", icon: Settings, label: "Hotels" },
+                { to: "/transportation-booking", icon: ShoppingBag, label: "Transport" }
+              ].map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className="p-8 rounded-xl bg-white hover:bg-primary/5 transition-all flex flex-col items-center group shadow-sm hover:shadow-md"
+                >
+                  <item.icon className="h-8 w-8 mb-4 text-primary group-hover:text-accent transition-colors" />
+                  <h3 className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{item.label}</h3>
                 </Link>
-              </div>
-              <div className="space-y-4">
-                {upcomingActivities.length > 0 ? (
-                  upcomingActivities.map((activity) => (
-                    <div key={activity._id} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                      <div>
-                        <p className="font-medium">{activity.name}</p>
-                        <p className="text-sm text-muted-foreground">
-                          {new Date(activity.date).toLocaleDateString()}
-                        </p>
-                      </div>
-                      <span className="text-sm px-2 py-1 bg-primary/10 text-primary rounded-full">
-                        {activity.status}
-                      </span>
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-muted-foreground text-center">No upcoming activities</p>
-                )}
-              </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* New Personalized Section */}
-        <section className="py-12 px-6 lg:px-8">
-          <div className="max-w-7xl mx-auto">
-            <div className="grid gap-8">
-              {/* Recommendations */}
-              <div>
-                
-                <div className="grid md:grid-cols-3 gap-6">
-                  {recommendations.slice(0, 3).map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/${item.type}/${item._id}`}
-                      className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all"
-                    >
-                      <div className="flex items-center gap-3 mb-3">
-                        {item.type === 'activity' ? (
-                          <Globe className="h-6 w-6 text-primary" />
-                        ) : (
-                          <MapPin className="h-6 w-6 text-primary" />
-                        )}
-                        <span className="text-sm font-medium text-muted-foreground capitalize">
-                          {item.type}
+        {/* Upcoming Activities */}
+        <section className="bg-white px-6 lg:px-8 py-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-primary">Upcoming Activities</h2>
+              <Link to="/Activities" className="text-sm font-medium text-primary hover:text-accent transition-colors">
+                View All
+              </Link>
+            </div>
+            <div className="grid gap-4">
+              {upcomingActivities.length > 0 ? (
+                upcomingActivities.map((activity) => (
+                  <Link
+                    key={activity._id}
+                    to={`/activities/${activity._id}`}
+                    className="block group"
+                  >
+                    <div className="p-6 bg-slate-50/50 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-primary/5 rounded-xl group-hover:bg-primary/10 transition-colors">
+                          <Calendar className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{activity.name}</p>
+                          <p className="text-sm text-slate-500">
+                            {new Date(activity.date).toLocaleDateString()}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-4">
+                        <span className="text-sm px-4 py-1.5 bg-primary/5 text-primary rounded-full font-medium">
+                          {activity.status}
                         </span>
+                        <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
                       </div>
-                      <h3 className="font-semibold mb-2">{item.name}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-2">
-                        {item.description}
-                      </p>
-                    </Link>
-                  ))}
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-center py-12 bg-slate-50/50 rounded-xl">
+                  <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
+                  <p className="text-slate-500">No upcoming activities</p>
                 </div>
-              </div>
-
-              {/* Recently Viewed */}
-              <div>
-                
-                <div className="grid md:grid-cols-4 gap-4">
-                  {recentlyViewed.slice(0, 4).map((item) => (
-                    <Link
-                      key={item._id}
-                      to={`/${item.type}/${item._id}`}
-                      className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all"
-                    >
-                      <div className="flex items-center gap-2 mb-2">
-                        {item.type === 'activity' ? (
-                          <Globe className="h-5 w-5 text-primary" />
-                        ) : (
-                          <MapPin className="h-5 w-5 text-primary" />
-                        )}
-                        <span className="text-sm font-medium">{item.name}</span>
-                      </div>
-                      <p className="text-xs text-muted-foreground">
-                        Viewed {formatTimeAgo(item.viewedAt)}
-                      </p>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+              )}
             </div>
           </div>
         </section>
 
-        {/* Rest of existing sections with updated styling */}
-        {/* Quick Actions */}
-        <section className="py-12 px-6 lg:px-8">
+        {/* Plan Your Journey */}
+        <section className="px-6 lg:px-8 py-12">
           <div className="mx-auto max-w-7xl">
-            <div className="grid md:grid-cols-4 gap-6">
-              <Link to="/activities" 
-                className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
-                <Globe className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
-                <h3 className="text-xl font-semibold">Activities</h3>
-              </Link>
-              <Link to="/book-flights"
-                className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
-                <Plane className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
-                <h3 className="text-xl font-semibold">Flights</h3>
-              </Link>
-              <Link to="/book-hotels"
-                className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
-                <Settings className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
-                <h3 className="text-xl font-semibold">Hotels</h3>
-              </Link>
-              <Link to="/transportation-booking"
-                className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
-                <ShoppingBag className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
-                <h3 className="text-xl font-semibold">Transport</h3>
-              </Link>
+            <h2 className="text-2xl font-bold text-primary mb-8">Plan Your Journey</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                { to: "/touristAll-Itineraries", icon: Globe, label: "Browse Itineraries" },
+                { to: "/touristMuseums", icon: MapPin, label: "Museums & History" }
+              ].map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex flex-col items-center group"
+                >
+                  <item.icon className="h-8 w-8 mb-4 text-primary group-hover:text-accent transition-colors" />
+                  <h3 className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{item.label}</h3>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Planning Section */}
-        <section className="py-12 bg-surface px-6 lg:px-8">
+        {/* Account Management */}
+        <section className="bg-white px-6 lg:px-8 py-12">
           <div className="mx-auto max-w-7xl">
-            <h2 className="text-3xl font-bold text-center mb-8">Plan Your Journey</h2>
-            <div className="grid md:grid-cols-3 gap-6">
-              <Link to="/tourist-Itineraries"
-                className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
-                <Calendar className="h-8 w-8 mb-4" />
-                <h3 className="text-xl font-semibold">My Itineraries</h3>
-              </Link>
-              <Link to="/touristAll-Itineraries"
-                className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
-                <Globe className="h-8 w-8 mb-4" />
-                <h3 className="text-xl font-semibold">Browse Itineraries</h3>
-              </Link>
-              <Link to="/touristMuseums"
-                className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
-                <MapPin className="h-8 w-8 mb-4" />
-                <h3 className="text-xl font-semibold">Museums & History</h3>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        {/* Profile & Settings */}
-        <section className="py-12 px-6 lg:px-8">
-          <div className="mx-auto max-w-7xl">
-            <h2 className="text-3xl font-bold text-center mb-8">Account Management</h2>
+            <h2 className="text-2xl font-bold text-primary mb-8">Account Management</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/viewTouristInfo" 
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <User className="h-5 w-5" />
-                <span>Profile Info</span>
-              </Link>
-              <Link to="/touristEditInfo"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <Info className="h-5 w-5" />
-                <span>Edit Profile</span>
-              </Link>
-              <Link to="/changePassword"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <Key className="h-5 w-5" />
-                <span>Password</span>
-              </Link>
-              <Link to="/touristSelectPreferences"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <Tag className="h-5 w-5" />
-                <span>Preferences</span>
-              </Link>
-              <Link to="/complaints"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <MessageSquare className="h-5 w-5" />
-                <span>Support</span>
-              </Link>
-              <Link to="/manage-addresses"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <MapPin className="h-5 w-5" />
-                <span>Addresses</span>
-              </Link>
-              <Link to={`/touristHistory/${localStorage.getItem("userID")}`}
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
-                <History className="h-5 w-5" />
-                <span>History</span>
-              </Link>
-              <Link to="/delete-account"
-                className="px-6 py-4 bg-background border border-border text-center rounded-xl hover:bg-red-50 hover:border-red-200 hover:text-red-500 transition-all flex flex-col items-center gap-2">
-                <User className="h-5 w-5" />
-                <span>Delete Account</span>
-              </Link>
+              {[
+                { to: "/viewTouristInfo", icon: User, label: "Profile Info" },
+                { to: "/changePassword", icon: Key, label: "Password" },
+                { to: "/touristSelectPreferences", icon: Tag, label: "Preferences" },
+                { to: "/complaints", icon: MessageSquare, label: "Support" },
+                { to: "/manage-addresses", icon: MapPin, label: "Addresses" },
+                { to: `/touristHistory/${localStorage.getItem("userID")}`, icon: History, label: "History" },
+                { to: "/bookmarks", icon: Bookmark, label: "Bookmarks" }
+              ].map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className={`p-6 bg-slate-50/50 rounded-xl transition-all flex flex-col items-center gap-3 group hover:shadow-sm
+                    ${item.danger 
+                      ? 'hover:bg-red-50 hover:text-red-500' 
+                      : 'hover:bg-primary/5'
+                    }`}
+                >
+                  <item.icon className={`h-6 w-6 ${item.danger ? 'text-slate-600 group-hover:text-red-500' : 'text-primary group-hover:text-accent'} transition-colors`} />
+                  <span className="text-sm font-medium text-center text-slate-700 group-hover:text-inherit transition-colors">{item.label}</span>
+                </Link>
+              ))}
             </div>
           </div>
         </section>
 
         {/* Shopping Section */}
-        <section className="px-6 lg:px-8 py-8">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Shopping & Orders</h2>
-            <div className="grid md:grid-cols-2 gap-6">
-              <Link to="/touristProducts" 
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                <ShoppingBag className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">Browse Products</h3>
-                  <p className="text-sm text-muted-foreground">Discover local treasures</p>
-                </div>
-              </Link>
-              <Link to="/my-orders"
-                className="p-6 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-4">
-                <CreditCard className="h-8 w-8 text-primary" />
-                <div>
-                  <h3 className="font-semibold">My Orders</h3>
-                  <p className="text-sm text-muted-foreground">Track your purchases</p>
-                </div>
-              </Link>
-            </div>
-          </div>
-        </section>
-
-        <section className="px-6 lg:px-8 py-8 bg-gray-50">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Profile & Settings</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/viewTouristInfo" 
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <User className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">View Profile</span>
-              </Link>
-              
-              <Link to="/touristEditInfo"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Settings className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Edit Profile</span>
-              </Link>
-
-              <Link to="/touristSelectPreferences"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Tag className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Preferences</span>
-              </Link>
-
-              <Link to="/manage-addresses"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <MapPin className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Addresses</span>
-              </Link>
+        <section className="px-6 lg:px-8 py-12">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="text-2xl font-bold text-primary mb-8">Shopping & Orders</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {[
+                { 
+                  to: "/touristProducts",
+                  icon: ShoppingBag,
+                  label: "Browse Products",
+                  description: "Discover local treasures"
+                },
+                {
+                  to: "/my-orders",
+                  icon: CreditCard,
+                  label: "My Orders",
+                  description: "Track your purchases"
+                },
+                {
+                  to: "/tourist/wishlist",
+                  icon: Heart,
+                  label: "Wishlist",
+                  description: "Your saved items"
+                }
+              ].map((item, index) => (
+                <Link
+                  key={index}
+                  to={item.to}
+                  className="p-8 bg-white rounded-xl shadow-sm hover:shadow-md transition-all flex items-center gap-6 group"
+                >
+                  <div className="p-4 rounded-xl bg-primary/5 group-hover:bg-primary/10 transition-colors">
+                    <item.icon className="h-8 w-8 text-primary" />
+                  </div>
+                  <div>
+                    <h3 className="font-semibold text-slate-700 group-hover:text-primary transition-colors mb-1">{item.label}</h3>
+                    <p className="text-sm text-slate-500">{item.description}</p>
+                  </div>
+                </Link>
+              ))}
             </div>
           </div>
         </section>

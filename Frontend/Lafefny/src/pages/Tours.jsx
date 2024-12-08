@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Globe2, Star, MapPin, Share2 } from "lucide-react";
+import { Clock, Globe2, Star, MapPin, Share2, Bookmark, BookmarkCheck } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { Input } from "@/components/ui/input";
@@ -36,6 +36,7 @@ const Tours = () => {
   const [currentItinerary, setCurrentItinerary] = useState(null);
   const [availableDates, setAvailableDates] = useState([]);
   const [bookedItineraries, setBookedItineraries] = useState(new Set());
+  const [bookmarkedTours, setBookmarkedTours] = useState(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -55,6 +56,13 @@ const Tours = () => {
         // Initialize booked itineraries
         const booked = new Set(updatedItineraries.filter(i => i.booked).map(i => i._id));
         setBookedItineraries(booked);
+
+        // Fetch bookmarked tours
+        if (isLoggedIn && isTourist) {
+          const bookmarksResponse = await axios.get(`http://localhost:8000/tourist/${touristId}/bookmarked-tours`);
+          const bookmarkedIds = new Set(bookmarksResponse.data.map(tour => tour._id));
+          setBookmarkedTours(bookmarkedIds);
+        }
         
         const highestPrice = Math.max(...response.data.map(i => 
           typeof i.price === 'string' ? 
@@ -282,8 +290,6 @@ const Tours = () => {
       setSelectedDate("");
 
       
-      
-
       // Navigate to payment page
       navigate(`/tourist/AllPay`, { 
         state: { 
@@ -306,6 +312,50 @@ const Tours = () => {
     event.stopPropagation();
     setSelectedItem(item);
     setIsShareModalOpen(true);
+  };
+
+  const handleBookmark = async (event, tourId) => {
+    event.stopPropagation();
+    
+    if (!isLoggedIn || !isTourist) {
+      toast({
+        title: "Authentication Required",
+        description: "Please log in as a tourist to bookmark tours.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    try {
+      const userId = localStorage.getItem('userID');
+      const response = await axios.post(
+        `http://localhost:8000/tourist/${userId}/bookmark-tour/${tourId}`
+      );
+
+      if (response.data.isBookmarked) {
+        setBookmarkedTours(prev => new Set([...prev, tourId]));
+        toast({
+          title: "Tour Bookmarked",
+          description: "Tour has been added to your bookmarks.",
+        });
+      } else {
+        setBookmarkedTours(prev => {
+          const newSet = new Set(prev);
+          newSet.delete(tourId);
+          return newSet;
+        });
+        toast({
+          title: "Bookmark Removed",
+          description: "Tour has been removed from your bookmarks.",
+        });
+      }
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to bookmark tour. Please try again.",
+        variant: "destructive"
+      });
+    }
   };
 
   const convertPrice = (price) => {
@@ -467,15 +517,32 @@ const Tours = () => {
                     src={itinerary.image || "https://via.placeholder.com/400x300"}
                     alt={itinerary.name}
                     className="w-full h-full object-cover"
+                    onError={(e) => {
+                      e.target.src = '/placeholder-tour.jpg';
+                    }}
                   />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="absolute top-4 right-4 bg-white/80 hover:bg-white"
-                    onClick={(e) => handleShare(e, itinerary)}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute top-4 right-4 flex gap-2">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                      onClick={(e) => handleBookmark(e, itinerary._id)}
+                    >
+                      {bookmarkedTours.has(itinerary._id) ? (
+                        <BookmarkCheck className="h-5 w-5 text-yellow-500 fill-current" />
+                      ) : (
+                        <Bookmark className="h-5 w-5" />
+                      )}
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="bg-white/80 backdrop-blur-sm hover:bg-white"
+                      onClick={(e) => handleShare(e, itinerary)}
+                    >
+                      <Share2 className="h-5 w-5" />
+                    </Button>
+                  </div>
                 </div>
                 <CardContent className="p-6">
                   <div className="space-y-4">
