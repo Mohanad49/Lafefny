@@ -1,5 +1,3 @@
-
-
 /* eslint-disable no-unused-vars */
 import React from 'react';
 import { Link } from 'react-router-dom';
@@ -26,8 +24,7 @@ const TourismGovernorHome = () => {
                   Manage Activities, Museums & Itineraries
                 </span>
               </h1>
-              
-              {/* Stats Banner */}
+　　 　 　 　 {/* Stats Banner */}
               <div className="bg-gradient-to-r from-primary/5 to-accent/5 p-4 rounded-lg mt-8">
                 <div className="grid grid-cols-3 gap-4">
                   <div className="flex items-center gap-2">
@@ -61,17 +58,17 @@ const TourismGovernorHome = () => {
         <section className="py-12 px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <div className="grid md:grid-cols-3 gap-6">
-              <Link to="/touristActivities" 
+              <Link to="/activities" 
                 className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
                 <Activity className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
                 <h3 className="text-xl font-semibold">Activities</h3>
               </Link>
-              <Link to="/guest-itineraries"
+              <Link to="/tours"
                 className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
                 <Globe className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
                 <h3 className="text-xl font-semibold">Itineraries</h3>
               </Link>
-              <Link to="/museums"
+              <Link to="/historicalPlaces"
                 className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
                 <Building2 className="h-10 w-10 mb-4 group-hover:text-accent transition-colors" />
                 <h3 className="text-xl font-semibold">Museums</h3>
@@ -84,12 +81,18 @@ const TourismGovernorHome = () => {
         <section className="py-12 bg-surface px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
             <h2 className="text-3xl font-bold text-center mb-8">Museum Management</h2>
-            <div className="grid md:grid-cols-2 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
               <Link to="/add-museum"
                 className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
                 <Plus className="h-8 w-8 mb-4" />
                 <h3 className="text-xl font-semibold">Add Museum</h3>
                 <p className="text-sm text-muted-foreground mt-2">Add new historical places and museums</p>
+              </Link>
+              <Link to="/manage-museums"
+                className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
+                <Building2 className="h-8 w-8 mb-4" />
+                <h3 className="text-xl font-semibold">Manage Museums</h3>
+                <p className="text-sm text-muted-foreground mt-2">Edit, update, and delete museums</p>
               </Link>
               <Link to="/add-museum-tag"
                 className="p-6 rounded-2xl bg-background border border-border hover:border-accent transition-all flex flex-col items-center">
@@ -111,8 +114,7 @@ const TourismGovernorHome = () => {
                 <Key className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Change Password</span>
               </Link>
-              
-              <Link to="/profile"
+　　 　 　 　 <Link to="/profile"
                 className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
                 <Shield className="h-6 w-6 text-primary" />
                 <span className="text-sm font-medium">Profile Settings</span>

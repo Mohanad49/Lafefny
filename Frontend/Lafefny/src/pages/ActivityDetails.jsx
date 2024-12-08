@@ -23,6 +23,7 @@ const ActivityDetails = () => {
     const { toast } = useToast();
     const isLoggedIn = !!localStorage.getItem('userID');
     const isTourist = localStorage.getItem('userRole') === 'Tourist';
+    const isTourismGovernor = localStorage.getItem('userRole') === 'TourismGovernor';
     const touristId = localStorage.getItem('userID');
 
     const getActivityDetails = async (id) => {
@@ -295,13 +296,23 @@ const ActivityDetails = () => {
                                         </Badge>
                                     </div>
                                     <div className="flex gap-2">
-                                        <Button
-                                            className={`flex-1 ${activity.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
-                                            onClick={handleBookingClick}
-                                            disabled={!activity.bookingOpen}
-                                        >
-                                            {activity.booked ? 'Cancel Booking' : 'Book Now'}
-                                        </Button>
+                                        {isTourist && (
+                                            <Button
+                                                className={`flex-1 ${activity.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
+                                                onClick={handleBookingClick}
+                                                disabled={!activity.bookingOpen}
+                                            >
+                                                {activity.booked ? 'Cancel Booking' : 'Book Now'}
+                                            </Button>
+                                        )}
+                                        {(!isLoggedIn || (!isTourist && !isTourismGovernor)) && (
+                                            <Button
+                                                className="flex-1"
+                                                onClick={() => navigate('/login')}
+                                            >
+                                                Login to Book
+                                            </Button>
+                                        )}
                                         <Button
                                             variant="outline"
                                             size="icon"
@@ -321,8 +332,7 @@ const ActivityDetails = () => {
                                                 Special Offer: {activity.specialDiscounts}
                                             </p>
                                         </div>
-                                    )}
-                                    
+                                    )}                                   
                                     <div className="text-sm text-primary">
                                         <p>• Instant confirmation</p>
                                         <p>• Free cancellation up to 24 hours before</p>

@@ -59,6 +59,7 @@ const AdminHome = () => {
         {/* Quick Actions */}
         <section className="py-12 px-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
+          <h2 className="text-3xl font-bold text-center mb-8">Quick Actions</h2>
             <div className="grid md:grid-cols-4 gap-6">
               <Link to="/users" 
                 className="p-8 rounded-2xl bg-background border border-border hover:border-accent hover:shadow-lg transition-all flex flex-col items-center group">
