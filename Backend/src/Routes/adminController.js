@@ -1,4 +1,5 @@
-const express = require('express'); // Added bcrypt for password hashing
+const express = require('express');
+const bcrypt = require('bcrypt'); // Added bcrypt for password hashing
 const router = express.Router();
 const User = require('../Models/User');
 const TourismGovernor = require('../Models/TourismGovernor');
@@ -67,6 +68,7 @@ router.post('/add-admin', async (req, res) => {
     await admin.save();
     res.json({ message: 'Admin added successfully' });
   } catch (error) {
+    console.error('Error adding Admin:', error); // Add logging
     res.status(500).json({ message: 'Error adding Admin', error });
   }
 });
