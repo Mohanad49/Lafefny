@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getTouristBookings, addActivityReview, addItineraryReview } from '../services/touristHistoryService';
+import { getTouristBookings, addActivityReview, addItineraryReview, addTourGuideReview } from '../services/touristHistoryService';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Clock, Globe2, Star, MapPin, Share2, ArrowLeft, Calendar } from "lucide-react";
@@ -123,6 +123,8 @@ const TouristHistory = () => {
               : itinerary
           )
         );
+      } else if (selectedItem.type === 'TourGuide') {
+        response = await addTourGuideReview(selectedItem._id, review);
       }
 
       toast({
@@ -140,7 +142,7 @@ const TouristHistory = () => {
     }
   };
 
-  const tabs = ['Activities', 'Itineraries'];
+  const tabs = ['Activities', 'Tours'];
 
   if (loading) return (
     <div className="min-h-screen flex items-center justify-center">
@@ -287,14 +289,14 @@ const TouristHistory = () => {
                 bookedItineraries.map((itinerary) => (
                   <Card 
                     key={itinerary._id} 
-                    className="overflow-hidden hover:shadow-lg transition-shadow cursor-pointer"
-                    onClick={() => navigate(`/tours/${itinerary._id}`)}
+                    className="overflow-hidden hover:shadow-lg transition-shadow group"
+                    
                   >
                     <div className="relative h-64">
                       <img
                         src={itinerary.image || "https://via.placeholder.com/400x300"}
                         alt={itinerary.name}
-                        className="w-full h-full object-cover"
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-200"
                         onError={(e) => {
                           e.target.src = '/placeholder-tour.jpg';
                         }}
@@ -357,15 +359,31 @@ const TouristHistory = () => {
                             <div className="text-sm text-primary">per person</div>
                           </div>
                         </div>
-                        <Button 
-                          className="w-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleReview({ ...itinerary, type: 'Itinerary' });
-                          }}
-                        >
-                          Add Review
-                        </Button>
+                        <div className="flex gap-2">
+                          <Button 
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReview({ ...itinerary, type: 'Itinerary' });
+                            }}
+                          >
+                            Review Itinerary
+                          </Button>
+                          <Button 
+                            variant="outline"
+                            className="flex-1"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleReview({ 
+                                _id: itinerary.tourGuideId,
+                                name: itinerary.tourGuideName,
+                                type: 'TourGuide'
+                              });
+                            }}
+                          >
+                            Review Guide
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
