@@ -363,6 +363,14 @@ const CheckoutPage = () => {
         throw new Error('User not logged in');
       }
 
+      // Validate cart items and address
+      if (!cartItems.length) {
+        throw new Error('Cart is empty');
+      }
+      if (selectedAddress === null || !addresses[selectedAddress]) {
+        throw new Error('Invalid delivery address');
+      }
+
       const orderData = {
         products: cartItems.map(item => ({
           productId: item._id,
@@ -374,12 +382,34 @@ const CheckoutPage = () => {
         selectedAddress: addresses[selectedAddress]
       };
 
-      await axios.post(`http://localhost:8000/tourist/${userId}/orders`, orderData);
-      alert('Order placed successfully!');
-      navigate('/touristHome');
+      // Log the order data before sending
+      console.log('Creating order with data:', orderData);
+
+      const response = await axios.post(
+        `http://localhost:8000/tourist/${userId}/orders`, 
+        orderData
+      );
+
+      if (response.data && response.data.order) {
+        console.log('Order created successfully:', response.data);
+        alert('Order placed successfully!');
+        navigate('/touristHome');
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (error) {
       console.error('Order creation error:', error);
-      alert('Payment successful but failed to create order. Please contact support.');
+      let errorMessage = 'Failed to create order. ';
+      
+      if (error.response?.data?.error) {
+        errorMessage += error.response.data.error;
+      } else if (error.message) {
+        errorMessage += error.message;
+      } else {
+        errorMessage += 'Please contact support.';
+      }
+      
+      alert(errorMessage);
     }
   };
 
@@ -452,8 +482,8 @@ const CheckoutPage = () => {
                 {addresses.map((address, index) => (
                   <div 
                     key={index} 
-                    className={`address-card ${selectedAddress === address ? 'selected' : ''}`}
-                    onClick={() => setSelectedAddress(address)}
+                    className={`address-card ${selectedAddress === index ? 'selected' : ''}`}
+                    onClick={() => setSelectedAddress(index)}
                   >
                     <p>{address.street}</p>
                     <p>{address.city}, {address.state}</p>
