@@ -1,10 +1,14 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { useState, useEffect } from "react";
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Edit, Trash2 } from 'lucide-react';
+import { 
+  ArrowLeft, Edit, Trash2, User, Phone, Globe, Briefcase, Calendar, Wallet, 
+  Award, Trophy, Star, Shield, Crown, Sparkles 
+} from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import Swal from 'sweetalert2';
+import Navigation from './Navigation';
 
 const TouristInfo = () => {
   const navigate = useNavigate();
@@ -167,6 +171,26 @@ const TouristInfo = () => {
     }
   };
 
+  const getBadgeIcon = (badge) => {
+    switch(badge?.toLowerCase()) {
+      case 'gold':
+        return <Crown className="h-6 w-6 text-yellow-500" />;
+      case 'silver':
+        return <Shield className="h-6 w-6 text-gray-400" />;
+      case 'platinum':
+        return <Sparkles className="h-6 w-6 text-blue-400" />;
+      default:
+        return <Star className="h-6 w-6 text-amber-700" />; // Bronze
+    }
+  };
+
+  const getLevelColor = (level) => {
+    const lvl = parseInt(level) || 1;
+    if (lvl >= 5) return 'text-purple-500';
+    if (lvl >= 3) return 'text-blue-500';
+    return 'text-green-500';
+  };
+
   if (error) {
     return <p className="text-destructive p-4">Error: {error}</p>;
   }
@@ -176,174 +200,238 @@ const TouristInfo = () => {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      <div className="flex items-center justify-between mb-4">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
-        <div className="flex gap-2">
-          <button
-            onClick={() => setShowEditModal(true)}
-            className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Edit className="h-4 w-4" />
-            Edit Info
-          </button>
-          <button
-            onClick={handleDeleteRequest}
-            className="flex items-center gap-2 bg-destructive text-destructive-foreground hover:bg-destructive/90 py-2 px-4 rounded-lg text-sm font-medium transition-colors"
-          >
-            <Trash2 className="h-4 w-4" />
-            Delete Account
-          </button>
-        </div>
-      </div>
-
-      <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden">
-        <div className="p-6">
-          <h2 className="text-2xl font-semibold text-primary mb-6">Tourist Information</h2>
-          
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Username</td>
-                  <td className="py-3 px-4">{touristData[0].username}</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Date of Birth</td>
-                  <td className="py-3 px-4">{new Date(touristData[0].dateOfBirth).toLocaleDateString()}</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Mobile Number</td>
-                  <td className="py-3 px-4">{touristData[0].mobileNumber}</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Nationality</td>
-                  <td className="py-3 px-4">{touristData[0].nationality}</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Job</td>
-                  <td className="py-3 px-4">{touristData[0].job}</td>
-                </tr>
-                <tr className="border-b border-border">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Wallet</td>
-                  <td className="py-3 px-4">EGP {Number(touristData[0].wallet || 0).toFixed(2)}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div className="mt-8 p-4 bg-accent/10 rounded-lg">
-            <h3 className="text-lg font-semibold mb-4">Loyalty Program</h3>
-            <table className="w-full border-collapse">
-              <tbody>
-                <tr className="border-b border-border/50">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Points</td>
-                  <td className="py-3 px-4">{Number(touristData[0].loyaltyPoints || 0)} points</td>
-                </tr>
-                <tr className="border-b border-border/50">
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Level</td>
-                  <td className="py-3 px-4">{touristData[0].level || 1}</td>
-                </tr>
-                <tr>
-                  <td className="py-3 px-4 font-medium text-muted-foreground">Badge</td>
-                  <td className="py-3 px-4">{touristData[0].badge || 'Bronze'}</td>
-                </tr>
-              </tbody>
-            </table>
-
-            {touristData[0].loyaltyPoints >= 10000 && (
-              <button 
-                onClick={handleRedeemPoints}
-                disabled={isRedeeming}
-                className="mt-4 w-full bg-primary text-primary-foreground hover:bg-primary/90 py-2 px-4 rounded-lg text-sm font-medium transition-colors disabled:opacity-50"
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="container mx-auto px-6 pt-28 pb-20">
+        <div className="max-w-6xl mx-auto">
+          {/* Header Section */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12">
+            <div className="space-y-3">
+              <button
+                onClick={() => navigate(-1)}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
               >
-                {isRedeeming ? 'Redeeming...' : 'Redeem Points'}
+                <ArrowLeft className="h-4 w-4" />
+                Back
               </button>
-            )}
+              <h1 className="text-4xl font-bold text-foreground">Tourist Profile</h1>
+              <p className="text-muted-foreground text-lg">Manage your personal information and preferences</p>
+            </div>
+            <div className="flex gap-4 mt-6 md:mt-0">
+              <button
+                onClick={() => setShowEditModal(true)}
+                className="flex items-center gap-2 bg-primary/10 text-primary hover:bg-primary/20 py-3 px-6 rounded-xl text-sm font-medium transition-all hover:scale-105"
+              >
+                <Edit className="h-4 w-4" />
+                Edit Profile
+              </button>
+              <button
+                onClick={handleDeleteRequest}
+                className="flex items-center gap-2 bg-destructive/10 text-destructive hover:bg-destructive/20 py-3 px-6 rounded-xl text-sm font-medium transition-all hover:scale-105"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete Account
+              </button>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {showEditModal && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm">
-          <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-lg rounded-lg bg-card p-6 shadow-lg border border-border">
-            <h3 className="text-lg font-semibold mb-4">Edit Tourist Information</h3>
-            <form onSubmit={handleEditSubmit} className="space-y-4">
-              
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Date of Birth</label>
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={editFormData.dateOfBirth}
-                  onChange={handleEditChange}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Personal Information Card */}
+            <div className="md:col-span-2">
+              <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="p-8">
+                  <h2 className="text-2xl font-semibold text-foreground mb-8 flex items-center gap-3">
+                    <User className="h-6 w-6 text-primary" />
+                    Personal Information
+                  </h2>
                   
-                />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Username</label>
+                        <p className="text-foreground font-medium text-lg">{touristData[0].username}</p>
+                      </div>
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Date of Birth</label>
+                        <p className="text-foreground font-medium text-lg flex items-center gap-3">
+                          <Calendar className="h-5 w-5 text-primary" />
+                          {new Date(touristData[0].dateOfBirth).toLocaleDateString()}
+                        </p>
+                      </div>
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Mobile Number</label>
+                        <p className="text-foreground font-medium text-lg flex items-center gap-3">
+                          <Phone className="h-5 w-5 text-primary" />
+                          {touristData[0].mobileNumber}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="space-y-6">
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Nationality</label>
+                        <p className="text-foreground font-medium text-lg flex items-center gap-3">
+                          <Globe className="h-5 w-5 text-primary" />
+                          {touristData[0].nationality}
+                        </p>
+                      </div>
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Job</label>
+                        <p className="text-foreground font-medium text-lg flex items-center gap-3">
+                          <Briefcase className="h-5 w-5 text-primary" />
+                          {touristData[0].job}
+                        </p>
+                      </div>
+                      <div className="bg-background/50 p-4 rounded-xl">
+                        <label className="text-sm text-muted-foreground block mb-2">Wallet Balance</label>
+                        <p className="text-foreground font-medium text-lg flex items-center gap-3">
+                          <Wallet className="h-5 w-5 text-primary" />
+                          <span className="text-xl font-bold">EGP {Number(touristData[0].wallet || 0).toFixed(2)}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Mobile Number</label>
-                <input
-                  type="text"
-                  name="mobileNumber"
-                  value={editFormData.mobileNumber}
-                  onChange={handleEditChange}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  required
-                />
-              </div>
+            {/* Loyalty Program Card */}
+            <div className="md:col-span-1">
+              <div className="bg-card rounded-2xl shadow-lg border border-border overflow-hidden hover:shadow-xl transition-shadow">
+                <div className="p-8">
+                  <h2 className="text-2xl font-semibold text-foreground mb-8 flex items-center gap-3">
+                    <Award className="h-6 w-6 text-primary" />
+                    Loyalty Program
+                  </h2>
+                  
+                  <div className="space-y-8">
+                    {/* Points Display */}
+                    <div className="bg-primary/5 rounded-2xl p-6 text-center">
+                      <label className="text-sm text-muted-foreground block mb-2">Points Balance</label>
+                      <p className="text-4xl font-bold text-primary">
+                        {Number(touristData[0].loyaltyPoints || 0).toLocaleString()}
+                      </p>
+                      <p className="text-sm text-muted-foreground mt-2">Total Points Earned</p>
+                    </div>
+                    
+                    {/* Level Display */}
+                    <div className="bg-background/50 rounded-2xl p-6">
+                      <label className="text-sm text-muted-foreground block mb-3">Current Level</label>
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Trophy className={`h-8 w-8 ${getLevelColor(touristData[0].level)}`} />
+                          <div>
+                            <p className={`text-2xl font-bold ${getLevelColor(touristData[0].level)}`}>
+                              Level {touristData[0].level || 1}
+                            </p>
+                            <p className="text-sm text-muted-foreground">Explorer Status</p>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {/* Badge Display */}
+                    <div className="bg-background/50 rounded-2xl p-6">
+                      <label className="text-sm text-muted-foreground block mb-3">Badge Status</label>
+                      <div className="flex items-center gap-4">
+                        {getBadgeIcon(touristData[0].badge)}
+                        <div>
+                          <p className="text-xl font-semibold">{touristData[0].badge || 'Bronze'}</p>
+                          <p className="text-sm text-muted-foreground">Current Rank</p>
+                        </div>
+                      </div>
+                    </div>
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Nationality</label>
-                <input
-                  type="text"
-                  name="nationality"
-                  value={editFormData.nationality}
-                  onChange={handleEditChange}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  required
-                />
+                    {touristData[0].loyaltyPoints >= 10000 && (
+                      <button 
+                        onClick={handleRedeemPoints}
+                        disabled={isRedeeming}
+                        className="w-full bg-primary text-primary-foreground hover:bg-primary/90 py-4 px-6 rounded-xl font-medium text-lg transition-all hover:scale-105 disabled:hover:scale-100 disabled:opacity-50 mt-4 flex items-center justify-center gap-2"
+                      >
+                        <Sparkles className="h-5 w-5" />
+                        {isRedeeming ? 'Redeeming Points...' : 'Redeem Points'}
+                      </button>
+                    )}
+                  </div>
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Job</label>
-                <input
-                  type="text"
-                  name="job"
-                  value={editFormData.job}
-                  onChange={handleEditChange}
-                  className="w-full rounded-lg border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
-                  required
-                />
-              </div>
-
-              <div className="flex justify-end gap-2 mt-6">
-                <button
-                  type="button"
-                  onClick={() => setShowEditModal(false)}
-                  className="px-4 py-2 border border-input rounded-lg text-sm font-medium hover:bg-accent"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-medium hover:bg-primary/90"
-                >
-                  Save Changes
-                </button>
-              </div>
-            </form>
+            </div>
           </div>
+
+          {/* Edit Modal */}
+          {showEditModal && (
+            <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50">
+              <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-xl rounded-2xl bg-card p-8 shadow-xl border border-border">
+                <h3 className="text-2xl font-semibold mb-8">Edit Profile Information</h3>
+                <form onSubmit={handleEditSubmit} className="space-y-6">
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-muted-foreground">Date of Birth</label>
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={editFormData.dateOfBirth}
+                      onChange={handleEditChange}
+                      className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-muted-foreground">Mobile Number</label>
+                    <input
+                      type="text"
+                      name="mobileNumber"
+                      value={editFormData.mobileNumber}
+                      onChange={handleEditChange}
+                      className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-muted-foreground">Nationality</label>
+                    <input
+                      type="text"
+                      name="nationality"
+                      value={editFormData.nationality}
+                      onChange={handleEditChange}
+                      className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      required
+                    />
+                  </div>
+
+                  <div className="space-y-3">
+                    <label className="text-sm font-medium text-muted-foreground">Job</label>
+                    <input
+                      type="text"
+                      name="job"
+                      value={editFormData.job}
+                      onChange={handleEditChange}
+                      className="w-full rounded-xl border border-input bg-background px-4 py-3 text-base ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring"
+                      required
+                    />
+                  </div>
+
+                  <div className="flex justify-end gap-4 mt-10">
+                    <button
+                      type="button"
+                      onClick={() => setShowEditModal(false)}
+                      className="px-6 py-3 border border-input rounded-xl text-base font-medium hover:bg-accent transition-all hover:scale-105"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      className="px-6 py-3 bg-primary text-primary-foreground rounded-xl text-base font-medium hover:bg-primary/90 transition-all hover:scale-105"
+                    >
+                      Save Changes
+                    </button>
+                  </div>
+                </form>
+              </div>
+            </div>
+          )}
         </div>
-      )}
+      </main>
     </div>
   );
 };
