@@ -9,11 +9,12 @@ import {
   useElements,
 } from '@stripe/react-stripe-js';
 import '../styles/checkout.css';
-import { ShoppingCart, CreditCard, MapPin, ArrowLeft } from 'lucide-react';
+import { ShoppingCart, CreditCard, MapPin, ArrowLeft, Plus, Check, Trash2, Wallet }  from 'lucide-react';
 import Navigation from '../components/Navigation';
 import Footer from '../components/Footer';
 import { useCurrency, currencies } from '../context/CurrencyContext';
-
+import { Button } from "./ui/button";
+import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 const stripePromise = loadStripe('pk_test_51QP7WoG4UGkAwtrqHrV9BgIvG1T8ZNjqOpbKq9W8kD4xwUcmNCegaX0jOnKzU1JNckplg9MIomiIhdGEt3e1FFHn007MSX3aFl');
 
 const StripePaymentForm = ({ onPaymentSuccess, total, selectedAddress }) => {
@@ -135,17 +136,10 @@ const CheckoutPage = () => {
 
   const { currency } = useCurrency();
     
-  const convertPrice = (price, reverse = false) => {
-    if (!price) return 0;
-    const numericPrice = typeof price === 'string' ? 
-      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
-      parseFloat(price);
-      
-    if (reverse) {
-      return numericPrice / currencies[currency].rate;
-    }
-    const convertedPrice = numericPrice * currencies[currency].rate;
-    return convertedPrice.toFixed(2);
+  const convertPrice = (priceInEGP) => {
+    if (!priceInEGP) return 0;
+    const price = typeof priceInEGP === 'string' ? parseFloat(priceInEGP) : priceInEGP;
+    return Math.round(price * currencies[currency].rate);
   };
 
   useEffect(() => {
@@ -413,178 +407,294 @@ const CheckoutPage = () => {
     }
   };
 
-  return (
-    <div className="min-h-screen flex flex-col">
+   return (
+    <div className="min-h-screen bg-background">
       <Navigation />
       
-      <main className="flex-1 py-16">
-        <div className="checkout-container">
-          {/* Back button styled consistently with other pages */}
-          <button 
-            onClick={() => navigate('/tourist/cart')}
-            className="flex items-center gap-2 text-primary hover:text-primary/80 mb-8"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            Back to Cart
-          </button>
-
-          <h1 className="text-3xl font-bold text-foreground mb-8">Checkout</h1>
-
-          <div className="order-summary">
-            <div className="p-4 border-b border-border">
-              <h2 className="text-lg font-semibold flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
-                Order Summary
-              </h2>
-            </div>
-            <table className="checkout-table">
-              <thead>
-                <tr>
-                  <th>Product</th>
-                  <th>Price</th>
-                  <th>Quantity</th>
-                  <th>Subtotal</th>
-                </tr>
-              </thead>
-              <tbody>
-                {cartItems.map(item => (
-                  <tr key={item._id}>
-                    <td>
-                      <div className="product-info">
-                        <img src={item.imageUrl} alt={item.name} />
-                        <span>{item.name}</span>
-                      </div>
-                    </td>
-                    <td>{currencies[currency].symbol}{convertPrice(item.price)}</td>
-                    <td>{item.quantity}</td>
-                    <td>{currencies[currency].symbol}{convertPrice((item.price * item.quantity))}</td>
-                  </tr>
-                ))}
-              </tbody>
-              <tfoot>
-                <tr>
-                  <td colSpan="3"><strong>Total</strong></td>
-                  <td><strong>{currencies[currency].symbol}{convertPrice(total)}</strong></td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
-
-          <div className="address-section">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <MapPin className="h-5 w-5" />
-              Delivery Address
-            </h2>
-            {addresses.length === 0 ? (
-              <p>No addresses found. Please add an address.</p>
-            ) : (
-              <div className="address-list">
-                {addresses.map((address, index) => (
-                  <div 
-                    key={index} 
-                    className={`address-card ${selectedAddress === index ? 'selected' : ''}`}
-                    onClick={() => setSelectedAddress(index)}
-                  >
-                    <p>{address.street}</p>
-                    <p>{address.city}, {address.state}</p>
-                    <p>{address.country}, {address.postalCode}</p>
-                  </div>
-                ))}
-              </div>
-            )}
+      <main className="pt-16 px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto">
+          {/* Header Section */}
+          <div className="flex items-center gap-4 mb-8">
             <button 
-              className="add-address-btn"
-              onClick={() => setShowAddModal(true)}
+              onClick={() => navigate(-1)} 
+              className="p-2 hover:bg-accent/10 rounded-full transition-colors"
             >
-              Add New Address
+              <ArrowLeft className="h-5 w-5" />
             </button>
+            <h1 className="text-3xl font-bold">Checkout</h1>
           </div>
 
-          {showAddModal && (
-            <div className="modal">
-              <div className="modal-content">
-                <h3>Add New Address</h3>
-                <input
-                  value={newAddress.street}
-                  onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
-                  placeholder="Street"
-                />
-                <input
-                  value={newAddress.city}
-                  onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
-                  placeholder="City"
-                />
-                <input
-                  value={newAddress.state}
-                  onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
-                  placeholder="State"
-                />
-                <input
-                  value={newAddress.country}
-                  onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
-                  placeholder="Country"
-                />
-                <input
-                  value={newAddress.postalCode}
-                  onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
-                  placeholder="Postal Code"
-                />
-                <label>
-                  <input
-                    type="checkbox"
-                    checked={newAddress.isDefault}
-                    onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
-                  />
-                  Set as default
-                </label>
-                <div className="modal-actions">
-                  <button onClick={handleAddAddress}>Add</button>
-                  <button onClick={() => setShowAddModal(false)}>Cancel</button>
+          {loading ? (
+            <div className="flex items-center justify-center h-64">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            </div>
+          ) : error ? (
+            <div className="bg-destructive/10 text-destructive p-4 rounded-lg">
+              {error}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+              {/* Cart Items Section */}
+              <div className="lg:col-span-2 space-y-6">
+                <div className="bg-card rounded-lg p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <ShoppingCart className="h-5 w-5" />
+                    Cart Items ({cartItems.length})
+                  </h2>
+                  {cartItems.length === 0 ? (
+                    <div className="text-center py-8 text-muted-foreground">
+                      Your cart is empty
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {cartItems.map((item) => (
+                        <div key={item._id} className="flex items-center gap-4 p-4 bg-accent/5 rounded-lg">
+                          <img 
+                            src={item.imageUrl || item.image} 
+                            alt={item.name}
+                            onError={(e) => {
+                              e.target.onerror = null;
+                              e.target.src = '/placeholder-image.jpg';
+                            }}
+                            className="w-24 h-24 object-cover rounded-md"
+                          />
+                          <div className="flex-1">
+                            <h3 className="font-medium">{item.name}</h3>
+                            <p className="text-sm text-muted-foreground">Quantity: {item.quantity}</p>
+                            <p className="text-primary font-medium">{currencies[currency].symbol}{convertPrice(item.price * item.quantity).toFixed(2)}</p>
+                          </div> 
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+
+                {/* Address Section */}
+                <div className="bg-card rounded-lg p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <MapPin className="h-5 w-5" />
+                    Delivery Address
+                  </h2>
+                  <div className="space-y-4">
+                    {addresses.length === 0 ? (
+                      <div className="text-center py-4 text-muted-foreground">
+                        No addresses found
+                      </div>
+                    ) : (
+                      addresses.map((address, index) => (
+                        <div 
+                          key={index}
+                          onClick={() => setSelectedAddress(index)}
+                          className={`p-4 rounded-lg cursor-pointer transition-all ${
+                            selectedAddress === index 
+                              ? 'bg-primary/10 ring-2 ring-primary shadow-sm' 
+                              : 'bg-background border border-border hover:border-primary/50'
+                          }`}
+                          role="button"
+                          tabIndex={0}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter' || e.key === ' ') {
+                              setSelectedAddress(index);
+                            }
+                          }}
+                          aria-selected={selectedAddress === index}
+                        >
+                          <div className="flex items-start">
+                            <div>
+                              <p className="font-medium">{address.street}</p>
+                              <p className="text-sm text-muted-foreground">
+                                {address.city}, {address.state} {address.postalCode}
+                              </p>
+                              <p className="text-sm text-muted-foreground">{address.country}</p>
+                              {address.isDefault && (
+                                <span className="inline-block mt-1 text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">
+                                  Default Address
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      ))
+                    )}
+                    <Button
+                      onClick={() => setShowAddModal(true)}
+                      variant="outline"
+                      className="w-full"
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Add New Address
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Payment Method Section */}
+                <div className="bg-card rounded-lg p-6 shadow-sm">
+                  <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
+                    <CreditCard className="h-5 w-5" />
+                    Payment Method
+                  </h2>
+                  <div className="space-y-4">
+                    {['Cash on Delivery', 'Credit Card', 'Wallet'].map((method) => (
+                      <div 
+                        key={method}
+                        onClick={() => handlePaymentMethodChange(method)}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition-colors ${
+                          paymentMethod === method
+                            ? 'border-primary bg-primary/5'
+                            : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            {method === 'Cash on Delivery' && <MapPin className="h-5 w-5" />}
+                            {method === 'Credit Card' && <CreditCard className="h-5 w-5" />}
+                            {method === 'Wallet' && <Wallet className="h-5 w-5" />}
+                            <span>{method}</span>
+                          </div>
+                          {paymentMethod === method && (
+                            <Check className="h-5 w-5 text-primary" />
+                          )}
+                        </div>
+                        {method === 'Wallet' && (
+                          <div>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              Balance: {currencies[currency].symbol}{convertPrice(walletBalance).toFixed(2)}
+                            </p>
+                            {walletBalance < (total + (paymentMethod === 'Cash on Delivery' ? 40 : 0)) && (
+                              <p className="text-sm text-destructive mt-1">
+                                Insufficient balance
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Order Summary Section */}
+              <div className="lg:col-span-1">
+                <div className="bg-card rounded-lg p-6 shadow-sm sticky top-24">
+                  <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+                  <div className="space-y-4">
+                    <div className="flex justify-between text-sm">
+                    <span>{currencies[currency].symbol}{convertPrice(total).toFixed(2)}</span>
+                      <span>{currencies[currency].symbol}{convertPrice(total).toFixed(2)}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Delivery Fee</span>
+                      <span>{currencies[currency].symbol}{paymentMethod === 'Cash on Delivery' ? convertPrice(40).toFixed(2) : '0.00'}</span>
+                    </div>
+                    <div className="border-t pt-4">
+                      <div className="flex justify-between font-medium">
+                        <span>Total</span>
+                        <span className="text-primary">
+                          {currencies[currency].symbol}
+                          {(convertPrice(total + (paymentMethod === 'Cash on Delivery' ? 40 : 0))).toFixed(2)}
+                        </span>
+                      </div>
+                    </div>
+                    <Button
+                      onClick={handlePlaceOrder}
+                      disabled={processing || cartItems.length === 0 || 
+                        (paymentMethod === 'Wallet' && walletBalance < total)}
+                      className="w-full"
+                    >
+                      {processing ? 'Processing...' : 'Place Order'}
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
           )}
-
-          <div className="payment-section">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
-              <CreditCard className="h-5 w-5" />
-              Payment Method
-            </h2>
-            <select 
-              value={paymentMethod} 
-              onChange={(e) => setPaymentMethod(e.target.value)}
-            >
-              <option value="Cash on Delivery">Cash on Delivery</option>
-              <option value="Credit Card">Credit Card</option>
-              <option value="Wallet">Wallet</option>
-            </select>
-
-            {paymentMethod === 'Credit Card' && (
-              <div className="stripe-payment-container">
-                <Elements stripe={stripePromise}>
-                  <StripePaymentForm
-                    onPaymentSuccess={handlePaymentSuccess}
-                    total={total}
-                    selectedAddress={selectedAddress}
-                  />
-                </Elements>
-              </div>
-            )}
-          </div>
-
-          {paymentMethod !== 'Credit Card' && (
-            <div className="checkout-actions">
-              <button 
-                onClick={paymentMethod === 'Wallet' ? handleWalletPayment : handleCashOrder}
-                disabled={!selectedAddress || cartItems.length === 0}
-                className="w-full py-3 rounded-lg bg-primary text-primary-foreground hover:bg-primary/90 font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {paymentMethod === 'Wallet' ? 'Pay with Wallet' : 'Place Order'}
-              </button>
-            </div>
-          )}
         </div>
       </main>
+
+      {/* Add Address Modal */}
+      <Sheet open={showAddModal} onOpenChange={setShowAddModal}>
+        <SheetContent>
+          <h2 className="text-xl font-semibold mb-4">Add New Address</h2>
+          <form onSubmit={handleAddAddress} className="space-y-4">
+            <input
+              value={newAddress.street}
+              onChange={(e) => setNewAddress({...newAddress, street: e.target.value})}
+              placeholder="Street"
+              className="w-full p-2 rounded-lg border border-border bg-background"
+              required
+            />
+            <input
+              value={newAddress.city}
+              onChange={(e) => setNewAddress({...newAddress, city: e.target.value})}
+              placeholder="City"
+              className="w-full p-2 rounded-lg border border-border bg-background"
+              required
+            />
+            <input
+              value={newAddress.state}
+              onChange={(e) => setNewAddress({...newAddress, state: e.target.value})}
+              placeholder="State"
+              className="w-full p-2 rounded-lg border border-border bg-background"
+              required
+            />
+            <input
+              value={newAddress.country}
+              onChange={(e) => setNewAddress({...newAddress, country: e.target.value})}
+              placeholder="Country"
+              className="w-full p-2 rounded-lg border border-border bg-background"
+              required
+            />
+            <input
+              value={newAddress.postalCode}
+              onChange={(e) => setNewAddress({...newAddress, postalCode: e.target.value})}
+              placeholder="Postal Code"
+              className="w-full p-2 rounded-lg border border-border bg-background"
+              required
+            />
+            <label className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={newAddress.isDefault}
+                onChange={(e) => setNewAddress({...newAddress, isDefault: e.target.checked})}
+                className="rounded border-border"
+              />
+              <span>Set as default address</span>
+            </label>
+            <div className="flex justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => setShowAddModal(false)}
+                disabled={processing}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={processing}
+              >
+                {processing ? 'Adding...' : 'Add Address'}
+              </Button>
+            </div>
+          </form>
+        </SheetContent>
+      </Sheet>
+
+          {/* Stripe Payment Modal */}
+      {showStripePayment && (
+        <Sheet open={showStripePayment} onOpenChange={setShowStripePayment}>
+          <SheetContent>
+            <h2 className="text-xl font-semibold mb-4">Credit Card Payment</h2>
+            <Elements stripe={stripePromise}>
+              <StripePaymentForm
+                onPaymentSuccess={handlePaymentSuccess}
+                total={total}
+                selectedAddress={addresses[selectedAddress]}
+              />
+            </Elements>
+          </SheetContent>
+        </Sheet>
+      )}
 
       <Footer />
     </div>

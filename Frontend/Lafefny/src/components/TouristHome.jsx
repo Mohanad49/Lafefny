@@ -88,7 +88,11 @@ const TouristHome = () => {
     const walletInUSD = wallet / conversionRates.EGP;
     return (walletInUSD * conversionRates[currency]).toFixed(2);
   };
-
+  const convertPrice = (priceInEGP) => {
+    if (!priceInEGP) return 0;
+    const price = typeof priceInEGP === 'string' ? parseFloat(priceInEGP) : priceInEGP;
+    return Math.round(price * currencies[currency].rate);
+  };
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation />
@@ -138,7 +142,7 @@ const TouristHome = () => {
                   <div>
                     <p className="text-sm font-medium text-slate-500">Wallet Balance</p>
                     <p className="text-lg font-semibold text-primary">
-                      {currencies[currency].symbol} {convertWalletBalance(profile.wallet)}
+                    {currencies[currency].symbol}{convertPrice(profile.wallet).toFixed(2)}
                     </p>
                   </div>
                 </div>
