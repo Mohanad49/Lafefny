@@ -1,41 +1,54 @@
+.home {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-  .home {
-    padding: 20px;
-  }
-  
-  .header {
-    position: relative;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
-  .notification-container {
-    position: absolute;
-    top: 0;
-    right: 0;
-  }
-  
-  .navigation section {
-    margin-bottom: 30px;
-  }
-  
-  .link-group {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-  }
-  
-  .link-group a {
-    text-decoration: none;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 4px;
-    transition: background-color 0.2s;
-  }
-  
-  .link-group a:hover {
-    background-color: blue;
-  }
-  
+.header {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+}
+
+.header h1 {
+  font-size: 2em;
+  margin: 0;
+}
+
+.notification-container {
+  position: relative;
+  top: 0;
+  right: 0;
+}
+
+.navigation {
+  margin-top: 20px;
+}
+
+.navigation section {
+  margin-bottom: 20px;
+}
+
+.navigation h2 {
+  font-size: 1.5em;
+  margin-bottom: 10px;
+}
+
+.link-group {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.link-group a {
+  text-decoration: none;
+  color: #007bff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  transition: background-color 0.2s;
+}
+
+.link-group a:hover {
+  text-decoration: underline;
+}
