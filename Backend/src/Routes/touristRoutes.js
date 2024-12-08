@@ -182,6 +182,14 @@ router.get("/touristHistory/:userID", async (req, res) => {
 
     // Get all itineraries
     const itineraries = await Itinerary.find();
+    
+    // Get all tour guides and users for efficient lookup
+    const tourGuides = await TourGuide.find();
+    const users = await User.find({ role: 'TourGuide' });
+
+    // Create lookup maps for efficient access
+    const tourGuideMap = new Map(tourGuides.map(guide => [guide.userID, guide]));
+    const userMap = new Map(users.map(user => [user._id.toString(), user]));
    
     // Filter itineraries manually
     const pastItineraries = itineraries.filter(itinerary => {
@@ -198,28 +206,33 @@ router.get("/touristHistory/:userID", async (req, res) => {
       // Sort by the user's specific booking date
       const aBooking = a.touristBookings?.find(booking => booking.tourist.toString() === userID);
       const bBooking = b.touristBookings?.find(booking => booking.tourist.toString() === userID);
+      
       return new Date(bBooking?.bookedDate || 0) - new Date(aBooking?.bookedDate || 0);
     });
 
-    
-
     // Format itineraries data
-    const formattedItineraries = pastItineraries.map(itinerary => ({
-      _id: itinerary._id,
-      name: itinerary.name,
-      locations: itinerary.locations,
-      startDate: itinerary.startDate,
-      endDate: itinerary.endDate,
-      price: itinerary.price,
-      tourGuideName: itinerary.tourGuideName,
-      activities: itinerary.activities,
-      ratings: itinerary.ratings,
-      image: itinerary.image,
-      language: itinerary.language,
-      duration: itinerary.duration,
-      description: itinerary.description,
-      paidBy: itinerary.paidBy
-    }));
+    const formattedItineraries = pastItineraries.map(itinerary => {
+      const tourGuide = tourGuideMap.get(itinerary.tourGuide.toString());
+      const user = tourGuide ? userMap.get(tourGuide.userID) : null;
+
+      return {
+        _id: itinerary._id,
+        name: itinerary.name,
+        locations: itinerary.locations,
+        startDate: itinerary.startDate,
+        endDate: itinerary.endDate,
+        price: itinerary.price,
+        tourGuideName: user?.username || 'Unknown Guide',
+        tourGuideId: tourGuide?._id?.toString(),
+        activities: itinerary.activities,
+        ratings: itinerary.ratings,
+        image: itinerary.image,
+        language: itinerary.language,
+        duration: itinerary.duration,
+        description: itinerary.description,
+        paidBy: itinerary.paidBy
+      };
+    });
 
     res.json({
       pastActivities,
@@ -294,7 +307,7 @@ router.post("/itineraries/:itineraryId/reviews", async (req, res) => {
     const { itineraryId } = req.params;
     const review = req.body;
       
-    const itinerary = await TouristItinerary.findById(itineraryId);
+    const itinerary = await Itinerary.findById(itineraryId);
     if (!itinerary) {
       return res.status(404).json({ message: 'Itinerary not found' });
     }
@@ -315,19 +328,13 @@ router.post("/itineraries/:itineraryId/reviews", async (req, res) => {
 });
 
 // Update the tour guide review endpoint
-router.post("/tour-guides/:tourGuideName/reviews", async (req, res) => {
+router.post("/tour-guides/:tourGuideId/reviews", async (req, res) => {
   try {
-    const { tourGuideName } = req.params;
+    const { tourGuideId } = req.params;
     const review = req.body;
       
-    // First find the user with the given username
-    const user = await User.findOne({ username: tourGuideName });
-    if (!user) {
-      return res.status(404).json({ message: 'Tour Guide not found' });
-    }
-
-    // Then find the tour guide document using the user's ID
-    const tourGuide = await TourGuide.findOne({ userID: user._id });
+    // Find the tour guide document using the tour guide's ID
+    const tourGuide = await TourGuide.findById(tourGuideId);
     if (!tourGuide) {
       return res.status(404).json({ message: 'Tour Guide profile not found' });
     }

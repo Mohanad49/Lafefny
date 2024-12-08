@@ -17,6 +17,6 @@ export const addItineraryReview = (itineraryId, review) => {
 };
 
 // Submit a review for a tour guide
-export const addTourGuideReview = (tourGuideName, review) => {
-  return axios.post(`${API_URL}/tourist/tour-guides/${tourGuideName}/reviews`, review);
+export const addTourGuideReview = (tourGuideId, review) => {
+  return axios.post(`${API_URL}/tourist/tour-guides/${tourGuideId}/reviews`, review);
 };
