@@ -35,6 +35,24 @@ const TouristProductList = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const fetchTouristName = async () => {
+      const userID = localStorage.getItem('userID');
+      if (!userID) return;
+      
+      try {
+        const response = await axios.get(`http://localhost:8000/users/${userID}`);
+        if (response.data.tourist && response.data.tourist.name) {
+          setTouristName(response.data.tourist.name);
+        }
+      } catch (error) {
+        console.error('Error fetching tourist name:', error);
+      }
+    };
+
+    fetchTouristName();
+  }, []);
+
+  useEffect(() => {
     const fetchProducts = async () => {
       try {
         const response = await axios.get('http://localhost:8000/products');
@@ -179,35 +197,35 @@ const TouristProductList = () => {
       });
       return;
     }
-
-    const userID = localStorage.getItem('userID');
-    try {
-      const response = await axios.post('http://localhost:8000/check-product-purchase', {
-        userID,
-        productId: product._id
-      });
-
-      if (!response.data.hasPurchased) {
-        toast({
-          variant: "destructive",
-          title: "Review Restricted",
-          description: "You can only review products you have purchased"
-        });
-        return;
+    
+      const userID = localStorage.getItem('userID');
+      try {
+        const response = await axios.get(`http://localhost:8000/products/check-purchase/${userID}/${product._id}`);
+        
+    
+        if (!response.data.hasPurchased) {
+          toast({
+            variant: "destructive",
+            title: "Review Restricted",
+            description: "You can only review products you have purchased"
+          });
+          return;
+        }
+    
+        const userResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userID}`);
+        const touristName = userResponse.data[0]?.username;
+        
+    
+        setTouristName(touristName);
+        setSelectedProduct(product);
+        setShowReviewModal(true);
+      } catch (error) {
+        console.error('Error checking product purchase:', error);
+        alert('Failed to verify purchase status');
       }
-
-      setTouristName(response.data.touristName);
-      setSelectedProduct(product);
-      setShowReviewModal(true);
-    } catch (error) {
-      console.error('Error checking product purchase:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to verify purchase status"
-      });
-    }
-  };
+    };
+  
+    
 
   const handleReviewSubmit = async (review) => {
     if (!selectedProduct) return;
@@ -481,7 +499,7 @@ const TouristProductList = () => {
               ×
             </button>
             <ReviewForm
-              productId={selectedProduct._id}
+              title={selectedProduct.name}
               touristName={touristName}
               onSubmit={handleReviewSubmit}
               onClose={() => setShowReviewModal(false)}
