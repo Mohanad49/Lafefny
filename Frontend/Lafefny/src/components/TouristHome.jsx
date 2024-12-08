@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   Plane, MapPin, Globe, Calendar, Settings, ShoppingBag,
-  User, Star, Wallet, History, Info, Key, Tag, MessageSquare,  CreditCard, Clock, Sparkles, Bookmark, Heart, ChevronRight 
+  User, Star, Wallet, History, Info, Key, Tag, MessageSquare,  CreditCard, Clock, Sparkles, Bookmark, Heart, ChevronRight, PlayCircle
 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -258,7 +258,8 @@ const TouristHome = () => {
                 { to: "/complaints", icon: MessageSquare, label: "Support" },
                 { to: "/manage-addresses", icon: MapPin, label: "Addresses" },
                 { to: `/touristHistory/${localStorage.getItem("userID")}`, icon: History, label: "History" },
-                { to: "/bookmarks", icon: Bookmark, label: "Bookmarks" }
+                { to: "/bookmarks", icon: Bookmark, label: "Bookmarks" },
+                { to: "/tutorial", icon: PlayCircle, label: "Tutorial" }
               ].map((item, index) => (
                 <Link
                   key={index}
