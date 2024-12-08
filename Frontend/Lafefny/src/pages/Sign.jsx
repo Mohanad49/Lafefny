@@ -5,8 +5,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Plane, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import { useToast } from "@/components/ui/use-toast";
 
 function Sign() {
+  const { toast } = useToast();
   const { login } = useAuth();
   const [isSignUp, setIsSignUp] = useState(false);
   const [userType, setUserType] = useState('Tourist');
@@ -70,7 +72,11 @@ function Sign() {
     try {
       if (isSignUp) {
         if (!formData.termsAccepted) {
-          alert("You must accept the terms and conditions to sign up.");
+          toast({
+            variant: "destructive",
+            title: "Terms & Conditions Required",
+            description: "You must accept the terms and conditions to sign up."
+          });
           return;
         }
 
@@ -143,10 +149,16 @@ function Sign() {
             );
           }
           if (userType === 'Tourist'){
-            alert ('Sign up successful!');
+            toast({
+              title: "Success",
+              description: "Sign up successful!"
+            });
           }
           else{
-            alert('Sign up successful! Please wait for admin approval before signing in.');
+            toast({
+              title: "Success",
+              description: "Sign up successful! Please wait for admin approval before signing in."
+            });
           }
           setIsSignUp(false);
 
@@ -154,7 +166,11 @@ function Sign() {
           console.error('Error creating role profile:', error);
           // Delete the user if role profile creation fails
           await axios.delete(`http://localhost:8000/admin/delete-account/${userId}`);
-          alert('Error creating profile. Please try again.');
+          toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Error creating profile. Please try again."
+          });
         }
 
       } else {
@@ -185,19 +201,35 @@ function Sign() {
               navigate('/TourismGovernorHome');
               break;
             default:
-              alert('Invalid role detected');
+              toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Invalid role detected"
+              });
           }
         } catch (error) {
           if (error.response?.status === 403) {
-            alert('Your account is pending approval. Please wait for admin confirmation.');
+            toast({
+              variant: "destructive",
+              title: "Account Pending",
+              description: "Your account is pending approval. Please wait for admin confirmation."
+            });
           } else {
-            alert('Invalid credentials. Please try again.');
+            toast({
+              variant: "destructive",
+              title: "Authentication Failed",
+              description: "Invalid credentials. Please try again."
+            });
           }
         }
       }
     } catch (error) {
       console.error('Authentication error:', error);
-      alert(error.message || 'An error occurred during authentication');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "An error occurred during authentication"
+      });
     }
   };
 
@@ -449,7 +481,7 @@ function Sign() {
                 onClick={toggleTermsModal}
                 className="text-gray-500 hover:text-gray-700"
               >
-                ✕
+                &#10006;
               </button>
             </div>
             <div className="prose prose-sm">

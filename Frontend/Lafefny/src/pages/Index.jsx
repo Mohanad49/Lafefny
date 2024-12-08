@@ -130,6 +130,23 @@ const Index = () => {
             </div>
           </div>
         </section>
+        
+        <section className="py-24 px-6 lg:px-8 bg-surface">
+  <div className="mx-auto max-w-3xl">
+    <h2 className="text-3xl font-bold text-center mb-16">How to Plan Your Trip</h2>
+    <div className="max-w-5xl mx-auto rounded-xl overflow-hidden shadow-lg">
+      <iframe 
+        src="https://scribehow.com/embed/How_To_Plan_Your_Trip_Online__eOAz1fPdSkGUmwW2d_6Feg?skipIntro=true&as=video" 
+        width="100%" 
+        height="640" 
+        allowFullScreen 
+        frameBorder="0"
+        className="w-full aspect-video"
+      />
+    </div>
+  </div>
+</section>
+
 
         {/* CTA Section */}
         <section className="py-24 bg-primary text-white px-6 lg:px-8">

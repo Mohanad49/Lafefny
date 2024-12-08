@@ -2,31 +2,41 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getMuseumById, updateMuseum } from '../services/museumService';
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowLeft, Building2, MapPin, Clock, Tag, Image, Ticket } from 'lucide-react';
+import { useToast } from "@/components/ui/use-toast";
+import Navigation from './Navigation';
 
 const EditMuseum = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const [museum, setMuseum] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchMuseum = async () => {
       try {
         setLoading(true);
         const response = await getMuseumById(id);
-        console.log('Fetched museum data:', response); // For debugging
-        setMuseum(response.data); // Set museum to response.data
+        setMuseum(response.data);
         setLoading(false);
       } catch (err) {
         console.error('Error fetching museum:', err);
-        setError('Failed to fetch museum data');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to fetch museum data"
+        });
         setLoading(false);
       }
     };
 
     fetchMuseum();
-  }, [id]);
+  }, [id, toast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -39,12 +49,6 @@ const EditMuseum = () => {
           [priceType]: parseFloat(value)
         }
       }));
-    } else if (name === 'tags') {
-      const tagsArray = value.split(',').map(tag => tag.trim());
-      setMuseum(prevState => ({
-        ...prevState,
-        tags: tagsArray
-      }));
     } else {
       setMuseum(prevState => ({
         ...prevState,
@@ -54,140 +58,210 @@ const EditMuseum = () => {
   };
 
   const handlePicturesChange = (e) => {
-    const picturesArray = e.target.value.split(',').map(url => url.trim());
-    setMuseum(prevState => ({
-      ...prevState,
-      pictures: picturesArray
-    }));
+    const pictures = e.target.value.split(',').map(url => url.trim());
+    setMuseum(prev => ({ ...prev, pictures }));
+  };
+
+  const handleTagsChange = (e) => {
+    const tags = e.target.value.split(',').map(tag => tag.trim());
+    setMuseum(prev => ({ ...prev, tags }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       await updateMuseum(id, museum);
-      alert('Museum updated successfully');
-      navigate('/museums');
+      toast({
+        title: "Success",
+        description: "Museum updated successfully"
+      });
+      navigate('/manage-museums');
     } catch (error) {
-      console.error('Error updating Museum:', error);
-      alert('Failed to update museum');
+      console.error('Error updating museum:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: error.message || "Failed to update museum"
+      });
     }
   };
 
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <main className="container mx-auto px-4 py-8">
+          <div className="text-center">Loading museum data...</div>
+        </main>
+      </div>
+    );
+  }
+
   if (!museum) return null;
 
   return (
-    <form onSubmit={handleSubmit}>
-      <h2>Edit Museum</h2>
-      <div>
-        <label htmlFor="name">Museum Name:</label>
-        <input
-          type="text"
-          id="name"
-          name="name"
-          value={museum.name || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      
+      <main className="container mx-auto px-4 py-8">
+        <Button 
+          variant="ghost" 
+          className="mb-6 hover:bg-transparent"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft className="h-5 w-5 mr-2" />
+          Back
+        </Button>
 
-      <div>
-        <label htmlFor="description">Description:</label>
-        <textarea
-          id="description"
-          name="description"
-          value={museum.description || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+        <Card>
+          <CardHeader>
+            <CardTitle className="text-2xl flex items-center gap-2">
+              <Building2 className="h-6 w-6" />
+              Edit Museum
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <form onSubmit={handleSubmit} className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Museum Name</label>
+                  <Input
+                    type="text"
+                    name="name"
+                    placeholder="Enter museum name"
+                    value={museum.name}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-      <div>
-        <label htmlFor="pictures">Pictures (comma-separated URLs):</label>
-        <input
-          type="text"
-          id="pictures"
-          name="pictures"
-          value={museum.pictures ? museum.pictures.join(', ') : ''}
-          onChange={handlePicturesChange}
-        />
-      </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 block">Description</label>
+                  <Textarea
+                    name="description"
+                    placeholder="Enter museum description"
+                    value={museum.description}
+                    onChange={handleChange}
+                    required
+                    className="min-h-[100px]"
+                  />
+                </div>
 
-      <div>
-        <label htmlFor="location">Location:</label>
-        <input
-          type="text"
-          id="location"
-          name="location"
-          value={museum.location || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Image className="h-4 w-4" />
+                    Picture URLs
+                  </label>
+                  <Input
+                    type="text"
+                    name="pictures"
+                    placeholder="Enter comma-separated picture URLs"
+                    value={museum.pictures.join(', ')}
+                    onChange={handlePicturesChange}
+                  />
+                </div>
 
-      <div>
-        <label htmlFor="openingHours">Opening Hours:</label>
-        <input
-          type="text"
-          id="openingHours"
-          name="openingHours"
-          value={museum.openingHours || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <MapPin className="h-4 w-4" />
+                    Location
+                  </label>
+                  <Input
+                    type="text"
+                    name="location"
+                    placeholder="Enter museum location"
+                    value={museum.location}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-      <div>
-        <label htmlFor="ticketPrices.foreigner">Ticket Price (Foreigner):</label>
-        <input
-          type="number"
-          id="ticketPrices.foreigner"
-          name="ticketPrices.foreigner"
-          value={museum.ticketPrices?.foreigner || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Clock className="h-4 w-4" />
+                    Opening Hours
+                  </label>
+                  <Input
+                    type="text"
+                    name="openingHours"
+                    placeholder="Enter opening hours"
+                    value={museum.openingHours}
+                    onChange={handleChange}
+                    required
+                  />
+                </div>
 
-      <div>
-        <label htmlFor="ticketPrices.native">Ticket Price (Native):</label>
-        <input
-          type="number"
-          id="ticketPrices.native"
-          name="ticketPrices.native"
-          value={museum.ticketPrices?.native || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div>
+                    <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <Ticket className="h-4 w-4" />
+                      Foreigner Ticket Price
+                    </label>
+                    <Input
+                      type="number"
+                      name="ticketPrices.foreigner"
+                      placeholder="Enter price"
+                      value={museum.ticketPrices.foreigner}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <Ticket className="h-4 w-4" />
+                      Native Ticket Price
+                    </label>
+                    <Input
+                      type="number"
+                      name="ticketPrices.native"
+                      placeholder="Enter price"
+                      value={museum.ticketPrices.native}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                      <Ticket className="h-4 w-4" />
+                      Student Ticket Price
+                    </label>
+                    <Input
+                      type="number"
+                      name="ticketPrices.student"
+                      placeholder="Enter price"
+                      value={museum.ticketPrices.student}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
 
-      <div>
-        <label htmlFor="ticketPrices.student">Ticket Price (Student):</label>
-        <input
-          type="number"
-          id="ticketPrices.student"
-          name="ticketPrices.student"
-          value={museum.ticketPrices?.student || ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
+                <div>
+                  <label className="text-sm font-medium mb-2 flex items-center gap-2">
+                    <Tag className="h-4 w-4" />
+                    Tags
+                  </label>
+                  <Input
+                    type="text"
+                    name="tags"
+                    placeholder="Enter comma-separated tags"
+                    value={museum.tags.join(', ')}
+                    onChange={handleTagsChange}
+                    required
+                  />
+                </div>
+              </div>
 
-      <div>
-        <label htmlFor="tags">Tags (comma-separated):</label>
-        <input
-          type="text"
-          id="tags"
-          name="tags"
-          value={museum.tags ? museum.tags.join(', ') : ''}
-          onChange={handleChange}
-          required
-        />
-      </div>
-
-      <button type="submit">Update Museum</button>
-    </form>
+              <div className="flex justify-end">
+                <Button type="submit" size="lg">
+                  Update Museum
+                </Button>
+              </div>
+            </form>
+          </CardContent>
+        </Card>
+      </main>
+    </div>
   );
 };
 
