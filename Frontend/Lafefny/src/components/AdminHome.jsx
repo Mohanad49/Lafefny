@@ -157,8 +157,8 @@ const AdminHome = () => {
         {/* Settings Section */}
         <section className="px-6 lg:px-8 py-8 bg-gray-50">
           <div className="max-w-7xl mx-auto">
-            <h2 className="text-2xl font-bold mb-6">Admin Settings</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <h2 className="text-2xl font-bold mb-6 text-center">Admin Settings</h2>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-center place-items-center">
               <Link to="/changePassword" 
                 className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
                 <Key className="h-6 w-6 text-primary" />
@@ -177,11 +177,7 @@ const AdminHome = () => {
                 <span className="text-sm font-medium">Add Tag</span>
               </Link>
 
-              <Link to="/admin/profile"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Settings className="h-6 w-6 text-primary" />
-                <span className="text-sm font-medium">Profile</span>
-              </Link>
+              {/* Removed admin/profile link */}
             </div>
           </div>
         </section>
