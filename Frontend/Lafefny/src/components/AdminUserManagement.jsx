@@ -3,6 +3,7 @@ import { fetchUsers, deleteUser, acceptUser, rejectUser,
   viewAdvertiser_pdf, viewSeller_pdf, viewTourGuide_pdf } from '../services/adminService';
 import { useNavigate, Link } from 'react-router-dom';
 import { Users, ArrowLeft, Eye, XCircle, Check, X, FileText } from 'lucide-react';
+import Navigation from '../components/Navigation'; // Import the Navigation component
 
 function AdminUserManagement() {
   const [users, setUsers] = useState([]);
@@ -131,7 +132,8 @@ function AdminUserManagement() {
   }
 
   return (
-    <div className="min-h-screen bg-background px-4 py-8">
+    <div className="min-h-screen bg-background">
+      <Navigation />
       <div className="max-w-7xl mx-auto">
         <div className="mb-8 flex items-center justify-between">
           <div className="flex items-center gap-4">
