@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { getProducts, updateProductArchiveStatus } from '../services/productService';
 import { ArrowLeft, Search, Plus } from 'lucide-react';
+import Navigation from '../components/Navigation';
 
 const ProductList = () => {
   const [products, setProducts] = useState([]);
@@ -93,16 +94,17 @@ const ProductList = () => {
   }
 
   return (
-    <div className="min-h-screen bg-background p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
+    <div className="min-h-screen bg-background">
+      <Navigation />
+      <div className="container max-w-4xl mx-auto pt-24 pb-16 px-4">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary mb-8"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back
+        </button>
         <div className="flex justify-between items-center mb-6">
-          <button
-            onClick={() => navigate(-1)}
-            className="flex items-center text-gray-600 hover:text-gray-900"
-          >
-            <ArrowLeft className="h-5 w-5 mr-2" />
-            Back
-          </button>
           <h1 className="text-2xl font-bold">Products</h1>
           <Link
             to="/add-product"
