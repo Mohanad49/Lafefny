@@ -378,10 +378,12 @@ const Navigation = () => {
                 
                 {isProfileDropdownOpen && (
                   <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-border py-2 z-50">
-                    <Link to= {viewProfileRoute} className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                      <User className="h-4 w-4" />
-                      View Profile
-                    </Link>
+                    {(role !== 'Admin' && role !== 'TourismGovernor') && (
+                      <Link to={viewProfileRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <User className="h-5 w-5" />
+                        View Profile
+                      </Link>
+                    )}
                     
                     <Link to="/changePassword" className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                       <Lock className="h-4 w-4" />
@@ -485,8 +487,7 @@ const Navigation = () => {
                   </div>
                 )}
               </div>
-              
-              {isTourist && (
+　　 　 　 　 {isTourist && (
                 <Link 
                   to="/tourist/cart"
                   className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
