@@ -6,6 +6,7 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 import NotificationBell from './NotificationBell';
 import '../styles/homePage.css'; // Ensure this path is correct
+import SalesReport from './SalesReport';
 
 const TourGuideHome = () => {
   return (
@@ -72,7 +73,6 @@ const TourGuideHome = () => {
               {[
                 { to: "/Activities", icon: Activity, label: "View Activities" },
                 { to: "/tours", icon: Calendar, label: "View Itineraries" },
-                { to: "/guide-tourist-Itineraries", icon: MapPin, label: "View Tourist Itineraries" },
                 { to: "/add-itinerary", icon: Plus, label: "Add Itinerary" }
               ].map((item, index) => (
                 <Link
@@ -104,6 +104,19 @@ const TourGuideHome = () => {
                 <p className="text-slate-500">No upcoming activities</p>
               </div>
             </div>
+          </div>
+        </section>
+
+        {/* Sales Report Section */}
+        <section className="px-6 lg:px-8 py-12 bg-slate-50">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-primary">Sales Report</h2>
+              <Link to="/sales-report" className="text-sm font-medium text-primary hover:text-accent transition-colors">
+                View Detailed Report
+              </Link>
+            </div>
+            <SalesReport />
           </div>
         </section>
       </main>
