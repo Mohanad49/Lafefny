@@ -229,9 +229,9 @@ const TouristHome = () => {
             <h2 className="text-2xl font-bold text-primary mb-8">Plan Your Journey</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               {[
-                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
-                { to: "/touristAll-Itineraries", icon: Globe, label: "Browse Itineraries" },
-                { to: "/touristMuseums", icon: MapPin, label: "Museums & History" }
+                // { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                { to: "/Tours", icon: Globe, label: "Browse Itineraries" },
+                { to: "/HistoricalPlaces", icon: MapPin, label: "Museums & History" }
               ].map((item, index) => (
                 <Link
                   key={index}

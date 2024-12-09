@@ -239,7 +239,9 @@ const Activities = () => {
   
     // Category filter
     if (selectedCategory && selectedCategory !== 'all') {
-      filtered = filtered.filter(activity => activity.category === selectedCategory);
+      filtered = filtered.filter(activity => 
+        activity.tags?.some(tag => tag === selectedCategory)
+      );
     }
   
     // Rating filter
@@ -255,11 +257,13 @@ const Activities = () => {
     const maxPriceBase = convertPrice(priceRange[1], true);
     
     filtered = filtered.filter(activity => {
-      const price = typeof activity.price === 'string' 
+      const activityPrice = typeof activity.price === 'string' 
         ? parseFloat(activity.price.replace(/[^0-9.-]+/g, ""))
-        : activity.price;
-      return price >= minPriceBase && price <= maxPriceBase;
+        : parseFloat(activity.price) || 0;
+      
+      return activityPrice >= priceRange[0] && activityPrice <= priceRange[1];
     });
+  
   
     // Sorting
     if (sortBy !== 'default') {
@@ -413,6 +417,8 @@ const Activities = () => {
                   value={priceRange}
                   onValueChange={setPriceRange}
                   className="w-full"
+                  defaultValue={[0, maxPrice]}
+                  minStepsBetweenThumbs={1}
                 />
               </div>
             </div>
