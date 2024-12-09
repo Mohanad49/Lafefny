@@ -155,7 +155,7 @@ const Index = () => {
             <p className="text-white/80 mb-8 max-w-2xl mx-auto">
               Join thousands of travelers who have already discovered their dream destinations with us.
             </p>
-            <button className="px-8 py-4 bg-accent text-primary rounded-full font-semibold hover:bg-gradient-to-r from-[#9EE755] to-[#CFDD3C] hover:text-black transition-all">
+            <button onClick={()=>{navigate("/sign")}} className="px-8 py-4 bg-accent text-primary rounded-full font-semibold hover:bg-gradient-to-r from-[#9EE755] to-[#CFDD3C] hover:text-black transition-all">
               Start Planning
             </button>
           </div>

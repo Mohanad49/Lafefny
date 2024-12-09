@@ -1,11 +1,25 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ArrowLeft} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import Navigation from '../components/Navigation';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function ActivityReport() {
     const [activities, setActivities] = useState([]);
     const [loading, setLoading] = useState(true);
     const [selectedMonth, setSelectedMonth] = useState('');
     const [isFiltered, setIsFiltered] = useState(false);
+    const navigate = useNavigate();
 
     useEffect(() => {
         fetchActivities();
@@ -35,77 +49,86 @@ export default function ActivityReport() {
     };
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Activity Report</h1>
+        <div className="min-h-screen bg-background p-8">
+            <Navigation />
             
-            <div className="mb-4 flex gap-4">
-                <input
-                    type="month"
-                    value={selectedMonth}
-                    onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="border p-2 rounded"
-                />
-                <button
-                    onClick={() => setIsFiltered(true)}
-                    disabled={!selectedMonth}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-                >
-                    Filter by Month
-                </button>
-                {isFiltered && (
-                    <button
-                        onClick={() => {
-                            setIsFiltered(false);
-                            setSelectedMonth('');
-                        }}
-                        className="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded"
-                    >
-                        Clear Filter
-                    </button>
-                )}
-            </div>
-
-            {loading ? (
-                <div>Loading...</div>
-            ) : (
-                <div className="overflow-x-auto">
-                    <table className="min-w-full border-collapse border border-gray-300">
-                        <thead>
-                            <tr className="bg-gray-100">
-                                <th className="border p-2">Activity Name</th>
-                                <th className="border p-2">Date</th>
-                                <th className="border p-2">Time</th>
-                                <th className="border p-2">Location</th>
-                                <th className="border p-2">Price ($)</th>
-                                <th className="border p-2">Category</th>
-                                <th className="border p-2">Rating</th>
-                                <th className="border p-2">Number of Tourists</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {activities.map((activity) => (
-                                <tr key={activity._id}>
-                                    <td className="border p-2">{activity.name}</td>
-                                    <td className="border p-2">
-                                        {new Date(activity.date).toLocaleDateString()}
-                                    </td>
-                                    <td className="border p-2">{activity.time}</td>
-                                    <td className="border p-2">{activity.location}</td>
-                                    <td className="border p-2">{activity.price}</td>
-                                    <td className="border p-2">{activity.category}</td>
-                                    <td className="border p-2">{activity.ratings?.averageRating || 0}</td>
-                                    <td className="border p-2">
-                                        <span className="font-medium">
-                                            {getFilteredTouristCount(activity)} tourists
-                                            {isFiltered && ` in ${selectedMonth}`}
-                                        </span>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+            {/* Back button */}
+            <div className="max-w-7xl mx-auto">
+                <div className="flex items-center justify-between mb-8">
+                    <Button
+                        variant="ghost"
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 mt-9"
+                    > 
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </Button>
                 </div>
-            )}
+
+                {/* Title */}
+                <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-primary">Activity Report</h1>
+                </div>
+
+                {/* Filter Controls */}
+                <div className="flex justify-center gap-4 mb-8">
+                    <input
+                        type="month"
+                        value={selectedMonth}
+                        onChange={(e) => setSelectedMonth(e.target.value)}
+                        className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    />
+                    <button
+                        onClick={() => setIsFiltered(true)}
+                        disabled={!selectedMonth}
+                        className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Filter by Month
+                    </button>
+                    {isFiltered && (
+                        <button
+                            onClick={() => {
+                                setIsFiltered(false);
+                                setSelectedMonth('');
+                            }}
+                            className="bg-gray-500 text-white px-4 py-2 rounded-md hover:bg-gray-600"
+                        >
+                            Clear Filter
+                        </button>
+                    )}
+                </div>
+
+                {/* Table */}
+                <div className="bg-white rounded-lg shadow">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Activity Name</TableHead>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Time</TableHead>
+                                <TableHead>Location</TableHead>
+                                <TableHead>Price</TableHead>
+                                <TableHead>Number of Tourists</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {activities.map((activity) => (
+                                <TableRow key={activity._id}>
+                                    <TableCell className="font-medium">{activity.name}</TableCell>
+                                    <TableCell>{new Date(activity.date).toLocaleDateString()}</TableCell>
+                                    <TableCell>{activity.time}</TableCell>
+                                    <TableCell>{activity.location}</TableCell>
+                                    <TableCell>${activity.price}</TableCell>
+                                    <TableCell>
+                                        {getFilteredTouristCount(activity)} tourists
+                                        {isFiltered && ` in ${selectedMonth}`}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
+            </div>
         </div>
     );
 }

@@ -9,6 +9,9 @@ import Footer from './Footer';
 import NotificationBell from './NotificationBell';
 import axios from 'axios';
 import { useCurrency, currencies } from '../context/CurrencyContext';
+import { Button } from "@/components/ui/button"; 
+import { Coins, Loader2 } from "lucide-react";
+import { useToast } from "@/components/ui/use-toast";
 
 
 const TouristHome = () => {
@@ -21,6 +24,8 @@ const TouristHome = () => {
   const [conversionRates, setConversionRates] = useState(null);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState(null);
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const { toast } = useToast();
 
   const [profile, setProfile] = useState({
     level: 1,
@@ -104,6 +109,35 @@ const TouristHome = () => {
     const price = typeof priceInEGP === 'string' ? parseFloat(priceInEGP) : priceInEGP;
     return Math.round(price * currencies[currency].rate);
   };
+
+  const handleRedeemPoints = async () => {
+    try {
+      setIsRedeeming(true);
+      const response = await axios.post(
+        `http://localhost:8000/tourist/redeemPoints/${userId}`
+      );
+      
+      setProfile(prev => ({
+        ...prev,
+        wallet: response.data.newWalletBalance,
+        loyaltyPoints: response.data.remainingPoints
+      }));
+  
+      toast({
+        title: "Points Redeemed Successfully!",
+        description: `${response.data.pointsRedeemed} points redeemed for ${response.data.egpAdded}`,
+      });
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Redemption Failed",
+        description: error.response?.data?.error || "Failed to redeem points",
+      });
+    } finally {
+      setIsRedeeming(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
       <Navigation />
@@ -158,6 +192,32 @@ const TouristHome = () => {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="px-6 lg:px-8 py-4">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex justify-center">
+              {profile.loyaltyPoints >= 10000 && (
+                <Button
+                  onClick={handleRedeemPoints}
+                  disabled={isRedeeming}
+                  className="bg-amber-500 hover:bg-amber-600 text-white flex items-center gap-2"
+                >
+                  {isRedeeming ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      Redeeming...
+                    </>
+                  ) : (
+                    <>
+                      <Coins className="h-4 w-4" />
+                      Redeem Points
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
           </div>
         </section>

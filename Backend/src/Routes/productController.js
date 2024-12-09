@@ -180,7 +180,7 @@ router.put('/:id', async (req, res) => {
     }
     if (description) product.description = description;
 
-    await product.save();
+    await product.save({ validateBeforeSave: false })
     res.json(product);
   } catch (err) {
     console.error('Error updating product:', err);

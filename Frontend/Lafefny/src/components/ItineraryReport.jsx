@@ -1,7 +1,21 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect } from 'react';
 import axios from 'axios';
+import { ArrowLeft} from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import Navigation from '../components/Navigation';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 
 export default function ItineraryReport() {
+    const navigate = useNavigate();
     const [itineraries, setItineraries] = useState([]);
     const [touristBookings, setTouristBookings] = useState({});
     const [loading, setLoading] = useState({});
@@ -10,8 +24,8 @@ export default function ItineraryReport() {
 
     useEffect(() => {
         fetchItineraries();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    },[]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps 
+    },[]); //itineraries
 
     const fetchItineraries = async () => {
         try {
@@ -50,21 +64,39 @@ export default function ItineraryReport() {
     };
 
     return (
-        <div className="p-4">
-            <h1 className="text-2xl font-bold mb-4">Itinerary Report</h1>
+    <div className="min-h-screen bg-background p-8">
+        <Navigation />
+        
+        {/* Back button */}
+        <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between mb-8">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 mt-9"
+                > 
+                    <ArrowLeft className="h-4 w-4" />
+                    Back
+                </Button>
+            </div>
             
-            <div className="mb-4 flex gap-4">
+           {/* Title */}
+           <div className="text-center mb-8">
+                    <h1 className="text-3xl font-bold text-primary">Itinerary Report</h1>
+                </div>
+            
+            <div className="flex justify-center mb-4  gap-4">
                 <input
                     type="month"
                     value={selectedMonth}
                     onChange={(e) => setSelectedMonth(e.target.value)}
-                    className="border p-2 rounded"
-                />
+                    className="px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-black"
+                    />
                 <button
                     onClick={() => setIsFiltered(true)}
                     disabled={!selectedMonth}
-                    className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50"
-                >
+                    className="bg-black text-white px-4 py-2 rounded-md hover:bg-gray-800 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
                     Filter by Month
                 </button>
                 {isFiltered && (
@@ -80,43 +112,34 @@ export default function ItineraryReport() {
                 )}
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="min-w-full border-collapse border border-gray-300">
-                    <thead>
-                        <tr className="bg-gray-100">
-                            <th className="border p-2">Itinerary Name</th>
-                            <th className="border p-2">Duration (hours)</th>
-                            <th className="border p-2">Price ($)</th>
-                            <th className="border p-2">Language</th>
-                            <th className="border p-2">Average Rating</th>
-                            <th className="border p-2">Number of Tourists</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {itineraries.map((itinerary) => (
-                            <tr key={itinerary._id}>
-                                <td className="border p-2">{itinerary.name}</td>
-                                <td className="border p-2">{itinerary.duration}</td>
-                                <td className="border p-2">{itinerary.price}</td>
-                                <td className="border p-2">{itinerary.language}</td>
-                                <td className="border p-2">{itinerary.ratings?.averageRating || 0}</td>
-                                <td className="border p-2">
-                                    <div className="flex flex-col items-center gap-2">
-                                        {loading[itinerary._id] ? (
-                                            <span>Loading...</span>
-                                        ) : (
-                                            <span className="font-medium">
-                                                {getFilteredTouristCount(itinerary._id)} tourists
-                                                {isFiltered && ` in ${selectedMonth}`}
-                                            </span>
-                                        )}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
+            <div className="bg-white rounded-lg shadow">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                            <TableHead>Itinerary Name</TableHead>
+                                <TableHead>Duration</TableHead>
+                                <TableHead>Location</TableHead>
+                                <TableHead>Price ($)</TableHead>
+                                <TableHead>Number of Tourists</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {itineraries.map((itinerary) => (
+                                <TableRow key={itinerary._id}>
+                                    <TableCell className="font-medium">{itinerary.name}</TableCell>
+                                    <TableCell>{itinerary.duration} hours</TableCell>
+                                    <TableCell>{itinerary.location}</TableCell>
+                                    <TableCell>{itinerary.price}</TableCell>
+                                    <TableCell>
+                                        {getFilteredTouristCount(itinerary._id)} tourists
+                                        {isFiltered && ` in ${selectedMonth}`}
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
         </div>
+    </div>
     );
 }

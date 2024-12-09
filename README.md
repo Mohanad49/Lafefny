@@ -81,10 +81,10 @@ The project uses Prettier with the following key settings:
 
 # Tech/Framework Used
 Frontend
-- React 18 with Vite
+- React 18.3.1 with Vite
 - Tailwind CSS for styling
 - Radix UI for accessible components
-- Lucide React for icons
+- Lucide and Shadcn UI for icons
 - Axios for HTTP requests
 - React Router v6 for routing
 
@@ -97,7 +97,7 @@ Backend
 - Stripe for payments
 - Multer for file uploads
 - Nodemailer for emails
-- Amadeus for bookings
+- Amadeus API for bookings
 
 DevOps & Tools
 - Git for version control
@@ -107,7 +107,7 @@ DevOps & Tools
 
 # Features
 User Management
-- Multi-role authentication (Tourist, Tour Guide, Seller, Advertiser, Admin)
+- Multi-role authentication (Tourist, Tour Guide, Tourism Governer ,Seller, Advertiser, Admin)
 - Document verification for service providers
 - Profile management with customizable preferences
 - Loyalty points system
@@ -116,6 +116,7 @@ Travel Experience
 - Interactive itinerary planning
 - Activity booking and management
 - Real-time availability checking
+- Flight and hotel booking
 - Location-based recommendations
 - Virtual tours and previews
 
@@ -129,6 +130,7 @@ Business Tools
 Platform Features
 - Real-time notifications
 - Multi-language support
+- Multi-currency support
 - Rating and review system
 - Secure payment processing
 - Admin moderation tools
@@ -210,6 +212,7 @@ npm install
 MONGODB_URI=your_database_url
 JWT_SECRET=your_jwt_secret
 STRIPE_SECRET_KEY=your_stripe_key
+AMADEUS_API_KEY=your_amadeus_key
 EMAIL_SERVICE=gmail
 EMAIL_USER=your_email
 EMAIL_PASS=your_app_password
@@ -438,8 +441,7 @@ User Registeration & Login:
 1. Navigate to http://localhost:5173/sign
 2. Choose "Tourist" role
 3. Fill in registration details
-4. Verify email address
-5. Log in with credentials
+4. Log in with credentials
 
 - For Service Providers (Tour Guides, Sellers, Advertisers)
 1. Navigate to http://localhost:5173/sign
@@ -452,20 +454,22 @@ Tourist Features:
 - Browse Activities
 1. Go to Activities page
 2. Use filters for:
-   - Location
+   - Tags
    - Price range
-   - Categories
-   - Dates
-3. Click on activity for details
-4. Book directly or add to itinerary
+   - Ratings
+     
+3. Click on activity card for details
+4. Book directly or add to bookmarks
 
-- Create Itinerary
-1. Navigate to "Plan Trip"
-2. Select dates and preferences
-3. Add activities to itinerary
-4. Choose tour guide (optional)
-5. Review total cost
-6. Confirm booking
+- Browse Itinerary
+1. Navigate to "Tours"
+2. Use Filter or Search options for:
+   - Prefered language
+   - Tags
+   - Price range
+
+3. Click on itinerary card for details
+4. Book directly or add to bookmarks
 
 Tour Guide Features:
 - Manage Profile
@@ -508,7 +512,7 @@ Admin Panel:
 5. Handle verification requests
 
 # Contribute
-Lafefny stands out through its intuitive design philosophy that prioritizes user experience without sacrificing functionality. Our loyalty points system seamlessly integrates with every transaction, automatically rewarding users without requiring manual input. The smart itinerary generation engine efficiently matches tourists with experiences based on their preferences, reducing planning time from hours to minutes.
+Lafefny stands out through its intuitive design philosophy that prioritizes user experience without sacrificing functionality using visual feedback, clear navigation paths, and intuitive workflows that make travel planning accessible to users of all technical backgrounds. Addtionally, our loyalty points system seamlessly integrates with every transaction, automatically rewarding users without requiring manual input and reducing planning time from hours to minutes.
 
 # Credits
 - Mohanad49
