@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Users, Settings, ShoppingBag, Tag, MessageSquare, 
   Plus, Key, UserPlus, BarChart, Activity, Globe,
-  LayoutGrid, Ticket, History, Shield
+  LayoutGrid, Ticket, History, Shield, DollarSign
 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -181,6 +181,12 @@ const AdminHome = () => {
                 className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
                 <Tag className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
                 <span className="text-sm font-medium">Add Tag</span>
+              </Link>
+
+              <Link to="/admin/sales-report"
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <DollarSign className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
+                <span className="text-sm font-medium">Sales Report</span>
               </Link>
 
               <Link to="/preferenceTags"
