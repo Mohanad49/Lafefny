@@ -11,6 +11,7 @@ const Product = require('../Models/Product'); // Import Product model
 const { createPaymentIntent } = require('../Services/payingService'); // Import createPaymentIntent
 const { sendReceiptEmail } = require('../Services/emailService');
 const Order = require('../Models/Order');
+const { updateLoyaltyPoints } = require('./loyaltyPoints');
 
 const { default: mongoose } = require("mongoose");
 
@@ -405,6 +406,46 @@ router.post("/redeemPoints/:id", async (req, res) => {
     }
 });
 
+// Add test loyalty points route
+router.post('/:touristId/add-test-points', async (req, res) => {
+  const { touristId } = req.params;
+
+  try {
+    const tourist = await Tourist.findOne({ userID: touristId });
+    if (!tourist) {
+      return res.status(404).json({ error: 'Tourist not found' });
+    }
+
+    // Add 1,000,000 points
+    tourist.loyaltyPoints += 1000000;
+
+    // Recalculate level based on new points total
+    if (tourist.loyaltyPoints <= 100000) {
+      tourist.level = 1;
+      tourist.badge = 'Bronze Badge';
+    } else if (tourist.loyaltyPoints <= 500000) {
+      tourist.level = 2;
+      tourist.badge = 'Silver Badge';
+    } else {
+      tourist.level = 3;
+      tourist.badge = 'Gold Badge';
+    }
+
+    await tourist.save();
+
+    res.status(200).json({ 
+      message: 'Test points added successfully', 
+      newPoints: tourist.loyaltyPoints,
+      newLevel: tourist.level,
+      newBadge: tourist.badge
+    });
+
+  } catch (error) {
+    console.error('Error adding test points:', error);
+    res.status(500).json({ error: 'Failed to add test points' });
+  }
+});
+
 // Update the transportation booking route
 router.post("/:userId/transportation-booking", async (req, res) => {
   try {
@@ -692,6 +733,7 @@ router.post('/:itineraryId/payment', async (req, res) => {
         console.error('Tourist not found');
         return res.status(404).json({ error: 'Tourist not found' });
       }
+      await updateLoyaltyPoints(touristId, itinerary.price);
     } else if (method === 'wallet') {
       tourist = await Tourist.findOne({ userID: touristId });
       if (!tourist) {
@@ -703,6 +745,7 @@ router.post('/:itineraryId/payment', async (req, res) => {
         return res.status(400).json({ error: 'Insufficient wallet balance' });
       }
       tourist.wallet -= itinerary.price;
+      await updateLoyaltyPoints(touristId, itinerary.price);
       await tourist.save();
     }
 
@@ -1113,10 +1156,24 @@ router.put('/:userId/orders/:orderId/cancel', async (req, res) => {
       });
     }
 
-    order.orderStatus = 'Cancelled';
-    await order.save();
+     // Calculate refund amount
+     const refundAmount = order.totalAmount;
 
-    res.status(200).json(order);
+     // Update order status
+     order.orderStatus = 'Cancelled';
+ 
+     // Add refund to wallet
+     tourist.wallet += refundAmount;
+
+    await order.save();
+    await tourist.save();
+
+    res.status(200).json({
+      message: "Order cancelled successfully",
+      order,
+      newWalletBalance: tourist.wallet,
+      refundAmount
+    });
   } catch (error) {
     console.error('Error cancelling order:', error);
     res.status(500).json({ error: error.message });
