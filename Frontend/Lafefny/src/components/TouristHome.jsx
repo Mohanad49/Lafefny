@@ -310,7 +310,7 @@ const TouristHome = () => {
                 upcomingItineraries.map((itinerary) => (
                   <Link
                     key={itinerary._id}
-                    to={`/itineraries/${itinerary._id}`}
+                    to={`/tours/${itinerary._id}`}
                     className="block group"
                   >
                     <div className="p-6 bg-slate-50/50 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
