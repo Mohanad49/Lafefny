@@ -6,6 +6,8 @@ import { useAuth } from '../context/AuthContext';
 import { Plane, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import { useToast } from "@/components/ui/use-toast";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 function Sign() {
   const { toast } = useToast();
@@ -317,16 +319,25 @@ function Sign() {
                 {userType === 'Tourist' && (
                   <>
                     <div>
-                      <label className="block text-sm font-medium mb-2">Date of Birth</label>
-                      <input
-                        type="date"
-                        name="dateOfBirth"
-                        value={formData.dateOfBirth}
-                        onChange={handleChange}
-                        required
-                        className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
-                      />
-                    </div>
+  <label className="block text-sm font-medium mb-2">Date of Birth</label>
+  <DatePicker
+    selected={formData.dateOfBirth ? new Date(formData.dateOfBirth) : null}
+    onChange={(date) => {
+      setFormData({
+        ...formData,
+        dateOfBirth: date ? date.toISOString().split('T')[0] : ''
+      });
+    }}
+    dateFormat="yyyy-MM-dd"
+    maxDate={new Date()}
+    showYearDropdown
+    showMonthDropdown
+    dropdownMode="select"
+    placeholderText="Select date"
+    className="w-full px-4 py-2 border border-border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+    required
+  />
+</div>
 
                     <div>
                       <label className="block text-sm font-medium mb-2">Mobile Number</label>
