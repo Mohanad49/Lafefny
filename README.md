@@ -97,6 +97,7 @@ Backend
 - Stripe for payments
 - Multer for file uploads
 - Nodemailer for emails
+- Amadeus for bookings
 
 DevOps & Tools
 - Git for version control
