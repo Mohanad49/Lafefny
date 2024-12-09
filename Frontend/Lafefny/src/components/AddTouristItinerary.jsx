@@ -28,29 +28,8 @@ const AddTouristItinerary = () => {
     startDate: '',
     endDate: '',
     price: '',
-    touristName: '',
-    tourGuideName: ''
+    touristName: ''
   });
-
-  useEffect(() => {
-    const fetchTourGuideName = async () => {
-      try {
-        const userId = localStorage.getItem('userID');
-        const response = await axios.get(`http://localhost:8000/users/${userId}`);
-        const user = response.data;
-        setItinerary(prev => ({ ...prev, tourGuideName: user.username }));
-      } catch (error) {
-        console.error('Error fetching tour guide name:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to fetch tour guide name"
-        });
-      }
-    };
-
-    fetchTourGuideName();
-  }, [toast]);
 
   const handleChange = (e) => {
     const { name, value } = e.target;

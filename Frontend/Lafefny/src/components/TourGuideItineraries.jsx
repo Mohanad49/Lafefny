@@ -54,11 +54,7 @@ const TourGuideItineraries = () => {
   const formatDate = (dateString) => {
     if (!dateString) return 'Not specified';
     const date = new Date(dateString);
-    return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    return isNaN(date.getTime()) ? 'Invalid Date' : date.toLocaleDateString();
   };
 
   const filteredItineraries = itineraries
