@@ -79,7 +79,7 @@ const MyOrders = () => {
       
       toast({
         title: "Order Cancelled",
-        description: `Order cancelled successfully. Updated wallet balance: ${currencies[currency].symbol}${convertPrice(response.data.walletBalance).toFixed(2)}`,
+        description: `Order cancelled successfully`,
       });
     } catch (error) {
       console.error('Error cancelling order:', error);

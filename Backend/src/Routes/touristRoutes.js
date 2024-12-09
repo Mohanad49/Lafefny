@@ -1404,4 +1404,18 @@ router.get("/upcomingItineraries/:userID", async (req, res) => {
   }
 });
 
+// Get tourist's wallet balance
+router.get('/:userId/wallet', async (req, res) => {
+  try {
+    const tourist = await Tourist.findOne({ userID: req.params.userId });
+    if (!tourist) {
+      return res.status(404).json({ error: "Tourist not found" });
+    }
+    res.json({ balance: tourist.wallet });
+  } catch (error) {
+    console.error('Error fetching wallet balance:', error);
+    res.status(500).json({ error: "Failed to fetch wallet balance" });
+  }
+});
+
 module.exports=router
