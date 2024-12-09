@@ -201,7 +201,7 @@ router.get("/numberOfNewUsers", async (req, res) => {
 
 router.get('/sales-report', async (req, res) => {
   try {
-    const { startDate, endDate, productId, month, year } = req.query;
+    const { startDate, endDate, type, productId, month, year } = req.query;
     
     if (!startDate || !endDate) {
       return res.status(400).json({
@@ -216,7 +216,33 @@ router.get('/sales-report', async (req, res) => {
       year
     };
 
-    const report = await salesReportService.generateSalesReport(startDate, endDate, filters);
+    // Modify the report generation based on type
+    let report;
+    switch(type) {
+      case 'products':
+        report = await salesReportService.generateSalesReport(startDate, endDate, { 
+          ...filters, 
+          type: 'products' 
+        });
+        report.giftShop.sales = report.giftShop.sales.filter(sale => sale.totalSales > 0);
+        break;
+      case 'itineraries':
+        report = await salesReportService.generateSalesReport(startDate, endDate, { 
+          ...filters, 
+          type: 'itineraries' 
+        });
+        report.itineraries.sales = report.itineraries.sales.filter(sale => sale.totalSales > 0);
+        break;
+      case 'events':
+        report = await salesReportService.generateSalesReport(startDate, endDate, { 
+          ...filters, 
+          type: 'events' 
+        });
+        report.activities.sales = report.activities.sales.filter(sale => sale.totalSales > 0);
+        break;
+      default:
+        report = await salesReportService.generateSalesReport(startDate, endDate, filters);
+    }
     
     res.json({
       success: true,
