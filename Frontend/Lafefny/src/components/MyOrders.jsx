@@ -2,19 +2,49 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import Navigation from './Navigation';
-import { ArrowLeft, Package, Calendar, MapPin, CreditCard, Clock, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Package, Calendar, MapPin, CreditCard, Clock, ShoppingBag, Wallet } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useToast } from "@/components/ui/use-toast";
+import { useCurrency, currencies } from '../context/CurrencyContext';
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [walletBalance, setWalletBalance] = useState(0);
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const { currency } = useCurrency();
 
   useEffect(() => {
     fetchOrders();
+    fetchWalletBalance();
   }, []);
+
+  const fetchWalletBalance = async () => {
+    try {
+      const userId = localStorage.getItem('userID');
+      const response = await axios.get(`http://localhost:8000/tourist/${userId}/wallet`);
+      setWalletBalance(response.data.balance);
+    } catch (error) {
+      console.error('Error fetching wallet balance:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch wallet balance",
+        variant: "destructive"
+      });
+    }
+  };
+
+  const convertPrice = (price) => {
+    if (!price) return 0;
+    const numericPrice = typeof price === 'string' ? 
+      parseFloat(price.replace(/[^0-9.-]+/g, "")) : 
+      parseFloat(price);
+    const convertedPrice = numericPrice * currencies[currency].rate;
+    return convertedPrice;
+  };
 
   const fetchOrders = async () => {
     try {
@@ -27,22 +57,37 @@ const MyOrders = () => {
       console.error('Error fetching orders:', error);
       setError('Failed to load orders');
       setLoading(false);
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive"
+      });
     }
   };
 
   const handleCancelOrder = async (orderId) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
+      const response = await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
       
       setOrders(orders.map(order => 
         order._id === orderId ? { ...order, orderStatus: 'Cancelled' } : order
       ));
       
-      alert('Order cancelled successfully');
+      // Update wallet balance after cancellation
+      setWalletBalance(response.data.walletBalance);
+      
+      toast({
+        title: "Order Cancelled",
+        description: `Order cancelled successfully. Updated wallet balance: ${currencies[currency].symbol}${convertPrice(response.data.walletBalance).toFixed(2)}`,
+      });
     } catch (error) {
       console.error('Error cancelling order:', error);
-      alert(error.response?.data?.error || 'Failed to cancel order');
+      toast({
+        title: "Error",
+        description: error.response?.data?.error || 'Failed to cancel order',
+        variant: "destructive"
+      });
     }
   };
 
@@ -78,9 +123,17 @@ const MyOrders = () => {
           </Button>
 
           <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <ShoppingBag className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-semibold text-primary">My Orders</h1>
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <ShoppingBag className="h-6 w-6 text-primary" />
+                <h1 className="text-2xl font-semibold text-primary">My Orders</h1>
+              </div>
+              <div className="flex items-center gap-2 bg-primary/10 px-4 py-2 rounded-lg">
+                <Wallet className="h-5 w-5 text-primary" />
+                <span className="text-sm font-medium">
+                  Wallet Balance: {currencies[currency].symbol}{convertPrice(walletBalance).toFixed(2)}
+                </span>
+              </div>
             </div>
 
             {loading ? (
@@ -133,14 +186,14 @@ const MyOrders = () => {
                               {order.products.map((product, index) => (
                                 <li key={index} className="text-sm text-gray-600">
                                   {product.productId?.name || 'Product'} × {product.quantity}
-                                  <span className="float-right">${product.price.toFixed(2)}</span>
+                                  <span className="float-right">${convertPrice(product.price).toFixed(2)}</span>
                                 </li>
                               ))}
                             </ul>
                             <div className="pt-2 border-t">
                               <p className="text-sm font-medium flex justify-between">
                                 Total Amount:
-                                <span className="text-primary">${order.totalAmount.toFixed(2)}</span>
+                                <span className="text-primary">${convertPrice(order.totalAmount).toFixed(2)}</span>
                               </p>
                             </div>
                           </div>

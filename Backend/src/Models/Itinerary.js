@@ -61,8 +61,8 @@ const itinerarySchema = new mongoose.Schema({
     },
     bookedDate: {
       type: Date,
-    },
-    default: []
+      required: true
+    }
   }],
   tourGuide: {
     type: mongoose.Schema.Types.ObjectId,

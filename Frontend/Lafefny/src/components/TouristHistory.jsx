@@ -259,7 +259,7 @@ const TouristHistory = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-semibold text-primary">
-                              {convertPrice(activity.price || 0)}
+                              {currencies[currency].symbol}{convertPrice(activity.price || 0).toFixed(2)}
                             </div>
                           </div>
                         </div>
@@ -283,7 +283,7 @@ const TouristHistory = () => {
             </div>
           )}
 
-          {activeTab === "Itineraries" && (
+          {activeTab === "Tours" && (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {bookedItineraries.length > 0 ? (
                 bookedItineraries.map((itinerary) => (
@@ -354,7 +354,7 @@ const TouristHistory = () => {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-semibold text-primary">
-                              {currencies[currency].symbol}{convertPrice(itinerary.price)}
+                              {currencies[currency].symbol}{convertPrice(itinerary.price).toFixed(2)}
                             </div>
                             <div className="text-sm text-primary">per person</div>
                           </div>

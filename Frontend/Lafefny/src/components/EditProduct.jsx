@@ -62,7 +62,7 @@ const EditProduct = () => {
         title: "Success",
         description: "Product updated successfully"
       });
-      navigate('/products');
+      navigate('/sellerHome');
     } catch (error) {
       console.error('Error updating Product:', error);
       toast({
@@ -187,7 +187,7 @@ const EditProduct = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
+              <Button type="submit" className="w-full" navigate="/sellerHome">
                 Update Product
               </Button>
             </form>

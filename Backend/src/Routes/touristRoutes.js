@@ -1,6 +1,6 @@
-const express= require("express");
-const Tourist= require("../Models/touristModel");
-const User= require("../Models/User");
+const express = require("express");
+const Tourist = require("../Models/touristModel");
+const User = require("../Models/User");
 const TouristItinerary = require("../Models/Tourist-Itinerary");
 const Itinerary = require("../Models/Itinerary"); // Adjust the path to your Itinerary model
 const Activity = require("../Models/Activity");
@@ -274,8 +274,46 @@ router.get("/upcomingActivities/:userID", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+// Get upcoming itineraries for a tourist
+router.get("/upcomingItineraries/:userID", async (req, res) => {
+  try {
+    const { userID } = req.params;
   
-// Add activity review
+    // Step 1: Find the tourist
+    const tourist = await User.findOne({ _id: mongoose.Types.ObjectId(userID) });
+    if (!tourist) {
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+  
+    // Step 2: Fetch all itineraries
+    const allItineraries = await Itinerary.find();
+  
+    // Step 3: Filter itineraries that contain the userID in paidBy and have a future date
+    const upcomingItineraries = allItineraries.filter(itinerary => {
+      // Check if tourist has paid for this itinerary
+      if (!itinerary.paidBy?.includes(userID)) return false;
+      
+      // Find the specific booking for this tourist
+      const touristBooking = itinerary.touristBookings?.find(
+        booking => booking.tourist.toString() === userID
+      );
+      
+      // Only include if there's a valid booking with a future date
+      return touristBooking && new Date(touristBooking.bookedDate) > new Date();
+    });
+  
+    // Step 4: Send the filtered itineraries in the response
+    res.json({
+      upcomingItineraries,
+      touristName: tourist.username
+    });
+  } catch (error) {
+    console.error("Error fetching upcoming itineraries:", error);
+    res.status(500).json({ message: error.message });
+  }
+});
+
 router.post("/activities/:activityId/reviews", async (req, res) => {
   try {
     const { activityId } = req.params;
@@ -301,7 +339,6 @@ router.post("/activities/:activityId/reviews", async (req, res) => {
   }
 });
 
-// Add itinerary review
 router.post("/itineraries/:itineraryId/reviews", async (req, res) => {
   try {
     const { itineraryId } = req.params;
@@ -1267,6 +1304,46 @@ router.post('/:userId/bookmark-tour/:tourId', async (req, res) => {
   } catch (error) {
     console.error('Error bookmarking tour:', error);
     res.status(500).json({ error: "Failed to bookmark tour" });
+  }
+});
+
+router.get("/upcomingItineraries/:userID", async (req, res) => {
+  try {
+    const { userID } = req.params;
+    console.log('Fetching itineraries for user:', userID);
+  
+    // Step 1: Find the tourist
+    const tourist = await User.findOne({ _id: userID });
+    if (!tourist) {
+      console.log('Tourist not found:', userID);
+      return res.status(404).json({ message: 'Tourist not found' });
+    }
+  
+    // Step 2: Fetch all itineraries with populated tourist bookings
+    const allItineraries = await Itinerary.find({
+      'paidBy': userID,
+      'touristBookings': { 
+        $elemMatch: { 
+          tourist: userID,
+          bookedDate: { $gt: new Date() }
+        }
+      }
+    });
+    
+    console.log('Found itineraries:', allItineraries.length);
+  
+    // Step 4: Send the filtered itineraries in the response
+    res.json({
+      upcomingItineraries: allItineraries,
+      touristName: tourist.username
+    });
+  } catch (error) {
+    console.error("Error fetching upcoming itineraries:", error);
+    res.status(500).json({ 
+      message: "Error fetching upcoming itineraries",
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    });
   }
 });
 

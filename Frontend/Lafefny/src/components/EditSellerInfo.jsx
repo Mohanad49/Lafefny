@@ -11,6 +11,7 @@ import Footer from "../components/Footer";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { Trash2 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
+
 const UpdateSellerInfo = () => {
   const auth = useAuth();
   const { toast } = useToast();
@@ -43,18 +44,43 @@ const UpdateSellerInfo = () => {
             description: sellerInfo.description || "",
             logo: sellerInfo.logo || "",
           });
+        } else if (response.status === 404) {
+          // If seller info doesn't exist, create it
+          const createResponse = await fetch(
+            `http://localhost:8000/seller/addSellerInfo/${localStorage.getItem("userID")}`,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                name: "New Seller",
+                description: "New Seller Description",
+              }),
+            }
+          );
+
+          if (createResponse.ok) {
+            const newSellerData = await createResponse.json();
+            setFormData({
+              name: newSellerData.name,
+              description: newSellerData.description,
+              logo: newSellerData.logo || "",
+            });
+            toast({
+              title: "Welcome!",
+              description: "Your seller profile has been created. You can now edit your information.",
+            });
+          } else {
+            throw new Error("Failed to create seller profile");
+          }
         } else {
-          toast({
-            title: "Error",
-            description: "Error fetching seller information",
-            variant: "destructive",
-          });
+          throw new Error("Failed to fetch seller information");
         }
       } catch (error) {
-        console.error("Error:", error);
         toast({
           title: "Error",
-          description: "Error connecting to server",
+          description: error.message || "An error occurred while setting up your seller profile",
           variant: "destructive",
         });
       } finally {
@@ -63,7 +89,7 @@ const UpdateSellerInfo = () => {
     };
 
     fetchSellerInfo();
-  }, []); // Empty dependency array means this runs once on mount
+  }, [toast]);
 
   const handleRequestDelete = async () => {
     try {

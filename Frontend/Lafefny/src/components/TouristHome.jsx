@@ -13,6 +13,7 @@ import { useCurrency, currencies } from '../context/CurrencyContext';
 
 const TouristHome = () => {
   const [upcomingActivities, setUpcomingActivities] = useState([]);
+  const [upcomingItineraries, setUpcomingItineraries] = useState([]);
   const [userPreferences, setUserPreferences] = useState([]);
   const userId = localStorage.getItem('userID');
 
@@ -47,6 +48,16 @@ const TouristHome = () => {
         // Fetch upcoming activities
         const activitiesResponse = await axios.get(`http://localhost:8000/tourist/upcomingActivities/${userId}`);
         setUpcomingActivities(activitiesResponse.data.upcomingActivities);
+
+        try {
+          // Fetch upcoming itineraries - wrapped in try-catch to handle 404 gracefully
+          const itinerariesResponse = await axios.get(`http://localhost:8000/tourist/upcomingItineraries/${userId}`);
+          setUpcomingItineraries(itinerariesResponse.data.upcomingItineraries);
+        } catch (error) {
+          // If endpoint is not ready, set empty array and log only in development
+          console.log('Itineraries endpoint not available yet');
+          setUpcomingItineraries([]);
+        }
       } catch (error) {
         console.error('Error fetching tourist data:', error);
       }
@@ -156,7 +167,9 @@ const TouristHome = () => {
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-primary mb-8">Quick Actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-              {[
+              {[/* 
+                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                */ 
                 { to: "/activities", icon: Globe, label: "Activities" },
                 { to: "/book-flights", icon: Plane, label: "Flights" },
                 { to: "/book-hotels", icon: Settings, label: "Hotels" },
@@ -223,13 +236,54 @@ const TouristHome = () => {
           </div>
         </section>
 
+        {/* Upcoming Itineraries */}
+        <section className="bg-white px-6 lg:px-8 py-12">
+          <div className="mx-auto max-w-7xl">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-2xl font-bold text-primary">Upcoming Itineraries</h2>
+              <Link to="/tours" className="text-sm font-medium text-primary hover:text-accent transition-colors">
+                View All
+              </Link>
+            </div>
+            <div className="grid gap-4">
+              {upcomingItineraries.length > 0 ? (
+                upcomingItineraries.map((itinerary) => (
+                  <Link
+                    key={itinerary._id}
+                    to={`/itineraries/${itinerary._id}`}
+                    className="block group"
+                  >
+                    <div className="p-6 bg-slate-50/50 rounded-xl shadow-sm hover:shadow-md transition-all flex items-center justify-between cursor-pointer">
+                      <div className="flex items-center gap-4">
+                        <div className="p-3 bg-primary/5 rounded-xl group-hover:bg-primary/10 transition-colors">
+                          <MapPin className="h-6 w-6 text-primary" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{itinerary.name}</p>
+                          <p className="text-sm text-slate-500">{new Date(itinerary.startDate).toLocaleDateString()} - {new Date(itinerary.endDate).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                      <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
+                    </div>
+                  </Link>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <p className="text-slate-500">No upcoming itineraries</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </section>
+
         {/* Plan Your Journey */}
         <section className="px-6 lg:px-8 py-12">
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-primary mb-8">Plan Your Journey</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
-                // { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+              {[/* 
+                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                */ 
                 { to: "/Tours", icon: Globe, label: "Browse Itineraries" },
                 { to: "/HistoricalPlaces", icon: MapPin, label: "Museums & History" }
               ].map((item, index) => (
@@ -251,7 +305,9 @@ const TouristHome = () => {
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-primary mb-8">Account Management</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {[
+              {[/* 
+                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                */ 
                 { to: "/viewTouristInfo", icon: User, label: "Profile Info" },
                 { to: "/changePassword", icon: Key, label: "Password" },
                 { to: "/touristSelectPreferences", icon: Tag, label: "Preferences" },
@@ -283,7 +339,9 @@ const TouristHome = () => {
           <div className="mx-auto max-w-7xl">
             <h2 className="text-2xl font-bold text-primary mb-8">Shopping & Orders</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {[
+              {[/* 
+                { to: "/tourist-Itineraries", icon: Calendar, label: "My Itineraries" },
+                */ 
                 { 
                   to: "/touristProducts",
                   icon: ShoppingBag,
