@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Ticket } from 'lucide-react';
+import { ArrowLeft, Ticket, CalendarIcon } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/components/ui/use-toast";
+import { Calendar } from "@/components/ui/calendar";
+import { format } from "date-fns";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -28,6 +34,13 @@ const CreatePromoCode = () => {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleDateChange = (date, field) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: date ? format(date, 'yyyy-MM-dd') : ''
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -127,27 +140,49 @@ const CreatePromoCode = () => {
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="validFrom">Valid From</Label>
-                    <Input
-                      id="validFrom"
-                      name="validFrom"
-                      type="date"
-                      value={formData.validFrom}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Label>Valid From</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.validFrom ? format(new Date(formData.validFrom), 'PPP') : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.validFrom ? new Date(formData.validFrom) : undefined}
+                          onSelect={(date) => handleDateChange(date, 'validFrom')}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="validUntil">Valid Until</Label>
-                    <Input
-                      id="validUntil"
-                      name="validUntil"
-                      type="date"
-                      value={formData.validUntil}
-                      onChange={handleChange}
-                      required
-                    />
+                    <Label>Valid Until</Label>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className="w-full justify-start text-left font-normal"
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {formData.validUntil ? format(new Date(formData.validUntil), 'PPP') : <span>Pick a date</span>}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={formData.validUntil ? new Date(formData.validUntil) : undefined}
+                          onSelect={(date) => handleDateChange(date, 'validUntil')}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
 
                   <div className="space-y-2">
