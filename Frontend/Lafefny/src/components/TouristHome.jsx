@@ -320,7 +320,7 @@ const TouristHome = () => {
                         </div>
                         <div>
                           <p className="font-semibold text-slate-700 group-hover:text-primary transition-colors">{itinerary.name}</p>
-                          <p className="text-sm text-slate-500">{new Date(itinerary.startDate).toLocaleDateString()} - {new Date(itinerary.endDate).toLocaleDateString()}</p>
+                          <p className="text-sm text-slate-500">{new Date(itinerary.availableDates[0]).toLocaleDateString()}</p>
                         </div>
                       </div>
                       <ChevronRight className="h-5 w-5 text-slate-400 group-hover:text-primary transition-colors" />
