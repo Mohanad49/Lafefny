@@ -189,7 +189,7 @@ const ActivityDetails = () => {
             <main className="pt-24 pb-16 px-6">
                 <div className="max-w-7xl mx-auto">
                     <button
-                        onClick={() => navigate(-1)}
+                        onClick={() => navigate('/activities')}
                         className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
                     >
                         <ArrowLeft className="h-4 w-4" />
@@ -304,7 +304,7 @@ const ActivityDetails = () => {
                                         </Badge>
                                     </div>
                                     <div className="flex gap-2">
-                                        {isTourist && (
+                                        {isTourist ? (
                                             <Button
                                                 className={`flex-1 ${activity.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
                                                 onClick={handleBookingClick}
@@ -312,14 +312,15 @@ const ActivityDetails = () => {
                                             >
                                                 {activity.booked ? 'Cancel Booking' : 'Book Now'}
                                             </Button>
-                                        )}
-                                        {(!isLoggedIn || (!isTourist && !isTourismGovernor)) && (
+                                        ) : !isLoggedIn ? (
                                             <Button
                                                 className="flex-1"
-                                                onClick={() => navigate('/login')}
+                                                onClick={() => navigate('/sign')}
                                             >
-                                                Login to Book
+                                                Sign in to book
                                             </Button>
+                                        ) : (
+                                            <div className="flex-1 h-10" /> // Empty space with same height as button
                                         )}
                                         <Button
                                             variant="outline"

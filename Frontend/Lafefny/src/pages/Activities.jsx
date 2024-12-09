@@ -490,7 +490,7 @@ const Activities = () => {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      {isTourist && (
+                      {isTourist ? (
                         <Button
                           onClick={() => handleBookNow(activity._id, activity.date)}
                           variant={activity.booked ? "destructive" : "default"}
@@ -498,14 +498,15 @@ const Activities = () => {
                         >
                           {activity.booked ? "Cancel Booking" : "Book Now"}
                         </Button>
-                      )}
-                      {(!isLoggedIn || (!isTourist && localStorage.getItem('userRole') !== 'TourismGovernor')) && (
+                      ) : !isLoggedIn ? (
                         <Button
                           className="w-full"
-                          onClick={() => navigate('/login')}
+                          onClick={() => navigate('/sign')}
                         >
-                          Login to Book
+                          Sign in to book
                         </Button>
+                      ) : (
+                        <div className="w-full h-10" /> // Empty space with same height as button
                       )}
                       <Button
                         variant="ghost"
