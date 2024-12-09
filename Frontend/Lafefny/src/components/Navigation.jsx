@@ -28,6 +28,11 @@ const Navigation = () => {
   const isLoggedIn = !!localStorage.getItem('userID');
   const username = localStorage.getItem('currentUserName');
   const isTourist = localStorage.getItem('userRole') === 'Tourist';
+  const isAdvertiser = localStorage.getItem('userRole') === 'Advertiser';
+  const isTourGuide = localStorage.getItem('userRole') === 'TourGuide';
+  const isAdmin = localStorage.getItem('userRole') === 'Admin';
+  const isTourismGovernor = localStorage.getItem('userRole') === 'TourismGovernor';
+  const isSeller = localStorage.getItem('userRole') === 'Seller';
   const role = localStorage.getItem('userRole');
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const profileDropdownRef = useRef(null);
@@ -167,7 +172,7 @@ const Navigation = () => {
                 </div>
                 
                 <div className="space-y-4">
-                  {!isTourist && (
+                  {!isTourist && !isAdvertiser && !isTourGuide && !isAdmin && !isTourismGovernor && !isSeller && (
                     <>
                     <div className="border-b pb-4">
                     <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
@@ -199,7 +204,178 @@ const Navigation = () => {
                     </div>
                   </div>
                   </>)}
-
+                  {isLoggedIn && isAdvertiser && (
+                    <>
+                      <div className="border-b pb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
+                    <div className="space-y-4">
+                    <Link to= {homeRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Home
+                      </Link>
+                      <Link to= "/ActivityReport" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Activty Reports
+                      </Link>
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
+                  </div>
+                  </>
+                  )}
+                  {isLoggedIn && isTourGuide && (
+                    <>
+                      <div className="border-b pb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
+                    <div className="space-y-4">
+                    <Link to= {homeRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Home
+                      </Link>
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
+                  </div>
+                  </>
+                  )}
+                  {isLoggedIn && isAdmin && (
+                    <>
+                      <div className="border-b pb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
+                    <div className="space-y-4">
+                    <Link to= {homeRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Home
+                      </Link>
+                
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
+                  </div>
+                  </>
+                  )}
+                  {isLoggedIn && isSeller && (
+                    <>
+                      <div className="border-b pb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
+                    <div className="space-y-4">
+                    <Link to= {homeRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Home
+                      </Link>
+                     
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
+                  </div>
+                  </>
+                  )}
+                  {isLoggedIn && isTourismGovernor && (
+                    <>
+                      <div className="border-b pb-4">
+                    <h3 className="text-sm font-medium text-muted-foreground mb-4">Navigation</h3>
+                    <div className="space-y-4">
+                    <Link to= {homeRoute} className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          Home
+                      </Link>
+                      
+                      <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <MapPin className="h-5 w-5" />
+                        Destinations
+                      </Link>
+                      <Link to="/activities" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Activity className="h-5 w-5" />
+                        Activities
+                      </Link>
+                      <Link to="/historicalPlaces" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <History className="h-5 w-5" />
+                        Historical Places
+                      </Link>
+                      <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <Globe className="h-5 w-5" />
+                        Tours
+                      </Link>
+                      <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <NavigationIcon className="h-5 w-5" />
+                        About
+                      </Link>
+                    </div>
+                  </div>
+                  </>
+                  )}
                   {isLoggedIn && isTourist && (
                     <>
                       {/* Activities & Itineraries Section */}
