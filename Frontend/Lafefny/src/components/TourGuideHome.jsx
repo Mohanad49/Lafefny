@@ -70,8 +70,8 @@ const TourGuideHome = () => {
             <h2 className="text-2xl font-bold text-primary mb-8">Quick Actions</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
               {[
-                { to: "/guestActivities", icon: Activity, label: "View Activities" },
-                { to: "/itineraries", icon: Calendar, label: "View Itineraries" },
+                { to: "/Activities", icon: Activity, label: "View Activities" },
+                { to: "/tours", icon: Calendar, label: "View Itineraries" },
                 { to: "/guide-tourist-Itineraries", icon: MapPin, label: "View Tourist Itineraries" },
                 { to: "/add-itinerary", icon: Plus, label: "Add Itinerary" }
               ].map((item, index) => (

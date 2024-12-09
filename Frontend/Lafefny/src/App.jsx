@@ -95,6 +95,7 @@ import UploadTourGuideDocs from './components/UploadTourGuideDocs'
 
 import AdminItineraryList from './components/Admin-ItineraryList';
 import AdminActivityList from './components/Admin-ActivityList';
+import AdminSalesReport from './components/AdminSalesReport';
 import SellerDelete from './components/Sellerdelete';
 import DeleteAccount from './components/DeleteAccount'
 
@@ -163,6 +164,7 @@ const App = () => {
           <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['Admin']}><AdminActivityList /></ProtectedRoute>} />
           <Route path="/numberOfUsers" element={<ProtectedRoute allowedRoles={['Admin']}><AdminNumberOfUsers/></ProtectedRoute>} />
           <Route path="/create-promo-code" element={<ProtectedRoute allowedRoles={['Admin']}><CreatePromoCode/></ProtectedRoute>} />
+          <Route path="/admin/sales-report" element={<ProtectedRoute allowedRoles={['Admin']}><AdminSalesReport/></ProtectedRoute>} />
           {/* Tourist Routes */}
           <Route path="/touristHome" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHome /></ProtectedRoute>} />
           <Route path="/touristActivities" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristActivityList /></ProtectedRoute>} />

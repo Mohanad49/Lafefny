@@ -17,7 +17,7 @@ const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 
-const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
+const stripe = require('stripe')('sk_test_51QP7WoG4UGkAwtrqZjSlHzUJWjb7AxUt9FLLsi1lS8UoQR4eLi63B0B2AQSoGkVRJhQVfdyLWVwdgjdPrMPZPbiu00k2wMYV84');
 
 // Add a test route
 router.get('/test', (req, res) => {

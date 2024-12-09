@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import { 
   Users, Settings, ShoppingBag, Tag, MessageSquare, 
   Plus, Key, UserPlus, BarChart, Activity, Globe,
-  LayoutGrid, Ticket, History, Shield
+  LayoutGrid, Ticket, History, Shield, DollarSign
 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -160,24 +160,40 @@ const AdminHome = () => {
             <h2 className="text-2xl font-bold mb-6 text-center">Admin Settings</h2>
             <div className="grid grid-cols-2 md:grid-cols-3 gap-4 justify-center place-items-center">
               <Link to="/changePassword" 
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Key className="h-6 w-6 text-primary" />
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <Key className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
                 <span className="text-sm font-medium">Change Password</span>
               </Link>
               
               <Link to="/add-activityCategory"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Plus className="h-6 w-6 text-primary" />
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <Plus className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
                 <span className="text-sm font-medium">Add Category</span>
               </Link>
 
+              <Link to="/activityCategories/"
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <LayoutGrid className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
+                <span className="text-sm font-medium">Edit Categories</span>
+              </Link>
+
               <Link to="/add-preferenceTag"
-                className="p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center gap-2">
-                <Tag className="h-6 w-6 text-primary" />
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <Tag className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
                 <span className="text-sm font-medium">Add Tag</span>
               </Link>
 
-              {/* Removed admin/profile link */}
+              <Link to="/admin/sales-report"
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <DollarSign className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
+                <span className="text-sm font-medium">Sales Report</span>
+              </Link>
+
+              <Link to="/preferenceTags"
+                className="w-full p-4 bg-white rounded-lg shadow-sm hover:shadow-md transition-all flex flex-col items-center justify-center text-center group">
+                <Settings className="h-6 w-6 mb-2 text-primary group-hover:text-accent transition-colors" />
+                <span className="text-sm font-medium">Edit Tags</span>
+              </Link>
             </div>
           </div>
         </section>

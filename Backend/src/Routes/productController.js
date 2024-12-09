@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const Product = require('../Models/Product');
+const Product = require('../Models/Product'); // Fix the Product model import
 const Tourist = require('../Models/touristModel');
 const Notification = require('../Models/notificationModel');
 const User = require('../Models/User');
@@ -20,14 +20,25 @@ router.get('/', async (req, res) => {
 router.patch('/:id/toggleArchive', async (req, res) => {
   try {
     const product = await Product.findById(req.params.id);
-    if (!product) return res.status(404).json({ error: "Product not found" });
+    if (!product) {
+      return res.status(404).json({ error: "Product not found" });
+    }
 
     product.isArchived = !product.isArchived;
-    await product.save();
-
-    res.json(product);
+    const updatedProduct = await product.save();
+    
+    res.json({
+      success: true,
+      message: `Product ${updatedProduct.isArchived ? 'archived' : 'unarchived'} successfully`,
+      product: updatedProduct
+    });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Error toggling product archive status:', error);
+    res.status(500).json({ 
+      success: false,
+      error: "Failed to update product archive status",
+      details: error.message 
+    });
   }
 });
 
@@ -84,7 +95,7 @@ router.get('/filter', async (req, res) => {
       }
 
       // Fetch products based on the query
-      let products = await ProductsModel.find(query);
+      let products = await Product.find(query);
 
       // Sort by rating if specified
       if (sortBy === 'rating') {
@@ -99,7 +110,6 @@ router.get('/filter', async (req, res) => {
 
 // Route to add a product (accessible by admins or sellers)
 router.post('/', async (req, res) => {
-
   try {
     const newProduct = new Product(req.body);
     await newProduct.save();
@@ -108,7 +118,6 @@ router.post('/', async (req, res) => {
     res.status(400).json({ message: err.message });
   }
 });
-
 
 // Route to edit a product's details (accessible by admins or sellers)
 router.put('/:id', async (req, res) => {

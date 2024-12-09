@@ -50,8 +50,10 @@ const AdminActivityList = () => {
         title: "Success",
         description: `Activity marked as ${!currentFlag ? 'inappropriate' : 'appropriate'}.`
       });
+      navigate('/admin-activities'); 
     } catch (error) {
       console.error('Error toggling inappropriate flag:', error);
+      navigate('/admin-activities'); 
       toast({
         variant: "destructive",
         title: "Error",

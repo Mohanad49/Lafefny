@@ -4,7 +4,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { 
   Activity, Globe, PlusCircle, 
   User, Key, Settings, AlertCircle,
-  Calendar, MapPin, Building, Loader2
+  Calendar, MapPin, Building, Loader2,
+  Trash2
 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
@@ -64,6 +65,23 @@ const AdvertiserHome = () => {
     }
   };
 
+  const handleDeleteActivity = async (activityId) => {
+    try {
+      await axios.delete(`http://localhost:8000/activities/${activityId}`);
+      setActivities(activities.filter(activity => activity._id !== activityId));
+      toast({
+        title: "Success",
+        description: "Activity deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete activity",
+        variant: "destructive",
+      });
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -113,6 +131,12 @@ const AdvertiserHome = () => {
               {activities.map((activity) => (
                 <Card key={activity._id}>
                   <div className="relative h-48">
+                    <button
+                      onClick={() => handleDeleteActivity(activity._id)}
+                      className="absolute top-2 left-2 p-2 bg-white/80 hover:bg-white rounded-full transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </button>
                     <img
                       src={activity.image}
                       alt={activity.name}
@@ -152,7 +176,7 @@ const AdvertiserHome = () => {
                 <Activity className="h-6 w-6 text-primary" />
                 <span className="font-medium">View Activities</span>
               </Link>
-              
+　　 　 　 　
               <Link to="/add-activity"
                 className="p-6 bg-background border border-border rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
                 <PlusCircle className="h-6 w-6 text-primary" />
