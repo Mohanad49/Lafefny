@@ -172,8 +172,8 @@ const App = () => {
           <Route path="/touristAll-Itineraries" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristViewAllItineraries /></ProtectedRoute>} />
           <Route path="/touristMuseums" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristMuseumList /></ProtectedRoute>} />
           <Route path="/touristProducts" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristProductList /></ProtectedRoute>} />
-          <Route path="/add-tourist-itinerary" element={<ProtectedRoute allowedRoles={['Tourist']}><AddTouristItinerary /></ProtectedRoute>} />
-          <Route path="/edit-tourist-itinerary/:id" element={<ProtectedRoute allowedRoles={['Tourist']}><EditTouristItinerary /></ProtectedRoute>} />
+          
+          
           <Route path="/touristHistory/:userID" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHistory /></ProtectedRoute>} />
           <Route path="/my-complaints" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristComplaintList /></ProtectedRoute>} />
           <Route path="/tourist/wishlist" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristWishlist /></ProtectedRoute>} />
@@ -198,8 +198,9 @@ const App = () => {
           <Route path="/add-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddItinerary /></ProtectedRoute>} />
           <Route path="/TourGuide-Itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><ItineraryList /></ProtectedRoute>} />
           <Route path="/edit-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditItinerary /></ProtectedRoute>} />
-
-
+          <Route path="/add-tourist-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddTouristItinerary /></ProtectedRoute>} />
+          <Route path="/edit-tourist-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditTouristItinerary /></ProtectedRoute>} />
+          
           {/* Seller Routes */}
           <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
           <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
