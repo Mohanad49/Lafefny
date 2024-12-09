@@ -67,7 +67,7 @@ const itinerarySchema = new mongoose.Schema({
   tourGuide: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'TourGuide',
-    required: true
+    required: false
   },
   paidBy: [{ type: mongoose.Schema.Types.ObjectId,
     ref: 'Tourist' }],

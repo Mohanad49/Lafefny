@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getItineraries, deleteItinerary, updateItineraryStatus } from '../services/itineraryService';
 import '../styles/ItineraryList.css';
+import axios from 'axios';
 
 const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
@@ -10,6 +11,7 @@ const ItineraryList = () => {
   const [filterType, setFilterType] = useState('');
   const [filterValue, setFilterValue] = useState('');
   const [sortBy, setSortBy] = useState('name');
+  const userId = localStorage.getItem('userID');
 
   useEffect(() => {
     fetchItineraries();
@@ -24,7 +26,9 @@ const ItineraryList = () => {
         sortBy,
       });
       console.log('Fetched itineraries:', response.data);
-      setItineraries(Array.isArray(response.data) ? response.data : []);
+       const ItinerariesRes = await axios.get(`http://localhost:8000/itineraries/tourGuide/${userId}`);
+        const fetchedItineraries = ItinerariesRes.data;
+        setItineraries(fetchedItineraries); // Only show first 4 activities
     } catch (error) {
       console.error('Error fetching itineraries:', error);
       setItineraries([]);

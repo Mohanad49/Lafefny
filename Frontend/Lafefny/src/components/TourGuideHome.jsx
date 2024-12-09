@@ -1,14 +1,98 @@
 /* eslint-disable no-unused-vars */
-import React from 'react';
-import { Link } from 'react-router-dom';
-import { Activity, Calendar, Globe, MapPin, Plus, Tag, Shield } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { Activity, Calendar, Globe, MapPin, Plus, Tag, Shield, Trash2, Loader2 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
 import NotificationBell from './NotificationBell';
 import '../styles/homePage.css'; // Ensure this path is correct
 import SalesReport from './SalesReport';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { useToast } from '@/components/ui/use-toast';
+import axios from 'axios';
 
 const TourGuideHome = () => {
+  const [itineraries, setItineraries] = useState([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+  const navigate = useNavigate();
+  const userId = localStorage.getItem('userID');
+
+  useEffect(() => {
+    if (!userId) {
+      toast({
+        title: "Error",
+        description: "User ID not found. Please login again.",
+        variant: "destructive",
+      });
+      navigate('/login');
+      return;
+    }
+    fetchItineraries();
+  }, [userId]);
+
+  const fetchItineraries = async () => {
+    try {
+      const response = await axios.get(`http://localhost:8000/itineraries/tourGuide/${userId}`);
+      const fetchedItineraries = response.data;
+      setItineraries(fetchedItineraries.slice(0, 4)); // Only show first 4 itineraries
+      setIsLoading(false);
+    } catch (error) {
+      console.error('Error fetching itineraries:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch itineraries",
+        variant: "destructive",
+      });
+      setItineraries([]);
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteItinerary = async (itineraryId) => {
+    try {
+      await axios.delete(`http://localhost:8000/itineraries/${itineraryId}`);
+      setItineraries(itineraries.filter(itinerary => itinerary._id !== itineraryId));
+      toast({
+        title: "Success",
+        description: "Itinerary deleted successfully",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to delete itinerary",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const toggleActiveStatus = async (id, currentStatus) => {
+    try {
+      await axios.patch(`http://localhost:8000/itineraries/${id}/toggleActive`, { isActive: !currentStatus });
+      fetchItineraries();
+    } catch (error) {
+      console.error('Error toggling itinerary status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to toggle itinerary status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleClick = (id) => {
+    navigate(`/tours/${id}`);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
@@ -88,21 +172,61 @@ const TourGuideHome = () => {
           </div>
         </section>
 
-        {/* Upcoming Activities */}
+        {/* Your Itineraries Section */}
         <section className="bg-white px-6 lg:px-8 py-12">
           <div className="mx-auto max-w-7xl">
             <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-primary">Upcoming Activities</h2>
-              <Link to="/Activities" className="text-sm font-medium text-primary hover:text-accent transition-colors">
+              <h2 className="text-2xl font-bold text-primary">Your Itineraries</h2>
+              <Link to="/tours" className="text-sm font-medium text-primary hover:text-accent transition-colors">
                 View All
               </Link>
             </div>
-            <div className="grid gap-4">
-              {/* Add upcoming activities here */}
-              <div className="text-center py-12 bg-slate-50/50 rounded-xl">
-                <Calendar className="h-12 w-12 text-slate-300 mx-auto mb-4" />
-                <p className="text-slate-500">No upcoming activities</p>
-              </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              {itineraries.map((itinerary) => (
+                <Card key={itinerary._id} onClick={() => handleClick(itinerary._id)}>
+                  <div className="relative h-48">
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteItinerary(itinerary._id);
+                      }}
+                      className="absolute top-2 left-2 p-2 bg-white/80 hover:bg-white rounded-full transition-colors"
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </button>
+                    <img
+                      src={itinerary.image}
+                      alt={itinerary.name}
+                      className="w-full h-full object-cover rounded-t-lg"
+                    />
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-semibold mb-2">{itinerary.name}</h3>
+                    <p className="text-sm text-gray-500 line-clamp-2 mb-3">
+                      {itinerary.description}
+                    </p>
+                    <div className="flex justify-between items-center">
+                      
+                      <Button variant="outline" size="sm" onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/edit-itinerary/${itinerary._id}`);
+                      }}>
+                        Edit
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          toggleActiveStatus(itinerary._id, itinerary.isActive);
+                        }}
+                      >
+                        {itinerary.isActive ? 'Deactivate' : 'Activate'}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
             </div>
           </div>
         </section>

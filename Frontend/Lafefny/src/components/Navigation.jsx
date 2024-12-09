@@ -250,6 +250,10 @@ const Navigation = () => {
                         <House className="h-5 w-5" />
                           Home
                       </Link>
+                      <Link to= "/TourGuide-Itinerary" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <House className="h-5 w-5" />
+                          My Itineraries
+                      </Link>
                       <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                         <MapPin className="h-5 w-5" />
                         Destinations

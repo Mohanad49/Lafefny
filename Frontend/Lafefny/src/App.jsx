@@ -196,6 +196,9 @@ const App = () => {
           <Route path="/viewTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><UpdateTourGuideInfo /></ProtectedRoute>} />
           <Route path="/uploadTourGuideDocs" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuideDocs /></ProtectedRoute>} />
           <Route path="/add-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddItinerary /></ProtectedRoute>} />
+          <Route path="/TourGuide-Itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><ItineraryList /></ProtectedRoute>} />
+          <Route path="/edit-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditItinerary /></ProtectedRoute>} />
+
 
           {/* Seller Routes */}
           <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />

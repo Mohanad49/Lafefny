@@ -70,16 +70,16 @@ const AddItinerary = () => {
       <Navigation />
       
       <main className="container mx-auto px-4 py-8">
-        <Button 
-          variant="ghost" 
-          className="mb-6 hover:bg-transparent"
+      <button
           onClick={() => navigate(-1)}
+          className="flex items-center gap-2 text-muted-foreground hover:text-primary mb-8"
         >
-          <ArrowLeft className="h-5 w-5 mr-2" />
+          <ArrowLeft className="h-4 w-4" />
           Back
-        </Button>
+        </button>
 
         <Card>
+          
           <CardHeader>
             <CardTitle className="text-2xl flex items-center gap-2">
               <Calendar className="h-6 w-6" />

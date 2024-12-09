@@ -107,7 +107,7 @@ router.delete('/:id', async (req, res) => {
 
     const itinerary = await Itinerary.findById(req.params.id);
 
-    if (itinerary.bookings.length > 0) {
+    if (itinerary.touristBookings.length > 0) {
 
       return res.status(400).json({ error: 'Cannot delete itinerary with existing bookings' });
 
@@ -604,47 +604,27 @@ router.patch('/:id/toggleInappropriate', async (req, res) => {
 
 
 router.get('/tourGuide/:id', async (req, res) => {
-
   const tourGuideId = req.params.id;
-
   
-
+  // Validate advertiser ID
   if (!mongoose.isValidObjectId(tourGuideId)) {
-
-    return res.status(400).json({ error: "Invalid tourGuide ID" });
-
+      return res.status(400).json({ error: "Invalid advertiser ID" });
   }
-
-
 
   try {
+      const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
+      
+      if (!itineraries.length) {
+          return res.status(404).json({ message: "No activities found for this advertiser" });
+      }
 
-    const itineraries = await Itinerary.find({ tourGuide: tourGuideId });
-
-    
-
-    if (!itineraries.length) {
-
-      return res.status(404).json({ message: "No itineraries found for this tour guide" });
-
-    }
-
-
-
-    res.status(200).json(itineraries);
-
+      res.status(200).json(itineraries);
   } catch (error) {
-
-    res.status(500).json({ 
-
-      error: "Error fetching itineraries",
-
-      details: error.message 
-
-    });
-
+      res.status(500).json({ 
+          error: "Error fetching itineraries",
+          details: error.message 
+      });
   }
-
 });
 
 
