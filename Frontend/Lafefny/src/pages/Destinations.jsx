@@ -2,6 +2,8 @@ import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { MapPin } from "lucide-react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ArrowLeft } from 'lucide-react';
 const destinations = [
   {
     name: "Santorini, Greece",
@@ -46,13 +48,23 @@ const destinations = [
     rating: 4.9,
   }
 ];
+
 const Destinations = () => {
+  const { id } = useParams();
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      
+
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
           <div className="text-center mb-16">
             <h1 className="text-4xl md:text-5xl font-bold tracking-tight text-primary mb-6">
               Popular Destinations

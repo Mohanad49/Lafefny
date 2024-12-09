@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card, CardContent } from "@/components/ui/card";
-import { History, MapPin, Clock } from "lucide-react";
+import { History, MapPin, Clock , ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { Input } from "@/components/ui/input";
@@ -104,6 +104,13 @@ const HistoricalPlaces = () => {
       
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center p-3 bg-accent/10 rounded-full mb-6">
               <History className="h-8 w-8 text-primary" />

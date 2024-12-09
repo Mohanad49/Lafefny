@@ -22,8 +22,9 @@ import {
     Camera,
     Share2,
     Bookmark,
-    BookmarkCheck
-  } from "lucide-react";
+    BookmarkCheck,
+    ArrowLeft
+    } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { Input } from "@/components/ui/input";
@@ -346,6 +347,13 @@ const Activities = () => {
       
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
           <div className="text-center mb-16">
             <div className="inline-flex items-center justify-center p-3 bg-accent/10 rounded-full mb-6">
               <Activity className="h-8 w-8 text-primary" />

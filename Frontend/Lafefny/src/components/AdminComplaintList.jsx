@@ -80,16 +80,18 @@ const AdminComplaintList = () => {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container relative min-h-screen flex-col items-start justify-start grid lg:max-w-none lg:grid-cols-1 lg:px-0">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-4 top-4 flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
+      
 
         <div className="w-full space-y-6 p-8">
+          
           <div className="flex flex-col space-y-2">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
             <h1 className="text-2xl font-semibold tracking-tight">Complaints</h1>
             <p className="text-sm text-muted-foreground">
               Manage and view all complaints

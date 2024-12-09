@@ -65,15 +65,16 @@ export default function AdminNumberOfUsers() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container relative min-h-screen flex-col items-center justify-center grid lg:max-w-none lg:grid-cols-1 lg:px-0">
-        <button
-          onClick={() => navigate(-1)}
-          className="absolute left-4 top-4 flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Back
-        </button>
-
+      
         <div className="lg:p-8">
+        <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
+
           <div className="mx-auto flex w-full flex-col justify-center space-y-6">
             <div className="flex flex-col space-y-2 text-center mb-8">
               <h1 className="text-2xl font-semibold tracking-tight">

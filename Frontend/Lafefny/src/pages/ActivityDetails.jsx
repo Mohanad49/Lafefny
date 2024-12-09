@@ -11,6 +11,7 @@ import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { useCurrency, currencies } from '../context/CurrencyContext';
 import { useToast } from "@/components/ui/use-toast";
+import { ArrowLeft } from 'lucide-react';
 
 const ActivityDetails = () => {
     const [activity, setActivity] = useState(null);
@@ -187,6 +188,13 @@ const ActivityDetails = () => {
 
             <main className="pt-24 pb-16 px-6">
                 <div className="max-w-7xl mx-auto">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                    </button>
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Main Content */}
                         <div className="lg:col-span-2 space-y-8">

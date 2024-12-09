@@ -1,15 +1,16 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { MapPin, Clock, Tag, Star, History } from "lucide-react";
+import { MapPin, Clock, Tag, Star, History, ArrowLeft } from "lucide-react";
 import { getMuseumById } from '../services/museumService';
 
 const HistoricalPlaceDetails = () => {
   const { id } = useParams();
-  
+  const navigate = useNavigate();
+
   const { data: museum, isLoading, error } = useQuery({
     queryKey: ["museum", id],
     queryFn: () => getMuseumById(id).then(res => res.data),
@@ -42,6 +43,13 @@ const HistoricalPlaceDetails = () => {
       
       <main className="pt-24 pb-16 px-6">
         <div className="max-w-7xl mx-auto">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex items-center gap-2 text-muted-foreground hover:text-foreground text-sm mb-4 md:mb-0 hover:translate-x-1 transition-transform"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </button>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Main Content */}
             <div className="lg:col-span-2 space-y-8">
@@ -152,4 +160,5 @@ const HistoricalPlaceDetails = () => {
     </div>
   );
 };
+
 export default HistoricalPlaceDetails;
