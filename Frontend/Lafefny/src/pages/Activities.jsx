@@ -498,14 +498,8 @@ const Activities = () => {
                         >
                           {activity.booked ? "Cancel Booking" : "Book Now"}
                         </Button>
-                      ) : !isLoggedIn ? (
-                        <Button
-                          className="w-full"
-                          onClick={() => navigate('/sign')}
-                        >
-                          Sign in to book
-                        </Button>
-                      ) : (
+                      ) 
+                      : (
                         <div className="w-full h-10" /> // Empty space with same height as button
                       )}
                       <Button

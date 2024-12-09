@@ -409,8 +409,9 @@ const TourDetails = () => {
                     </ScrollArea>
                   </div>
 
+                  {/* Inside the Card in the sidebar */}
                   <div className="flex flex-col gap-4">
-                    {isLoggedIn && isTourist && (
+                    {isTourist ? (
                       <div className="flex gap-4">
                         <Button 
                           className={`flex-1 ${tour.booked ? 'bg-red-500 hover:bg-red-600' : ''}`}
@@ -430,6 +431,18 @@ const TourDetails = () => {
                           )}
                         </Button>
                       </div>
+                    ) : !isLoggedIn ? (
+                      <div className="flex gap-4">
+                        <Button 
+                          className="flex-1"
+                          onClick={() => navigate('/sign')}
+                        >
+                          Sign in to book
+                        </Button>
+                        <div className="w-12" /> {/* Spacer to maintain layout */}
+                      </div>
+                    ) : (
+                      <div className="h-1" /> /* Empty space for other logged-in user types */
                     )}
                   </div>
 
