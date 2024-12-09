@@ -73,6 +73,7 @@ router.post("/", async (req, res) => {
           console.error('Tourist not found');
           return res.status(404).json({ error: 'Tourist not found' });
         }
+        await updateLoyaltyPoints(touristId, itinerary.price);
       } else if (method === 'wallet') {
         tourist = await Tourist.findOne({ userID: touristId });
         if (!tourist) {
@@ -84,6 +85,7 @@ router.post("/", async (req, res) => {
           return res.status(400).json({ error: 'Insufficient wallet balance' });
         }
         tourist.wallet -= itinerary.price;
+        await updateLoyaltyPoints(touristId, itinerary.price);
         await tourist.save();
       }
   
