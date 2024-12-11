@@ -4,6 +4,7 @@ const TouristItinerary = require('../Models/Tourist-itinerary');
 const Seller = require('../Models/sellerModel');
 const Advertiser = require('../Models/advertiserModel');
 const TourGuide = require('../Models/tourGuideModel');
+const mongoose = require('mongoose');
 
 const userSalesReportService = {
   // For Sellers (Gift Shop)
@@ -129,11 +130,10 @@ const userSalesReportService = {
       const advertiser = await Advertiser.findOne({ userID: userId });
       if (!advertiser) throw new Error('Advertiser not found');
 
-      // Build match conditions based on filters
+      // Build match conditions
       const matchConditions = {
-        advertiser: advertiser._id,
-        date: { $gte: start, $lte: end },
-        paidBy: { $exists: true, $not: { $size: 0 } }
+        advertiser: userId,
+        date: { $gte: start, $lte: end }
       };
 
       // Add specific activity filter if provided
@@ -142,23 +142,22 @@ const userSalesReportService = {
       }
 
       // Add month/year filters if provided
-      if (month) {
-        matchConditions.$expr = {
-          $eq: [{ $month: '$date' }, parseInt(month)]
-        };
-      }
-      if (year) {
-        if (matchConditions.$expr) {
-          matchConditions.$expr = {
-            $and: [
-              matchConditions.$expr,
-              { $eq: [{ $year: '$date' }, parseInt(year)] }
-            ]
-          };
-        } else {
-          matchConditions.$expr = { 
-            $eq: [{ $year: '$date' }, parseInt(year)] 
-          };
+      if (month || year) {
+        matchConditions.$expr = {};
+        if (month) {
+          matchConditions.$expr.$eq = [{ $month: '$date' }, parseInt(month)];
+        }
+        if (year) {
+          if (matchConditions.$expr.$eq) {
+            matchConditions.$expr = {
+              $and: [
+                { $eq: [{ $month: '$date' }, parseInt(month)] },
+                { $eq: [{ $year: '$date' }, parseInt(year)] }
+              ]
+            };
+          } else {
+            matchConditions.$expr.$eq = [{ $year: '$date' }, parseInt(year)];
+          }
         }
       }
 
@@ -167,14 +166,35 @@ const userSalesReportService = {
           $match: matchConditions
         },
         {
+          $addFields: {
+            // Combine both touristBookings and paidBy arrays for total bookings
+            allBookings: {
+              $setUnion: [
+                { $ifNull: ['$touristBookings', []] },
+                { $ifNull: ['$paidBy', []] }
+              ]
+            }
+          }
+        },
+        {
+          $project: {
+            name: 1,
+            date: 1,
+            price: 1,
+            allBookings: 1,
+            'ratings.averageRating': 1,
+            bookingsCount: { $size: '$allBookings' }
+          }
+        },
+        {
           $group: {
             _id: {
               month: { $month: '$date' },
               year: { $year: '$date' },
               activity: '$name'
             },
-            revenue: { $sum: { $multiply: ['$price', { $size: '$paidBy' }] } },
-            bookings: { $sum: { $size: '$paidBy' } },
+            revenue: { $sum: { $multiply: ['$price', '$bookingsCount'] } },
+            bookings: { $sum: '$bookingsCount' },
             averageRating: { $first: '$ratings.averageRating' }
           }
         },
@@ -185,6 +205,12 @@ const userSalesReportService = {
           }
         }
       ]);
+
+      console.log('Sales Report Data:', {
+        activities,
+        matchConditions,
+        advertiserId: userId
+      });
 
       return {
         period: { start, end },
@@ -202,11 +228,13 @@ const userSalesReportService = {
           totalRevenue: activities.reduce((acc, curr) => acc + curr.revenue, 0),
           totalBookings: activities.reduce((acc, curr) => acc + curr.bookings, 0),
           totalActivities: activities.length,
-          averageRating: activities.reduce((acc, curr) => acc + (curr.averageRating || 0), 0) / 
-                        (activities.filter(a => a.averageRating).length || 1)
+          averageRating: activities.length > 0 
+            ? activities.reduce((acc, curr) => acc + (curr.averageRating || 0), 0) / activities.length 
+            : 0
         }
       };
     } catch (error) {
+      console.error('Error in getAdvertiserSalesReport:', error);
       throw error;
     }
   },

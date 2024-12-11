@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
 import axios from 'axios';
-import SalesReport from './SalesReport';
+import SalesReport from './AdvertiserSalesReport';
 
 const AdvertiserHome = () => {
   const [activities, setActivities] = useState([]);
@@ -163,7 +163,6 @@ const AdvertiserHome = () => {
           </div>
 
           <section className="bg-white p-6 rounded-lg shadow-sm">
-            <h2 className="text-2xl font-bold mb-6">Sales Report</h2>
             <SalesReport />
           </section>
 
@@ -176,7 +175,7 @@ const AdvertiserHome = () => {
                 <Activity className="h-6 w-6 text-primary" />
                 <span className="font-medium">View Activities</span>
               </Link>
-　　 　 　 　
+
               <Link to="/add-activity"
                 className="p-6 bg-background border border-border rounded-xl hover:border-accent transition-all flex flex-col items-center gap-2">
                 <PlusCircle className="h-6 w-6 text-primary" />

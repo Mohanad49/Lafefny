@@ -79,6 +79,15 @@ The project uses Prettier with the following key settings:
 }
 ```
 
+# ScreenShots
+Landing Page:
+![image](https://github.com/user-attachments/assets/88cb4081-dc96-465a-96c8-51cf0701f666)
+Activities Page:
+![image](https://github.com/user-attachments/assets/20d36ee4-3ba7-4b22-9c5e-85cb41c23ce4)
+Itineraries Page:
+![image](https://github.com/user-attachments/assets/ed4af6ed-e663-4759-9008-f1911e15d5b1)
+
+
 # Tech/Framework Used
 Frontend
 - React 18.3.1 with Vite

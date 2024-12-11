@@ -6,7 +6,7 @@ import Navigation from './Navigation';
 import Footer from './Footer';
 import NotificationBell from './NotificationBell';
 import '../styles/homePage.css'; // Ensure this path is correct
-import SalesReport from './SalesReport';
+import SalesReport from './TourGuideSalesReport';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/components/ui/use-toast';
@@ -234,12 +234,6 @@ const TourGuideHome = () => {
         {/* Sales Report Section */}
         <section className="px-6 lg:px-8 py-12 bg-slate-50">
           <div className="mx-auto max-w-7xl">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-2xl font-bold text-primary">Sales Report</h2>
-              <Link to="/sales-report" className="text-sm font-medium text-primary hover:text-accent transition-colors">
-                View Detailed Report
-              </Link>
-            </div>
             <SalesReport />
           </div>
         </section>

@@ -5,7 +5,7 @@ import {
   Activity, History, ChevronDown, User, LogOut, ShoppingCart,
   Calendar, Landmark, Building, Car, ShoppingBag, Package, 
   Lock, Heart, MessageSquare, List, Trash2, Bell,
-  AlertTriangle, House
+  AlertTriangle, House, FileText
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "./ui/sheet";
 import { Input } from "./ui/input";
@@ -214,8 +214,8 @@ const Navigation = () => {
                           Home
                       </Link>
                       <Link to= "/ActivityReport" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
-                        <House className="h-5 w-5" />
-                          Activty Reports
+                        <Activity className="h-5 w-5" />
+                          Activity Reports
                       </Link>
                       <Link to="/destinations" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                         <MapPin className="h-5 w-5" />
@@ -273,6 +273,10 @@ const Navigation = () => {
                       <Link to="/about" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
                         <NavigationIcon className="h-5 w-5" />
                         About
+                      </Link>
+                      <Link to="/viewItinerariesReport" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
+                        <FileText className="h-5 w-5" />
+                        Itineraries Reports
                       </Link>
                     </div>
                   </div>
@@ -511,7 +515,7 @@ const Navigation = () => {
           <Link to="/destinations" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
             Destinations
           </Link>
-          <Link to="/tours" className="text-gray-600 hover:text-gray-900 font-medium transition-colors">
+          <Link to="/tours" className="flex items-center gap-3 text-lg text-gray-600 hover:text-gray-900 transition-colors">
             Tours
           </Link>
           <div className="relative group" ref={currencyDropdownRef}>
@@ -667,7 +671,7 @@ const Navigation = () => {
                   </div>
                 )}
               </div>
-　　 　 　 　 {isTourist && (
+              {isTourist && (
                 <Link 
                   to="/tourist/cart"
                   className="relative p-2 text-gray-600 hover:text-gray-900 transition-colors"
