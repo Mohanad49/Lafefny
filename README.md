@@ -86,6 +86,31 @@ Activities Page:
 ![image](https://github.com/user-attachments/assets/20d36ee4-3ba7-4b22-9c5e-85cb41c23ce4)
 Itineraries Page:
 ![image](https://github.com/user-attachments/assets/ed4af6ed-e663-4759-9008-f1911e15d5b1)
+Museums Page:
+![Museums page](https://github.com/user-attachments/assets/495a8872-3384-4809-afac-22ff260f642f)
+About Page:
+![About](https://github.com/user-attachments/assets/5816b899-3883-4660-9e1f-ff632a7db58f)
+Activity Details Page:
+![Activity_details](https://github.com/user-attachments/assets/3ef06cf7-77c2-4eef-b0eb-5524c8c5bf11)
+Itinerary Details Page:
+![Itinerary_Details](https://github.com/user-attachments/assets/9018c63b-0bcc-4e9d-838a-afb1b3366a30)
+Museum Details Page:
+![Museum_details](https://github.com/user-attachments/assets/b6513997-f974-4484-bab5-66db83b19069)
+Sign In Page:
+![Sign_in](https://github.com/user-attachments/assets/9f3d68e9-eb7c-4fc6-95d6-72be103ae2af)
+Sign Up Page:
+![Sign_up](https://github.com/user-attachments/assets/88f51b1d-0f24-435f-9b70-69d96dee8b23)
+Tourist Profile:
+![Tourist_Profile](https://github.com/user-attachments/assets/c78cbc46-eeb4-4969-a8ca-60f51e67274d)
+Complaint Form Page:
+![Complaint](https://github.com/user-attachments/assets/97bf004e-dea3-493f-8680-d1649beda32e)
+My Orders Page:
+![My_orders](https://github.com/user-attachments/assets/bfae2f3f-0886-4ab2-a50b-ceabe5ea1f4f)
+Password Change Page:
+![Password_Change](https://github.com/user-attachments/assets/d2fbf2c0-5939-4d2a-80ea-4a3016e22e2a)
+Select Preferences Page:
+![Preferences](https://github.com/user-attachments/assets/20112fab-98b1-4635-a89b-71c5bbadc483)
+
 
 
 # Tech/Framework Used
@@ -443,6 +468,10 @@ PUT /reject/:id                // Reject user registration
 // Admin Creation
 POST /add-admin               // Add new admin
 ```
+
+# Test Routes
+Postman Collection Link:
+https://www.postman.com/mohanadyehia/workspace/lafefny/collection/26045583-162122a6-d8d0-4119-a463-f42c53f398fd?action=share&creator=26045583
 
 # How to Use Lafefny
 User Registeration & Login:
