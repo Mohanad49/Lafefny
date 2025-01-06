@@ -1,6 +1,6 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const Stripe = require('stripe');
-const stripe = Stripe('sk_test_51QP8ZuEtF2Lqtv9Ot7NSnBhK0kJZETF9drygd2IHJekzjAMrwZPIEs3yQqPLPQn4sKHg9lpgInOQZ7hs2nyYMMqC00GMInqDLx');
+const stripe = Stripe(process.env.STRIPE_SECRET_KEY);
 
 const processCardPayment = async (paymentMethodId, amount) => {
   try {
