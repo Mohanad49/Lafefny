@@ -1,9 +1,9 @@
 const express = require('express');
 const router = express.Router();
-const { checkBirthdays } = require('../services/birthdayPromoService');
+const { checkBirthdays } = require('../Services/birthdayPromoService');
 const User = require('../Models/User');
 const PromoCode = require('../Models/PromoCode');
-const { sendPromoCodeEmail } = require('../services/emailService');
+const { sendPromoCodeEmail } = require('../Services/emailService');
 
 // New GET route to retrieve users with birthdays today
 router.get('/birthdays-today', async (req, res) => {
