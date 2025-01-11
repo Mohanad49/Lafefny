@@ -41,7 +41,7 @@ const StripePaymentForm = ({ onPaymentSuccess, total, currencySymbol, selectedAd
       
       // Create payment intent
       const { data } = await axios.post(
-        `http://localhost:8000/tourist/${userId}/create-payment-intent`,
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/create-payment-intent`,
         {
           amount: Math.round(total * 100), // Convert to cents
           currency: 'usd'
@@ -155,11 +155,11 @@ const CheckoutPage = () => {
         }
         
         // Fetch cart items
-        const cartResponse = await axios.get(`http://localhost:8000/tourist/${userId}/cart`);
+        const cartResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/cart`);
         setCartItems(cartResponse.data);
 
         // Fetch addresses
-        const addressResponse = await axios.get(`http://localhost:8000/tourist/${userId}/addresses`);
+        const addressResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses`);
         const addressData = addressResponse.data;
         setAddresses(addressData);
         
@@ -172,7 +172,7 @@ const CheckoutPage = () => {
         }
 
         // Fetch wallet balance
-        const walletResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userId}`);
+        const walletResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/getTouristInfo/${userId}`);
         if (walletResponse.data && walletResponse.data.length > 0) {
           setWalletBalance(walletResponse.data[0].wallet || 0);
         }
@@ -214,7 +214,7 @@ const CheckoutPage = () => {
       const userId = localStorage.getItem('userID');
       
 
-      const deductResponse = await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
+      const deductResponse = await axios.post(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wallet/deduct`, {
         amount: total
       });
   
@@ -223,7 +223,7 @@ const CheckoutPage = () => {
       }
       // Create order with wallet payment
       const orderResponse = await axios.post(
-        `http://localhost:8000/tourist/${userId}/orders`,
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/orders`,
         {
           products: cartItems.map(item => ({
             productId: item._id,
@@ -236,9 +236,9 @@ const CheckoutPage = () => {
         }
       );
       // Deduct from wallet
-      // await axios.post(`http://localhost:8000/tourist/${userId}/wallet/deduct`, {
-      //   amount: total
-      // });
+      await axios.post(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wallet/deduct`, {
+        amount: total
+      });
 
       toast({
         title: "Order Placed Successfully",
@@ -333,7 +333,7 @@ const CheckoutPage = () => {
 
       setProcessing(true);
       const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/addresses`,
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses`,
         newAddress
       );
 
@@ -387,7 +387,7 @@ const CheckoutPage = () => {
         selectedAddress: addresses[selectedAddress]
       };
 
-      await axios.post(`http://localhost:8000/tourist/${userId}/orders`, orderData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/tourist/${userId}/orders`, orderData);
       toast({
         title: "Success",
         description: "Order placed successfully!"
@@ -429,7 +429,7 @@ const CheckoutPage = () => {
       console.log('Creating order with data:', orderData);
 
       const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/orders`, 
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/orders`, 
         orderData
       );
 

@@ -21,7 +21,7 @@ const OrderDetails = () => {
   const fetchOrderDetails = async () => {
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/tourist/${userId}/orders/${orderId}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/orders/${orderId}`);
       console.log('Fetched order details:', response.data);
       setOrder(response.data);
       setLoading(false);
@@ -39,7 +39,7 @@ const OrderDetails = () => {
       }
 
       const userId = localStorage.getItem('userID');
-      await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
+      await axios.put(`${import.meta.env.VITE_API_URL}/tourist/${userId}/orders/${orderId}/cancel`);
       
       await fetchOrderDetails();
       alert('Order cancelled successfully');

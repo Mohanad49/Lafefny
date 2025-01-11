@@ -24,7 +24,7 @@ const TouristComplaintList = () => {
 
   const fetchUserComplaints = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8000/complaints/user/${userId}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/complaints/user/${userId}`);
       if (!response.ok) throw new Error('Failed to fetch complaints');
       const data = await response.json();
       setComplaints(data);
@@ -80,7 +80,7 @@ const TouristComplaintList = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/complaints', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/complaints`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

@@ -16,7 +16,7 @@ const NotificationBell = () => {
 
   const fetchNotifications = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/notifications/${userId}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/notifications/${userId}`);
       setNotifications(response.data);
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -25,7 +25,7 @@ const NotificationBell = () => {
 
   const markAsRead = async (notificationId) => {
     try {
-      await axios.patch(`http://localhost:8000/notifications/${notificationId}/read`);
+      await axios.patch(`${import.meta.env.VITE_API_URL}/notifications/${notificationId}/read`);
       fetchNotifications();
     } catch (error) {
       console.error('Error marking notification as read:', error);

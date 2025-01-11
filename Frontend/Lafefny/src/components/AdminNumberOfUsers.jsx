@@ -33,8 +33,8 @@ export default function AdminNumberOfUsers() {
     const fetchNumOfUsers = async () => {
       try {
         setLoading(true);
-        const users = await axios.get('http://localhost:8000/admin/numberOfUsers');
-        const newUsers = await axios.get('http://localhost:8000/admin/numberOfNewUsers');
+        const users = await axios.get(`${import.meta.env.VITE_API_URL}/admin/numberOfUsers`);
+        const newUsers = await axios.get(`${import.meta.env.VITE_API_URL}/admin/numberOfNewUsers`);
         setNumOfUsers({
           totalNum: users.data,
           monthlyUsers: newUsers.data

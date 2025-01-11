@@ -56,7 +56,7 @@ const BookFlights = () => {
         }
   
         // Get tourist data (includes both user and tourist info)
-        const touristResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userId}`);
+        const touristResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/getTouristInfo/${userId}`);
         
         if (!touristResponse.data) {
           throw new Error('Tourist data not found');
@@ -106,7 +106,7 @@ const BookFlights = () => {
         max: 10
       };
 
-      const response = await axios.get('http://localhost:8000/amadeus/search-flights', { params });
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/amadeus/search-flights`, { params });
       if (!response.data || response.data.length === 0) {
         setError('No flights found for the selected criteria. Please try different dates or destinations.');
         return;
@@ -131,7 +131,7 @@ const BookFlights = () => {
       return;
     }
 
-    const response = await axios.post('http://localhost:8000/tourist/addFlightBooking', {
+    const response = await axios.post(`${import.meta.env.VITE_API_URL}/tourist/addFlightBooking`, {
       userId,
       flightDetails: {
         validatingAirlineCodes: flight.validatingAirlineCodes,

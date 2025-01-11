@@ -11,7 +11,7 @@ const SellerDelete = () => {
     if (!confirmed) return;
 
     try {
-      const response = await fetch(`http://localhost:8000/seller-delete/${sellerId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/seller-delete/${sellerId}`, {
         method: 'DELETE',
         headers: {
           'Content-Type': 'application/json',

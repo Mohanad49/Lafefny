@@ -46,8 +46,8 @@ const Bookmarks = () => {
         }
 
         const [activitiesResponse, toursResponse] = await Promise.all([
-          axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-activities`),
-          axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-tours`)
+          axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmarked-activities`),
+          axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmarked-tours`)
         ]);
 
         setBookmarkedActivities(activitiesResponse.data);
@@ -71,7 +71,7 @@ const Bookmarks = () => {
   const handleRemoveBookmark = async (itemId, type) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.post(`http://localhost:8000/tourist/${userId}/bookmark-${type}/${itemId}`);
+      await axios.post(`${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmark-${type}/${itemId}`);
       
       if (type === 'activity') {
         setBookmarkedActivities(prev => prev.filter(item => item._id !== itemId));

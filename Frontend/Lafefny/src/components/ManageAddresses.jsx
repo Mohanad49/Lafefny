@@ -27,7 +27,7 @@ const ManageAddresses = () => {
   const fetchAddresses = async () => {
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/tourist/${userId}/addresses`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses`);
       setAddresses(response.data);
     } catch (error) {
       console.error('Error fetching addresses:', error);
@@ -51,12 +51,12 @@ const ManageAddresses = () => {
       console.log('Attempting to add address:', {
         userId,
         address: newAddress,
-        url: `http://localhost:8000/tourist/${userId}/addresses`
+        url: `${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses`
       });
 
       const response = await axios({
         method: 'post',
-        url: `http://localhost:8000/tourist/${userId}/addresses`,
+        url: `${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses`,
         data: newAddress,
         headers: {
           'Content-Type': 'application/json',
@@ -104,7 +104,7 @@ const ManageAddresses = () => {
   const handleEditAddress = async (index) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.put(`http://localhost:8000/tourist/${userId}/addresses/${index}`, newAddress);
+      await axios.put(`${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses/${index}`, newAddress);
       fetchAddresses();
       setEditIndex(null);
       setNewAddress({
@@ -124,7 +124,7 @@ const ManageAddresses = () => {
   const handleDeleteAddress = async (index) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.delete(`http://localhost:8000/tourist/${userId}/addresses/${index}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/tourist/${userId}/addresses/${index}`);
       fetchAddresses();
     } catch (error) {
       console.error('Error deleting address:', error);

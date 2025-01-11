@@ -111,12 +111,12 @@ const FlightBookingPopup = ({ flight, onClose, onBookingSuccess, userData }) => 
       };
 
       // First, get the price offer
-      const priceResponse = await axios.get('http://localhost:8000/amadeus/flight-price-offers', {
+      const priceResponse = await axios.get(`${import.meta.env.VITE_API_URL}/amadeus/flight-price-offers`, {
         params: { flightOfferId: JSON.stringify(flight) }
       });
 
       // Then book the flight with the complete flight offer and traveler details
-      const bookingResponse = await axios.post('http://localhost:8000/amadeus/book-flight', {
+      const bookingResponse = await axios.post(`${import.meta.env.VITE_API_URL}/amadeus/book-flight`, {
         flightOffer: flight,
         traveler: formattedData
       });
@@ -255,7 +255,7 @@ const FlightBookingPopup = ({ flight, onClose, onBookingSuccess, userData }) => 
 
             <div className="border-t border-gray-200 pt-6">
               <div className="flex items-center gap-3 mb-4">
-                <Passport className="text-primary h-5 w-5" />
+                <BookOpen className="text-primary h-5 w-5" />
                 <h3 className="text-lg font-semibold text-gray-800">Passport Information</h3>
               </div>
 

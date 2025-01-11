@@ -28,7 +28,7 @@ const HistoricalPlaces = () => {
   useEffect(() => {
     const fetchMuseums = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/museums'); 
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/museums`); 
         setMuseums(response.data);
       } catch (err) {
         setError(err.message);

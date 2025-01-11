@@ -53,7 +53,7 @@ const ChangePassword = () => {
         return;
       }
 
-      const response = await fetch(`http://localhost:8000/change-password/${localStorage.getItem("userID")}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/change-password/${localStorage.getItem("userID")}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',

@@ -29,7 +29,7 @@ const ActivityDetails = () => {
 
     const getActivityDetails = async (id) => {
         try {
-            const response = await axios.get(`http://localhost:8000/activities/${id}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/activities/${id}`);
             const updatedActivity = {
                 ...response.data,
                 booked: response.data.paidBy?.includes(touristId),
@@ -52,7 +52,7 @@ const ActivityDetails = () => {
         
         try {
             const userId = localStorage.getItem('userID');
-            const response = await axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-activities`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmarked-activities`);
             const bookmarkedIds = new Set(response.data.map(activity => activity._id));
             setIsBookmarked(bookmarkedIds.has(activityId));
         } catch (error) {
@@ -73,7 +73,7 @@ const ActivityDetails = () => {
         try {
             const userId = localStorage.getItem('userID');
             const response = await axios.post(
-                `http://localhost:8000/tourist/${userId}/bookmark-activity/${activity._id}`
+                `${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmark-activity/${activity._id}`
             );
 
             setIsBookmarked(response.data.isBookmarked);
@@ -128,7 +128,7 @@ const ActivityDetails = () => {
                     });
                     return;
                 }
-                const response = await axios.post(`http://localhost:8000/activities/${activity._id}/cancel`, { touristId });
+                const response = await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activity._id}/cancel`, { touristId });
                 setActivity(prev => ({ ...prev, booked: false }));
                 setBookedActivities(prev => {
                     const newSet = new Set(prev);
@@ -141,7 +141,7 @@ const ActivityDetails = () => {
                 });
             } else {
                 // Handle booking
-                await axios.post(`http://localhost:8000/activities/${activity._id}/book`, { touristId });
+                await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activity._id}/book`, { touristId });
                 setActivity(prev => ({ ...prev, booked: true }));
                 setBookedActivities(prev => {
                     const newSet = new Set(prev);

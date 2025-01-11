@@ -29,7 +29,7 @@ const UpdateAdvertiserInfo = () => {
     const fetchAdvertiserInfo = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/advertiser/getAdvertiser/${localStorage.getItem(
+          `${import.meta.env.VITE_API_URL}/advertiser/getAdvertiser/${localStorage.getItem(
             "userID"
           )}`
         );
@@ -83,7 +83,7 @@ const UpdateAdvertiserInfo = () => {
       }
   
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${userID}`,
+        `${import.meta.env.VITE_API_URL}/request-deletion/${userID}`,
         {
           method: 'PUT',
           headers: {
@@ -132,7 +132,7 @@ const UpdateAdvertiserInfo = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:8000/advertiser/updateAdvertiser/${localStorage.getItem(
+        `${import.meta.env.VITE_API_URL}/advertiser/updateAdvertiser/${localStorage.getItem(
           "userID"
         )}`,
         {

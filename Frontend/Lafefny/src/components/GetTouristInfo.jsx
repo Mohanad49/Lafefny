@@ -30,7 +30,7 @@ const TouristInfo = () => {
 
   const fetchTouristInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/tourist/getTouristInfo/${localStorage.getItem("userID")}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tourist/getTouristInfo/${localStorage.getItem("userID")}`);
       if (!response.ok) {
         throw new Error("Tourist not found");
       }
@@ -52,7 +52,7 @@ const TouristInfo = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.post(
-        `http://localhost:8000/tourist/redeemPoints/${userId}`
+        `${import.meta.env.VITE_API_URL}/tourist/redeemPoints/${userId}`
       );
       
       setTouristData([{
@@ -82,7 +82,7 @@ const TouristInfo = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/tourist/updateTouristInfo/${localStorage.getItem("userID")}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tourist/updateTouristInfo/${localStorage.getItem("userID")}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -137,7 +137,7 @@ const TouristInfo = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${auth.userID}`, 
+        `${import.meta.env.VITE_API_URL}/request-deletion/${auth.userID}`, 
         {
           method: 'PUT',
           headers: {

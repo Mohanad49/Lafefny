@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 
-
 const SellerInfo = () => {
   const [sellerData, setSellerData] = useState(null);
   const [error, setError] = useState("");
@@ -11,7 +10,7 @@ const SellerInfo = () => {
   useEffect(() => {
     const fetchSeller = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/seller/getSeller/${localStorage.getItem("userID")}`);
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/seller/getSeller/${localStorage.getItem("userID")}`);
         if (!response.ok) {
           throw new Error("Seller not found");
         }

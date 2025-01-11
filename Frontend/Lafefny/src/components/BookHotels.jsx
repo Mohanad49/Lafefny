@@ -84,7 +84,7 @@ const BookHotel = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await axios.post('http://localhost:8000/amadeusHotel', {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/amadeusHotel`, {
         cityCode: cityCode.toUpperCase(),
         checkInDate,
         checkOutDate,
@@ -133,7 +133,7 @@ const BookHotel = () => {
         }
       };
 
-      const response = await axios.post('http://localhost:8000/tourist/addHotelBooking', bookingDetails);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/tourist/addHotelBooking`, bookingDetails);
 
       if (response.data && response.data.message) {
         setBookingSuccess(true);
@@ -469,12 +469,12 @@ const HotelCard = ({ hotel, onBook, isBooking, convertPrice, currency, cityCode 
   const hotelImages = {
     luxury: [
       "https://images.unsplash.com/photo-1566073771259-6a8506099945?q=80&w=2070",
-      "https://images.unsplash.com/photo-1582719508461-905c673771fd?q=80&w=1925",
+      "https://images.unsplash.com/photo-1582719505726-ca121723b8ef?q=80&w=1925",
       "https://images.unsplash.com/photo-1542314831-068cd1dbfeeb?q=80&w=2070",
       "https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?q=80&w=2049",
       "https://images.unsplash.com/photo-1618773928121-c32242e63f39?q=80&w=2070",
       "https://images.unsplash.com/photo-1551882547-ff40c63fe5fa?q=80&w=2070",
-      "https://images.unsplash.com/photo-1445019980597-93fa8acb246c?q=80&w=2074",
+      "https://images.unsplash.com/photo-1445019980597-33fa8acb246c?q=80&w=2074",
       "https://images.unsplash.com/photo-1611892440504-42a792e24d32?q=80&w=2070",
       "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?q=80&w=2070",
       "https://images.unsplash.com/photo-1590381105924-c72589b9ef3f?q=80&w=2071",
@@ -496,11 +496,11 @@ const HotelCard = ({ hotel, onBook, isBooking, convertPrice, currency, cityCode 
       "https://images.unsplash.com/photo-1600210492493-0946911123ea?q=80&w=2074",
       "https://images.unsplash.com/photo-1563013544-824ae1b704d3?q=80&w=2070",
       "https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069",
-      "https://images.unsplash.com/photo-1497366811353-6870744d04b2?q=80&w=2070"
+      "https://images.unsplash.com/photo-1497366811353-68707424de2d?q=80&w=2070"
     ],
     resort: [
       "https://images.unsplash.com/photo-1610641818989-c2051b5e2cfd?q=80&w=2070",
-      "https://images.unsplash.com/photo-1571896349842-33c89424de2d?q=80&w=2080",
+      "https://images.unsplash.com/photo-1571896349842-33fa8acb246c?q=80&w=2080",
       "https://images.unsplash.com/photo-1540541338287-41700207dee6?q=80&w=2070",
       "https://images.unsplash.com/photo-1573052905904-34ad8c27f0cc?q=80&w=2070",
       "https://images.unsplash.com/photo-1559599746-c0f1c8b23c11?q=80&w=2069",

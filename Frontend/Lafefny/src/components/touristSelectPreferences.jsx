@@ -50,7 +50,7 @@ const SelectPreferences = () => {
     }
 
     try {
-      const response = await axios.put(`http://localhost:8000/tourist/updatePreferences/${userID}`, { preferences: selectedPreferences });
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/tourist/updatePreferences/${userID}`, { preferences: selectedPreferences });
       toast({
         title: "Success",
         description: "Your preferences have been updated successfully!"

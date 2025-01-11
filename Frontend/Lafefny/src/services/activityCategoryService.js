@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/activityCategory'; 
+const API_URL = import.meta.env.VITE_API_URL;
 
 export const createActivityCategory = async (data) => {
     try {

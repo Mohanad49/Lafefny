@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/products'; // Adjust according to your backend URL
+const API_URL = `${import.meta.env.VITE_API_URL}/products`;
 
 // Fetch all products
 export const getProducts = async () => {

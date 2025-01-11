@@ -48,7 +48,7 @@ const CreatePromoCode = () => {
     setLoading(true);
 
     try {
-      const response = await fetch('http://localhost:8000/admin/promo-codes', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/admin/promo-codes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(formData),

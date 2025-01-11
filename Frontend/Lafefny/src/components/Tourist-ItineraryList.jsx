@@ -92,7 +92,7 @@ const ItineraryList = () => {
     }
     
     try {
-      await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/book`, { userId });
+      await axios.post(`${import.meta.env.VITE_API_URL}/touristItinerary/${itineraryId}/book`, { userId });
       alert("Itinerary booked successfully!");
       fetchItineraries(); // Refresh the list to reflect the booking
     } catch (error) {
@@ -103,7 +103,7 @@ const ItineraryList = () => {
 
   const handleCancelBooking = async (itineraryId) => {
     try {
-      await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/cancel`, { userId });
+      await axios.post(`${import.meta.env.VITE_API_URL}/touristItinerary/${itineraryId}/cancel`, { userId });
       alert("Booking canceled successfully!");
       fetchItineraries();
     } catch (error) {

@@ -29,7 +29,7 @@ const UpdateSellerInfo = () => {
     const fetchSellerInfo = async () => {
       try {
         const response = await fetch(
-          `http://localhost:8000/seller/getSeller/${localStorage.getItem(
+          `${import.meta.env.VITE_API_URL}/seller/getSeller/${localStorage.getItem(
             "userID"
           )}`
         );
@@ -47,7 +47,7 @@ const UpdateSellerInfo = () => {
         } else if (response.status === 404) {
           // If seller info doesn't exist, create it
           const createResponse = await fetch(
-            `http://localhost:8000/seller/addSellerInfo/${localStorage.getItem("userID")}`,
+            `${import.meta.env.VITE_API_URL}/seller/addSellerInfo/${localStorage.getItem("userID")}`,
             {
               method: "POST",
               headers: {
@@ -107,7 +107,7 @@ const UpdateSellerInfo = () => {
       }
   
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${userID}`,
+        `${import.meta.env.VITE_API_URL}/request-deletion/${userID}`,
         {
           method: 'PUT',
           headers: {
@@ -156,7 +156,7 @@ const UpdateSellerInfo = () => {
     e.preventDefault();
     try {
       const response = await fetch(
-        `http://localhost:8000/seller/updateSellerInfo/${localStorage.getItem(
+        `${import.meta.env.VITE_API_URL}/seller/updateSellerInfo/${localStorage.getItem(
           "userID"
         )}`,
         {

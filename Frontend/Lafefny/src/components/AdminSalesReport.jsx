@@ -55,7 +55,7 @@ const AdminSalesReport = () => {
         endDate: endDate.toISOString()
       });
 
-      const response = await axios.get('http://localhost:8000/admin/sales-report', {
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/admin/sales-report`, {
         params: {
           type: reportType,
           startDate: startDate.toISOString(),

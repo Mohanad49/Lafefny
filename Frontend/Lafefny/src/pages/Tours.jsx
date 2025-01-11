@@ -43,7 +43,7 @@ const Tours = () => {
   useEffect(() => {
     const fetchItineraries = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/itineraries');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries`);
         const touristId = localStorage.getItem('userID');
         
         // Update itineraries with booking status
@@ -60,7 +60,7 @@ const Tours = () => {
 
         // Fetch bookmarked tours
         if (isLoggedIn && isTourist) {
-          const bookmarksResponse = await axios.get(`http://localhost:8000/tourist/${touristId}/bookmarked-tours`);
+          const bookmarksResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${touristId}/bookmarked-tours`);
           const bookmarkedIds = new Set(bookmarksResponse.data.map(tour => tour._id));
           setBookmarkedTours(bookmarkedIds);
         }
@@ -154,7 +154,7 @@ const Tours = () => {
         return;
       }
 
-      const response = await axios.post(`http://localhost:8000/itineraries/${itineraryId}/cancel`, { 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/itineraries/${itineraryId}/cancel`, { 
         userId: touristId 
       });
 
@@ -203,7 +203,7 @@ const Tours = () => {
     }
 
     try {
-      const response = await axios.get(`http://localhost:8000/itineraries/${itineraryId}/availableDates`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/${itineraryId}/availableDates`);
       const dates = response.data.availableDates.map(date => format(new Date(date), 'yyyy-MM-dd'));
       setAvailableDates(dates);
       setCurrentItinerary(itineraryId);
@@ -249,7 +249,7 @@ const Tours = () => {
     }
 
     try {
-      const response = await axios.post(`http://localhost:8000/itineraries/${currentItinerary}/book`, { 
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/itineraries/${currentItinerary}/book`, { 
         userId: touristId, 
         selectedDate 
       });
@@ -330,7 +330,7 @@ const Tours = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/bookmark-tour/${tourId}`
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmark-tour/${tourId}`
       );
 
       if (response.data.isBookmarked) {

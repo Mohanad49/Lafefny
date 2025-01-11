@@ -34,7 +34,7 @@ export default function TourGuideSalesReport() {
 
   const fetchItineraries = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/itineraries');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries`);
       const allItineraries = response.data;
       // Filter itineraries by tour guide ID (userId)
       const tourGuideItineraries = allItineraries.filter(itinerary => itinerary.tourGuide === userId);

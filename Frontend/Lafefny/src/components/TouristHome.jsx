@@ -38,7 +38,7 @@ const TouristHome = () => {
     const fetchTouristData = async () => {
       try {
         // Fetch tourist profile information
-        const response = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userId}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/getTouristInfo/${userId}`);
         if (response.data && response.data.length > 0) {
           const touristInfo = response.data[0];
           setProfile({
@@ -51,12 +51,12 @@ const TouristHome = () => {
         }
         
         // Fetch upcoming activities
-        const activitiesResponse = await axios.get(`http://localhost:8000/tourist/upcomingActivities/${userId}`);
+        const activitiesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/upcomingActivities/${userId}`);
         setUpcomingActivities(activitiesResponse.data.upcomingActivities);
 
         try {
           // Fetch upcoming itineraries - wrapped in try-catch to handle 404 gracefully
-          const itinerariesResponse = await axios.get(`http://localhost:8000/tourist/upcomingItineraries/${userId}`);
+          const itinerariesResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/upcomingItineraries/${userId}`);
           setUpcomingItineraries(itinerariesResponse.data.upcomingItineraries);
         } catch (error) {
           // If endpoint is not ready, set empty array and log only in development
@@ -75,7 +75,7 @@ const TouristHome = () => {
     const fetchPersonalizedData = async () => {
       try {
         // Get user preferences
-        const prefsResponse = await axios.get(`http://localhost:8000/tourist/getTouristPreferences/${userId}`);
+        const prefsResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/getTouristPreferences/${userId}`);
         setUserPreferences(prefsResponse.data.preferences);
       } catch (error) {
         console.error('Error fetching personalized data:', error);
@@ -114,7 +114,7 @@ const TouristHome = () => {
     try {
       setIsRedeeming(true);
       const response = await axios.post(
-        `http://localhost:8000/tourist/redeemPoints/${userId}`
+        `${import.meta.env.VITE_API_URL}/tourist/redeemPoints/${userId}`
       );
       
       setProfile(prev => ({

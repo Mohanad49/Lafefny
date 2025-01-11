@@ -16,7 +16,7 @@ const ForgotPassword = () => {
 
   const handleSendOtp = async () => {
     try {
-      const response = await fetch('http://localhost:8000/forget/send-otp', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/forget/send-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -40,7 +40,7 @@ const ForgotPassword = () => {
 
   const handleVerifyOtp = async () => {
     try {
-      const response = await fetch('http://localhost:8000/forget/verify-otp', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/forget/verify-otp`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -61,7 +61,7 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async () => {
     try {
-      const response = await fetch('http://localhost:8000/forget/reset-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/forget/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

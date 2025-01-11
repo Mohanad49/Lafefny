@@ -97,7 +97,7 @@ const ActivityList = () => {
         return;
       }
 
-      await axios.post(`http://localhost:8000/activities/${activityId}/book`, { touristId });
+      await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activityId}/book`, { touristId });
       alert("Activity booked successfully!");
       fetchActivities(); 
     } catch (error) {
@@ -137,7 +137,7 @@ const ActivityList = () => {
         alert("Cancellation is not allowed less than 2 days before the booked date.");
         return;
       }
-      await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
+      await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activityId}/cancel`, { touristId });
       alert("Booking canceled successfully!");
       fetchActivities();
     } catch (error) {

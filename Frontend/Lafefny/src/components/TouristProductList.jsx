@@ -40,7 +40,7 @@ const TouristProductList = () => {
       if (!userID) return;
       
       try {
-        const response = await axios.get(`http://localhost:8000/users/${userID}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/users/${userID}`);
         if (response.data.tourist && response.data.tourist.name) {
           setTouristName(response.data.tourist.name);
         }
@@ -55,7 +55,7 @@ const TouristProductList = () => {
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/products');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/products`);
         // Filter out archived products and ensure imageUrl exists
         const activeProducts = response.data
           .filter(product => !product.isArchived)
@@ -80,7 +80,7 @@ const TouristProductList = () => {
     if (userID) {
       const fetchWishlist = async () => {
         try {
-          const response = await axios.get(`http://localhost:8000/tourist/${userID}/wishlist`);
+          const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userID}/wishlist`);
           const data = response.data;
           setWishlistedProducts(new Set(data.map(item => item._id)));
         } catch (error) {
@@ -120,14 +120,14 @@ const TouristProductList = () => {
       // Use the same endpoint format as TouristWishlist.jsx
       if (wishlistedProducts.has(productId)) {
         // Remove from wishlist
-        await axios.delete(`http://localhost:8000/tourist/${userId}/wishlist/${productId}`);
+        await axios.delete(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wishlist/${productId}`);
         toast({
           title: "Removed from Wishlist",
           description: "Item has been removed from your wishlist"
         });
       } else {
         // Add to wishlist
-        await axios.post(`http://localhost:8000/products/wishlist/${userId}`, {
+        await axios.post(`${import.meta.env.VITE_API_URL}/products/wishlist/${userId}`, {
           productId: productId
         });
         toast({
@@ -171,7 +171,7 @@ const TouristProductList = () => {
     setIsAddingToCart(true);
     try {
       const userId = localStorage.getItem('userID');
-      await axios.post(`http://localhost:8000/products/cart/${userId}`, { productId, quantity: 1 });
+      await axios.post(`${import.meta.env.VITE_API_URL}/products/cart/${userId}`, { productId, quantity: 1 });
       toast({
         title: "Success",
         description: "Item has been added to your cart"
@@ -200,7 +200,7 @@ const TouristProductList = () => {
     
       const userID = localStorage.getItem('userID');
       try {
-        const response = await axios.get(`http://localhost:8000/products/check-purchase/${userID}/${product._id}`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/products/check-purchase/${userID}/${product._id}`);
         
     
         if (!response.data.hasPurchased) {
@@ -212,7 +212,7 @@ const TouristProductList = () => {
           return;
         }
     
-        const userResponse = await axios.get(`http://localhost:8000/tourist/getTouristInfo/${userID}`);
+        const userResponse = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/getTouristInfo/${userID}`);
         const touristName = userResponse.data[0]?.username;
         
     
@@ -231,7 +231,7 @@ const TouristProductList = () => {
     if (!selectedProduct) return;
 
     try {
-      const response = await axios.post(`http://localhost:8000/products/${selectedProduct._id}/reviews`, review);
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/products/${selectedProduct._id}/reviews`, review);
       
       setProducts(prevProducts => 
         prevProducts.map(product => 

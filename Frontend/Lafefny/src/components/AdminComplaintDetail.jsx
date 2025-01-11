@@ -38,7 +38,7 @@ const AdminComplaintDetail = () => {
   const fetchComplaint = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/complaints/${id}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/complaints/${id}`);
       const data = await response.json();
       setComplaint(data);
       setStatus(data.status);
@@ -58,7 +58,7 @@ const AdminComplaintDetail = () => {
   const handleUpdate = async () => {
     try {
       setUpdating(true);
-      const response = await fetch(`http://localhost:8000/complaints/${id}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/complaints/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status, adminReply }),

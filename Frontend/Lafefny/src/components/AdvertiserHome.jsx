@@ -39,13 +39,13 @@ const AdvertiserHome = () => {
   const fetchAdvertiserData = async () => {
     try {
       // First get advertiser info
-      const advertiserRes = await axios.get(`http://localhost:8000/advertiser/getAdvertiser/${userId}`);
+      const advertiserRes = await axios.get(`${import.meta.env.VITE_API_URL}/advertiser/getAdvertiser/${userId}`);
       const advertiserData = advertiserRes.data[0];
       setAdvertiserInfo(advertiserData);
   
       // Then get activities using the correct endpoint URL
       if (advertiserData) {
-        const activitiesRes = await axios.get(`http://localhost:8000/activities/advertiser/${userId}`);
+        const activitiesRes = await axios.get(`${import.meta.env.VITE_API_URL}/activities/advertiser/${userId}`);
         const fetchedActivities = activitiesRes.data;
         setActivities(fetchedActivities.slice(0, 4)); // Only show first 4 activities
       }
@@ -67,7 +67,7 @@ const AdvertiserHome = () => {
 
   const handleDeleteActivity = async (activityId) => {
     try {
-      await axios.delete(`http://localhost:8000/activities/${activityId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/activities/${activityId}`);
       setActivities(activities.filter(activity => activity._id !== activityId));
       toast({
         title: "Success",

@@ -15,7 +15,7 @@ const DeleteAccount = () => {
   useEffect(() => {
     const checkExistingRequest = async () => {
       try {
-        const response = await fetch(`http://localhost:8000/users/${auth.userID}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_URL}/users/${auth.userID}`, {
           headers: {
             'Authorization': `Bearer ${auth.token}`,
             'Content-Type': 'application/json'
@@ -62,7 +62,7 @@ const DeleteAccount = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${auth.userID}`, 
+        `${import.meta.env.VITE_API_URL}/request-deletion/${auth.userID}`, 
         {
           method: 'PUT',
           headers: {
@@ -103,7 +103,7 @@ const DeleteAccount = () => {
   const handleCancelRequest = async () => {
     try {
       const response = await fetch(
-        `http://localhost:8000/cancel-deletion/${auth.userID}`,
+        `${import.meta.env.VITE_API_URL}/cancel-deletion/${auth.userID}`,
         {
           method: 'PUT',
           headers: {

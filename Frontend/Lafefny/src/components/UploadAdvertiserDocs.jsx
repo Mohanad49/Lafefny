@@ -10,7 +10,7 @@ const UploadAdvertiserDocs=()=>{
         formData.append('pdf', pdf);
     
         try {
-          await axios.patch(`http://localhost:8000/advertiser/uploadPDF/${localStorage.getItem("userID")}`, formData, {
+          await axios.patch(`${import.meta.env.VITE_API_URL}/advertiser/uploadPDF/${localStorage.getItem("userID")}`, formData, {
             headers: { 'Content-Type': 'multipart/form-data' },
           });
           alert('File uploaded successfully');

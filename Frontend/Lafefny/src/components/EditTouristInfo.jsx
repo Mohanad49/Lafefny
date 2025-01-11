@@ -27,7 +27,7 @@ const UpdateTouristInfo = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/tourist/updateTouristInfo/${localStorage.getItem("userID")}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tourist/updateTouristInfo/${localStorage.getItem("userID")}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",

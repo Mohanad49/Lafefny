@@ -27,7 +27,7 @@ export default function ActivityReport() {
 
     const fetchActivities = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/activities/advertiser/${localStorage.getItem('userID')}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/activities/advertiser/${localStorage.getItem('userID')}`);
             setActivities(response.data);
             console.log(response.data);
         } catch (error) {

@@ -35,7 +35,7 @@ const TourDetails = () => {
 
   const checkIfBookmarked = async (touristId, tourId) => {
     try {
-      const response = await axios.get(`http://localhost:8000/tourist/${touristId}/bookmarked-tours`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${touristId}/bookmarked-tours`);
       return response.data.some(tour => tour._id === tourId);
     } catch (error) {
       console.error('Error checking bookmark status:', error);
@@ -96,7 +96,7 @@ const TourDetails = () => {
   
     try {
       const touristId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/itineraries/${tour._id}/availableDates`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/${tour._id}/availableDates`);
       const dates = response.data.availableDates.map(date => format(new Date(date), 'yyyy-MM-dd'));
       setAvailableDates(dates);
       setIsDateDialogOpen(true);
@@ -127,7 +127,7 @@ const TourDetails = () => {
         });
         return;
       }
-      const response = await axios.post(`http://localhost:8000/itineraries/${tour._id}/cancel`, { userId: touristId });
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/itineraries/${tour._id}/cancel`, { userId: touristId });
       setTour(prev => ({ ...prev, booked: false }));
       setBookedTours(prev => {
         const newSet = new Set(prev);
@@ -169,7 +169,7 @@ const TourDetails = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/bookmark-tour/${tour._id}`
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmark-tour/${tour._id}`
       );
 
       setIsBookmarked(response.data.isBookmarked);
@@ -198,7 +198,7 @@ const TourDetails = () => {
 
     try {
       const touristId = localStorage.getItem('userID');
-      await axios.post(`http://localhost:8000/itineraries/${tour._id}/book`, { userId: touristId, selectedDate });
+      await axios.post(`${import.meta.env.VITE_API_URL}/itineraries/${tour._id}/book`, { userId: touristId, selectedDate });
       setTour(prev => ({ ...prev, booked: true }));
       setBookedTours(prev => {
         const newSet = new Set(prev);

@@ -35,7 +35,7 @@ const AdminComplaintList = () => {
   const fetchComplaints = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:8000/complaints?sort=${sortOrder}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/complaints?sort=${sortOrder}`);
       if (!response.ok) {
         throw new Error('Failed to fetch complaints');
       }

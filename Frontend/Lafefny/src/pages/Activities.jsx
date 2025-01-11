@@ -52,7 +52,7 @@ const Activities = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/activityCategory');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/activityCategory`);
       setCategories(response.data);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -64,7 +64,7 @@ const Activities = () => {
     
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/tourist/${userId}/bookmarked-activities`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmarked-activities`);
       const bookmarkedIds = new Set(response.data.map(activity => activity._id));
       setBookmarkedActivities(bookmarkedIds);
     } catch (error) {
@@ -85,7 +85,7 @@ const Activities = () => {
     try {
       const userId = localStorage.getItem('userID');
       const response = await axios.post(
-        `http://localhost:8000/tourist/${userId}/bookmark-activity/${activityId}`
+        `${import.meta.env.VITE_API_URL}/tourist/${userId}/bookmark-activity/${activityId}`
       );
 
       if (response.data.isBookmarked) {
@@ -146,7 +146,7 @@ const Activities = () => {
           });
           return;
         }
-        const response = await axios.post(`http://localhost:8000/activities/${activityId}/cancel`, { touristId });
+        const response = await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activityId}/cancel`, { touristId });
         setBookedActivities(prev => {
           const newSet = new Set(prev);
           newSet.delete(activityId);
@@ -158,7 +158,7 @@ const Activities = () => {
         });
       } else {
         // Handle booking
-        await axios.post(`http://localhost:8000/activities/${activityId}/book`, { touristId });
+        await axios.post(`${import.meta.env.VITE_API_URL}/activities/${activityId}/book`, { touristId });
         setBookedActivities(prev => {
           const newSet = new Set(prev);
           newSet.add(activityId);
@@ -298,8 +298,8 @@ const Activities = () => {
       try {
         setLoading(true);
         const [activitiesResponse, categoriesResponse] = await Promise.all([
-          axios.get('http://localhost:8000/activities'),
-          axios.get('http://localhost:8000/activityCategory')
+          axios.get(`${import.meta.env.VITE_API_URL}/activities`),
+          axios.get(`${import.meta.env.VITE_API_URL}/activityCategory`)
         ]);
         
         const touristId = localStorage.getItem('userID');

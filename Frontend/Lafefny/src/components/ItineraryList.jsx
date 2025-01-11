@@ -26,7 +26,7 @@ const ItineraryList = () => {
         sortBy,
       });
       console.log('Fetched itineraries:', response.data);
-       const ItinerariesRes = await axios.get(`http://localhost:8000/itineraries/tourGuide/${userId}`);
+       const ItinerariesRes = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/tourGuide/${userId}`);
         const fetchedItineraries = ItinerariesRes.data;
         setItineraries(fetchedItineraries); // Only show first 4 activities
     } catch (error) {

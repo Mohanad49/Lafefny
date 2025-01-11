@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_URL = 'http://localhost:8000/preferenceTag'; // Update the API URL as needed
+const API_URL = `${import.meta.env.VITE_API_URL}/preferenceTag`;
 
 
   // Create a new preference tag

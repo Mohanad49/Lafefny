@@ -33,7 +33,7 @@ const TourGuideHome = () => {
 
   const fetchItineraries = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/itineraries/tourGuide/${userId}`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/tourGuide/${userId}`);
       const fetchedItineraries = response.data;
       setItineraries(fetchedItineraries.slice(0, 4)); // Only show first 4 itineraries
       setIsLoading(false);
@@ -51,7 +51,7 @@ const TourGuideHome = () => {
 
   const handleDeleteItinerary = async (itineraryId) => {
     try {
-      await axios.delete(`http://localhost:8000/itineraries/${itineraryId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/itineraries/${itineraryId}`);
       setItineraries(itineraries.filter(itinerary => itinerary._id !== itineraryId));
       toast({
         title: "Success",
@@ -68,7 +68,7 @@ const TourGuideHome = () => {
 
   const toggleActiveStatus = async (id, currentStatus) => {
     try {
-      await axios.patch(`http://localhost:8000/itineraries/${id}/toggleActive`, { isActive: !currentStatus });
+      await axios.patch(`${import.meta.env.VITE_API_URL}/itineraries/${id}/toggleActive`, { isActive: !currentStatus });
       fetchItineraries();
     } catch (error) {
       console.error('Error toggling itinerary status:', error);

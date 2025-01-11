@@ -29,7 +29,7 @@ export default function ItineraryReport() {
 
     const fetchItineraries = async () => {
         try {
-            const response = await axios.get(`http://localhost:8000/itineraries/tourGuide/${localStorage.getItem('userID')}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/tourGuide/${localStorage.getItem('userID')}`);
             setItineraries(response.data);
             response.data.forEach(itinerary => getTouristBookings(itinerary._id));
         } catch (error) {
@@ -40,7 +40,7 @@ export default function ItineraryReport() {
     const getTouristBookings = async (itineraryId) => {
         setLoading(prev => ({ ...prev, [itineraryId]: true }));
         try {
-            const response = await axios.get(`http://localhost:8000/tourGuide/numberOfTourists/${itineraryId}`);
+            const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourGuide/numberOfTourists/${itineraryId}`);
             setTouristBookings(prev => ({
                 ...prev,
                 [itineraryId]: response.data

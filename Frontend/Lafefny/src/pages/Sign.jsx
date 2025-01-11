@@ -90,7 +90,7 @@ function Sign() {
         try {
           switch(userType) {
             case 'Tourist':
-              await axios.post(`http://localhost:8000/tourist/addTourist`, {
+              await axios.post(`${import.meta.env.VITE_API_URL}/tourist/addTourist`, {
                 userID: userId,
                 wallet: 0,
                 preferences: [],
@@ -101,7 +101,7 @@ function Sign() {
               break;
 
             case 'TourGuide':
-              await axios.post(`http://localhost:8000/tourGuide/addTourGuideInfo/${userId}`, {
+              await axios.post(`${import.meta.env.VITE_API_URL}/tourGuide/addTourGuideInfo/${userId}`, {
                 mobile: formData.mobileNumber,
                 yearsOfExperience: 0,
                 previousWork: ''
@@ -109,14 +109,14 @@ function Sign() {
               break;
 
             case 'Seller':
-              await axios.post(`http://localhost:8000/seller/addSellerInfo/${userId}`, {
+              await axios.post(`${import.meta.env.VITE_API_URL}/seller/addSellerInfo/${userId}`, {
                 name: formData.username || '', // Use username as name
                 description: formData.job || 'New Seller', // Use job as initial description or default
               });
               break;
 
             case 'Advertiser':
-              await axios.post(`http://localhost:8000/advertiser/addAdvertiserInfo/${userId}`, {
+              await axios.post(`${import.meta.env.VITE_API_URL}/advertiser/addAdvertiserInfo/${userId}`, {
                 hotline: formData.mobileNumber,
                 company: '',
                 website: ''
@@ -143,7 +143,7 @@ function Sign() {
             }
 
             await axios.patch(
-              `http://localhost:8000/${uploadEndpoint}/uploadPDF/${userId}`,
+              `${import.meta.env.VITE_API_URL}/${uploadEndpoint}/uploadPDF/${userId}`,
               fileFormData,
               {
                 headers: { 'Content-Type': 'multipart/form-data' },
@@ -167,7 +167,7 @@ function Sign() {
         } catch (error) {
           console.error('Error creating role profile:', error);
           // Delete the user if role profile creation fails
-          await axios.delete(`http://localhost:8000/admin/delete-account/${userId}`);
+          await axios.delete(`${import.meta.env.VITE_API_URL}/admin/delete-account/${userId}`);
           toast({
             variant: "destructive",
             title: "Error",

@@ -35,7 +35,7 @@ export default function AdvertiserSalesReport() {
 
   const fetchActivities = async () => {
     try {
-      const response = await axios.get('http://localhost:8000/activities');
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/activities`);
       const allActivities = response.data;
       // Filter activities by advertiser ID (userId)
       const advertiserActivities = allActivities.filter(activity => activity.advertiser === userId);

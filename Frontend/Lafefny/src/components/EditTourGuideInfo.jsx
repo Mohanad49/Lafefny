@@ -27,7 +27,7 @@ const UpdateTourGuideInfo = () => {
 
   const fetchTourGuideInfo = async () => {
     try {
-      const response = await fetch(`http://localhost:8000/tourGuide/getTourGuide/${localStorage.getItem("userID")}`);
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tourGuide/getTourGuide/${localStorage.getItem("userID")}`);
       if (!response.ok) {
         throw new Error("Tour Guide not found");
       }
@@ -47,7 +47,7 @@ const UpdateTourGuideInfo = () => {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch(`http://localhost:8000/tourGuide/updateTourGuideInfo/${localStorage.getItem("userID")}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/tourGuide/updateTourGuideInfo/${localStorage.getItem("userID")}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -102,7 +102,7 @@ const UpdateTourGuideInfo = () => {
 
     try {
       const response = await fetch(
-        `http://localhost:8000/request-deletion/${localStorage.getItem("userID")}`, 
+        `${import.meta.env.VITE_API_URL}/request-deletion/${localStorage.getItem("userID")}`, 
         {
           method: 'PUT',
           headers: {

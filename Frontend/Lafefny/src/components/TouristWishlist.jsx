@@ -19,7 +19,7 @@ const TouristWishlist = () => {
     const fetchWishlist = async () => {
       try {
         const userId = localStorage.getItem('userID');
-        const response = await axios.get(`http://localhost:8000/tourist/${userId}/wishlist`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wishlist`);
         setWishlistItems(response.data);
         setLoading(false);
       } catch (error) {
@@ -41,7 +41,7 @@ const TouristWishlist = () => {
   const removeFromWishlist = async (productId) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.delete(`http://localhost:8000/tourist/${userId}/wishlist/${productId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wishlist/${productId}`);
       setWishlistItems(prev => prev.filter(item => item._id !== productId));
     } catch (error) {
       console.error('Error removing from wishlist:', error);
@@ -55,7 +55,7 @@ const TouristWishlist = () => {
       const userId = localStorage.getItem('userID');
       
       // Add to cart first
-      await axios.post(`http://localhost:8000/products/cart/${userId}`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/products/cart/${userId}`, {
         productId,
         quantity: 1
       });

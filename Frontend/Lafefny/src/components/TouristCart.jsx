@@ -16,7 +16,7 @@ const TouristCart = () => {
     const fetchCart = async () => {
       try {
         const userId = localStorage.getItem('userID');
-        const response = await axios.get(`http://localhost:8000/tourist/${userId}/cart`);
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/cart`);
         setCartItems(response.data);
         setLoading(false);
       } catch (error) {
@@ -47,7 +47,7 @@ const TouristCart = () => {
   const updateQuantity = async (productId, newQuantity) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.put(`http://localhost:8000/tourist/${userId}/cart/${productId}`, {
+      await axios.put(`${import.meta.env.VITE_API_URL}/tourist/${userId}/cart/${productId}`, {
         quantity: newQuantity
       });
       setCartItems(prev => prev.map(item => 
@@ -62,7 +62,7 @@ const TouristCart = () => {
   const removeFromCart = async (productId) => {
     try {
       const userId = localStorage.getItem('userID');
-      await axios.delete(`http://localhost:8000/tourist/${userId}/cart/${productId}`);
+      await axios.delete(`${import.meta.env.VITE_API_URL}/tourist/${userId}/cart/${productId}`);
       setCartItems(prev => prev.filter(item => item._id !== productId));
     } catch (error) {
       console.error('Error removing from cart:', error);

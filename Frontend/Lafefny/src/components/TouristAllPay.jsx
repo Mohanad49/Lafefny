@@ -31,7 +31,7 @@ const TouristItineraryPay = () => {
   useEffect(() => {
     const fetchBooking = async () => {
       try {
-        const bookingResponse = await axios.get(`http://localhost:8000/itineraries/${itineraryId}`);
+        const bookingResponse = await axios.get(`${import.meta.env.VITE_API_URL}/itineraries/${itineraryId}`);
         setBooking(bookingResponse.data);
         setDiscountedPrice(bookingResponse.data.price); // Set initial price
       } catch (err) {
@@ -50,7 +50,7 @@ const TouristItineraryPay = () => {
   const handleApplyPromoCode = async () => {
     setPromoError('');
     try {
-      const response = await axios.post(`http://localhost:8000/promos/validate`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/promos/validate`, {
         promoCode,
         touristId,
         originalPrice: booking.price, // Pass the original price to the backend
@@ -85,7 +85,7 @@ const TouristItineraryPay = () => {
     }
 
     try {
-      await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/payment`, {
+      await axios.post(`${import.meta.env.VITE_API_URL}/touristItinerary/${itineraryId}/payment`, {
         method: 'card',
         paymentMethodId: paymentMethod.id,
         touristId,
@@ -109,7 +109,7 @@ const TouristItineraryPay = () => {
   // Handle wallet payment
   const handleWalletPayment = async () => {
     try {
-      const response = await axios.post(`http://localhost:8000/touristItinerary/${itineraryId}/payment`, {
+      const response = await axios.post(`${import.meta.env.VITE_API_URL}/touristItinerary/${itineraryId}/payment`, {
         method: 'wallet',
         touristId,
         amount: discountedPrice, // Send the discounted price

@@ -25,7 +25,7 @@ const MyOrders = () => {
   const fetchWalletBalance = async () => {
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/tourist/${userId}/wallet`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/wallet`);
       setWalletBalance(response.data.balance);
     } catch (error) {
       console.error('Error fetching wallet balance:', error);
@@ -49,7 +49,7 @@ const MyOrders = () => {
   const fetchOrders = async () => {
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.get(`http://localhost:8000/tourist/${userId}/orders`);
+      const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/${userId}/orders`);
       console.log('Fetched orders:', response.data);
       setOrders(response.data);
       setLoading(false);
@@ -68,7 +68,7 @@ const MyOrders = () => {
   const handleCancelOrder = async (orderId) => {
     try {
       const userId = localStorage.getItem('userID');
-      const response = await axios.put(`http://localhost:8000/tourist/${userId}/orders/${orderId}/cancel`);
+      const response = await axios.put(`${import.meta.env.VITE_API_URL}/tourist/${userId}/orders/${orderId}/cancel`);
       
       setOrders(orders.map(order => 
         order._id === orderId ? { ...order, orderStatus: 'Cancelled' } : order

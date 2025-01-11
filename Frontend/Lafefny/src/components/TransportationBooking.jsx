@@ -24,7 +24,7 @@ const TransportationBooking = () => {
   useEffect(() => {
     const fetchProviders = async () => {
       try {
-        const response = await axios.get('http://localhost:8000/tourist/advertisers');
+        const response = await axios.get(`${import.meta.env.VITE_API_URL}/tourist/advertisers`);
         setProviders(response.data);
       } catch (err) {
         setError('Failed to fetch transportation providers');
@@ -38,7 +38,7 @@ const TransportationBooking = () => {
     const userId = localStorage.getItem('userID');
 
     try {
-      await axios.post(`http://localhost:8000/tourist/${userId}/transportation-booking`, formData);
+      await axios.post(`${import.meta.env.VITE_API_URL}/tourist/${userId}/transportation-booking`, formData);
       setSuccess('Transportation booked successfully!');
       setError('');
       setFormData({
