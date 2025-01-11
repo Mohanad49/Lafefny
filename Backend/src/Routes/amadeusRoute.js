@@ -3,7 +3,6 @@ const NodeCache = require('node-cache');
 const { searchFlights, fetchFlightPriceOffers, bookFlight, getLocationCode, fetchHotelIdsByCity, fetchHotelOffers, HOTEL_SEARCH_CONFIG } = require('../Services/amadeusService');
 const axios = require('axios');
 const Amadeus = require('amadeus');
-require('dotenv').config(); // Load environment variables
 
 const router = express.Router();
 const hotelCache = new NodeCache({ stdTTL: 3600 }); // Cache for 1 hour

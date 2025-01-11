@@ -1,10 +1,9 @@
 const nodemailer = require('nodemailer');
-require('dotenv').config();
 const express = require('express');
 const crypto = require('crypto');
 const bcrypt = require('bcrypt');
 const User = require('../Models/User'); // Import the User model
-
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const router = express.Router();
 
 // Temporary storage for OTPs (in production, use a database)

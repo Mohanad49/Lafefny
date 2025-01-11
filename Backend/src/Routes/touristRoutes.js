@@ -1,5 +1,4 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '../.env') });
 const express = require("express");
 const Tourist = require("../Models/touristModel");
 const User = require("../Models/User");
@@ -19,6 +18,7 @@ const { default: mongoose } = require("mongoose");
 
 const router = express.Router();
 
+require('dotenv').config({ path: require('path').resolve(__dirname, '../../.env') });
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Add a test route

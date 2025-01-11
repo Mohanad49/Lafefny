@@ -29,8 +29,10 @@ const notificationRoute = require('./Routes/notificationRoutes');
 const forgetpassRoute = require('./Routes/forgetpass');
 require('./Services/reminderService');
 
+const path = require('path');
+require('dotenv').config({ path: path.resolve(__dirname, '../.env') });
+
 mongoose.set('strictQuery', false);
-require("dotenv").config();
 const MongoURI = process.env.MONGO_URI;
 
 // App variables
