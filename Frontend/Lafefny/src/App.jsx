@@ -96,7 +96,7 @@ import UploadTourGuideDocs from './components/UploadTourGuideDocs'
 import AdminItineraryList from './components/Admin-ItineraryList';
 import AdminActivityList from './components/Admin-ActivityList';
 import AdminSalesReport from './components/AdminSalesReport';
-import SellerDelete from './components/Sellerdelete';
+import SellerDelete from './components/SellerDelete';
 import DeleteAccount from './components/DeleteAccount'
 
 
