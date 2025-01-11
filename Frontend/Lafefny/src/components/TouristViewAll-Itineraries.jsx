@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getItineraries, bookItinerary, cancelBooking } from '../services/itineraryService';
 import { fetchExchangeRates } from '../services/currencyService';
 import axios from 'axios';
-import '../styles/ItineraryList.css';
+import '../styles/itineraryList.css';
 
 const ItineraryList = () => {
   const [itineraries, setItineraries] = useState([]);
