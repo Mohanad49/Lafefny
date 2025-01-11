@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom'; // Import useNavigate
 import { getActivities } from '../services/activityService';
 import { getAllActivityCategories } from '../services/activityCategoryService';
-import '../styles/ActivityList.css';
+import '../styles/activityList.css';
 import { fetchExchangeRates } from '../services/currencyService';
 import axios from 'axios';
 

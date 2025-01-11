@@ -4,7 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { getAllTouristItineraries, deleteTouristItinerary } from '../services/touristItineraryService';
 import { ArrowLeft, Search, Plus } from 'lucide-react';
 import Navigation from '../components/Navigation';
-import '../styles/ItineraryList.css';
+import '../styles/itineraryList.css';
 
 const TourGuideItineraries = () => {
   const [itineraries, setItineraries] = useState([]);

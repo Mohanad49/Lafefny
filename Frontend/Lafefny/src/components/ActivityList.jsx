@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getActivities, deleteActivity } from '../services/activityService';
-import '../styles/ActivityList.css';
+import '../styles/activityList.css';
 
 const ActivityList = () => {
   const [activities, setActivities] = useState([]);

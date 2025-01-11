@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { getItineraries, deleteItinerary, updateItineraryStatus } from '../services/itineraryService';
-import '../styles/ItineraryList.css';
+import '../styles/itineraryList.css';
 import axios from 'axios';
 
 const ItineraryList = () => {

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-import '../styles/NotificationBell.css';
+import '../styles/notificationBell.css';
 
 const NotificationBell = () => {
   const [notifications, setNotifications] = useState([]);

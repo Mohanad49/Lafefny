@@ -4,7 +4,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Activity, Calendar, Globe, MapPin, Plus, Tag, Shield, Trash2, Loader2 } from 'lucide-react';
 import Navigation from './Navigation';
 import Footer from './Footer';
-import NotificationBell from './NotificationBell';
 import '../styles/homePage.css'; // Ensure this path is correct
 import SalesReport from './TourGuideSalesReport';
 import { Button } from '@/components/ui/button';

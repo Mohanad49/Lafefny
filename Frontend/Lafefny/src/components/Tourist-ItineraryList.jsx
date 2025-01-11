@@ -3,7 +3,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 import { getAllTouristItineraries } from '../services/touristItineraryService';
-import '../styles/ItineraryList.css';
+import '../styles/itineraryList.css';
 
 const EXCHANGE_API_KEY = 'a6ef7b85eab930c5bf44ae65'; // Store this in .env file in practice
 
