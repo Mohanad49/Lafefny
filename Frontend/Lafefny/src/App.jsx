@@ -122,150 +122,142 @@ import TouristAllPay from './components/TouristAllPay';
 import AddProductPage from './pages/AddProduct';
 import Bookmarks from './pages/Bookmarks'
 import ManageMuseums from './components/ManageMuseums';
-import { Analytics } from "@vercel/analytics/react"
-import { SpeedInsights } from "@vercel/speed-insights/react"
 
 const queryClient = new QueryClient();
 
 const App = () => {
 
   return (
-    <>
     <AuthProvider>
       <CurrencyProvider>
-        <QueryClientProvider client={queryClient}>
-          <TooltipProvider>
-            <Toaster />
-            <Sonner />
-            <Router>
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/sign" element={<Sign />} />
-                <Route path="/about" element={<About />} />
-                <Route path="/destinations" element={<Destinations />} />
-                <Route path="/tours" element={<Tours />} />
-                <Route path="/tours/:id" element={<TourDetails />} />
-                <Route path="/guestHome" element={<Home />} />
-                <Route path="/forgotPassword" element={<ForgotPassword />} />
-                <Route path="/activities" element={<Activities />} />
-                <Route path="/activities/:id" element={<ActivityDetails />} />
-                <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
-                <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
-                <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
-                <Route path="/bookmarks" element={<Bookmarks />} />
-                <Route path="/guest-itinerary/:id" element={<TourDetails />} />
+      <QueryClientProvider client={queryClient}>
+      <TooltipProvider>
+      <Toaster />
+      <Sonner />
+      <Router>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<LandingPage />} />
+          <Route path="/sign" element={<Sign />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/destinations" element={<Destinations />} />
+          <Route path="/tours" element={<Tours />} />
+          <Route path="/tours/:id" element={<TourDetails />} />
+          <Route path="/guestHome" element={<Home />} />
+          <Route path="/forgotPassword" element={<ForgotPassword />} />
+          <Route path="/activities" element={<Activities />} />
+          <Route path="/activities/:id" element={<ActivityDetails />} />
+          <Route path="/guest-Itineraries" element={<GuestItineraryList />} />
+          <Route path="/historicalPlaces" element={<HistoricalPlaces />} />
+          <Route path="/historicalPlaces/:id" element={<HistoricalPlaceDetails />} />
+          <Route path="/bookmarks" element={<Bookmarks />} />
+          <Route path="/guest-itinerary/:id" element={<TourDetails />} />
 
-                {/* Admin Routes */}
-                <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />
-                <Route path="/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserManagement /></ProtectedRoute>} />
-                <Route path="/add-admin" element={<ProtectedRoute allowedRoles={['Admin']}><AddAdmin /></ProtectedRoute>} />
-                <Route path="/add-tourism-governor" element={<ProtectedRoute allowedRoles={['Admin']}><AddTourismGovernor /></ProtectedRoute>} />
-                <Route path="/admin/complaints" element={<ProtectedRoute allowedRoles={['Admin']}><AdminComplaintList /></ProtectedRoute>} />
-                <Route path="/admin/complaints/:id" element={<ProtectedRoute allowedRoles={['Admin']}><AdminComplaintDetail /></ProtectedRoute>} />
-                <Route path="/admin-itineraries" element={<ProtectedRoute allowedRoles={['Admin']}><AdminItineraryList /></ProtectedRoute>} />
-                <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['Admin']}><AdminActivityList /></ProtectedRoute>} />
-                <Route path="/numberOfUsers" element={<ProtectedRoute allowedRoles={['Admin']}><AdminNumberOfUsers /></ProtectedRoute>} />
-                <Route path="/create-promo-code" element={<ProtectedRoute allowedRoles={['Admin']}><CreatePromoCode /></ProtectedRoute>} />
-                <Route path="/admin/sales-report" element={<ProtectedRoute allowedRoles={['Admin']}><AdminSalesReport /></ProtectedRoute>} />
-                {/* Tourist Routes */}
-                <Route path="/touristHome" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHome /></ProtectedRoute>} />
-                <Route path="/touristActivities" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristActivityList /></ProtectedRoute>} />
-                <Route path="/tourist-Itineraries" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristItineraryList /></ProtectedRoute>} />
-                <Route path="/touristAll-Itineraries" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristViewAllItineraries /></ProtectedRoute>} />
-                <Route path="/touristMuseums" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristMuseumList /></ProtectedRoute>} />
-                <Route path="/touristProducts" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristProductList /></ProtectedRoute>} />
+          {/* Admin Routes */}
+          <Route path="/adminHome" element={<ProtectedRoute allowedRoles={['Admin']}><AdminHome /></ProtectedRoute>} />
+          <Route path="/users" element={<ProtectedRoute allowedRoles={['Admin']}><AdminUserManagement /></ProtectedRoute>} />
+          <Route path="/add-admin" element={<ProtectedRoute allowedRoles={['Admin']}><AddAdmin /></ProtectedRoute>} />
+          <Route path="/add-tourism-governor" element={<ProtectedRoute allowedRoles={['Admin']}><AddTourismGovernor /></ProtectedRoute>} />
+          <Route path="/admin/complaints" element={<ProtectedRoute allowedRoles={['Admin']}><AdminComplaintList /></ProtectedRoute>} />
+          <Route path="/admin/complaints/:id" element={<ProtectedRoute allowedRoles={['Admin']}><AdminComplaintDetail /></ProtectedRoute>} />
+          <Route path="/admin-itineraries" element={<ProtectedRoute allowedRoles={['Admin']}><AdminItineraryList /></ProtectedRoute>} />
+          <Route path="/admin-activities" element={<ProtectedRoute allowedRoles={['Admin']}><AdminActivityList /></ProtectedRoute>} />
+          <Route path="/numberOfUsers" element={<ProtectedRoute allowedRoles={['Admin']}><AdminNumberOfUsers/></ProtectedRoute>} />
+          <Route path="/create-promo-code" element={<ProtectedRoute allowedRoles={['Admin']}><CreatePromoCode/></ProtectedRoute>} />
+          <Route path="/admin/sales-report" element={<ProtectedRoute allowedRoles={['Admin']}><AdminSalesReport/></ProtectedRoute>} />
+          {/* Tourist Routes */}
+          <Route path="/touristHome" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHome /></ProtectedRoute>} />
+          <Route path="/touristActivities" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristActivityList /></ProtectedRoute>} />
+          <Route path="/tourist-Itineraries" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristItineraryList /></ProtectedRoute>} />
+          <Route path="/touristAll-Itineraries" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristViewAllItineraries /></ProtectedRoute>} />
+          <Route path="/touristMuseums" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristMuseumList /></ProtectedRoute>} />
+          <Route path="/touristProducts" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristProductList /></ProtectedRoute>} />
+          
+          
+          <Route path="/touristHistory/:userID" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHistory /></ProtectedRoute>} />
+          <Route path="/my-complaints" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristComplaintList /></ProtectedRoute>} />
+          <Route path="/tourist/wishlist" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristWishlist /></ProtectedRoute>} />
+          <Route path="/tourist/cart" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristCart /></ProtectedRoute>} />
+          <Route path="/touristEditInfo" element={<ProtectedRoute allowedRoles={['Tourist']}><UpdateTouristInfo /></ProtectedRoute>} />
+          <Route path="/viewTouristInfo" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristInfo /></ProtectedRoute>} />
+          <Route path="/touristSelectPreferences" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristSelectPreferences /></ProtectedRoute>} />
+          <Route path="/tourist/payment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristPayment /></ProtectedRoute>} />
+          <Route path="/tourist/Itinerarypayment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristITpay /></ProtectedRoute>} />
+          <Route path="/manage-addresses" element={<ProtectedRoute allowedRoles={['Tourist']}><ManageAddresses /></ProtectedRoute>} />
+          <Route path="/checkout" element={<ProtectedRoute allowedRoles={['Tourist']}><CheckoutPage /></ProtectedRoute>} />
+          <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['Tourist']}><MyOrders /></ProtectedRoute>} />
+          <Route path="/order-details/:orderId" element={<ProtectedRoute allowedRoles={['Tourist']}><OrderDetails /></ProtectedRoute>} />
+          <Route path="/tourist/AllPay" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristAllPay /></ProtectedRoute>} />
+          <Route path="/tutorial" element={<ProtectedRoute allowedRoles={['Tourist']}><Tutorial /></ProtectedRoute>} />
+
+          {/* Tour Guide Routes */}
+          <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />
+          <Route path="/guide-tourist-Itineraries" element={<ProtectedRoute allowedRoles={['TourGuide']}><GuideTouristItineraryList /></ProtectedRoute>} />
+          <Route path="/viewTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><UpdateTourGuideInfo /></ProtectedRoute>} />
+          <Route path="/uploadTourGuideDocs" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuideDocs /></ProtectedRoute>} />
+          <Route path="/add-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddItinerary /></ProtectedRoute>} />
+          <Route path="/TourGuide-Itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><ItineraryList /></ProtectedRoute>} />
+          <Route path="/edit-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditItinerary /></ProtectedRoute>} />
+          <Route path="/add-tourist-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddTouristItinerary /></ProtectedRoute>} />
+          <Route path="/edit-tourist-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditTouristItinerary /></ProtectedRoute>} />
+          
+          {/* Seller Routes */}
+          <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
+          <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
+          <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
+          <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
+          <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
+          <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
+          <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProduct /></ProtectedRoute>} />
+          <Route path="/edit-product/:id" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><EditProduct /></ProtectedRoute>} />
+          <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProductPage /></ProtectedRoute>} />
 
 
-                <Route path="/touristHistory/:userID" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristHistory /></ProtectedRoute>} />
-                <Route path="/my-complaints" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristComplaintList /></ProtectedRoute>} />
-                <Route path="/tourist/wishlist" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristWishlist /></ProtectedRoute>} />
-                <Route path="/tourist/cart" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristCart /></ProtectedRoute>} />
-                <Route path="/touristEditInfo" element={<ProtectedRoute allowedRoles={['Tourist']}><UpdateTouristInfo /></ProtectedRoute>} />
-                <Route path="/viewTouristInfo" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristInfo /></ProtectedRoute>} />
-                <Route path="/touristSelectPreferences" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristSelectPreferences /></ProtectedRoute>} />
-                <Route path="/tourist/payment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristPayment /></ProtectedRoute>} />
-                <Route path="/tourist/Itinerarypayment" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristITpay /></ProtectedRoute>} />
-                <Route path="/manage-addresses" element={<ProtectedRoute allowedRoles={['Tourist']}><ManageAddresses /></ProtectedRoute>} />
-                <Route path="/checkout" element={<ProtectedRoute allowedRoles={['Tourist']}><CheckoutPage /></ProtectedRoute>} />
-                <Route path="/my-orders" element={<ProtectedRoute allowedRoles={['Tourist']}><MyOrders /></ProtectedRoute>} />
-                <Route path="/order-details/:orderId" element={<ProtectedRoute allowedRoles={['Tourist']}><OrderDetails /></ProtectedRoute>} />
-                <Route path="/tourist/AllPay" element={<ProtectedRoute allowedRoles={['Tourist']}><TouristAllPay /></ProtectedRoute>} />
-                <Route path="/tutorial" element={<ProtectedRoute allowedRoles={['Tourist']}><Tutorial /></ProtectedRoute>} />
+          {/* Advertiser Routes */}
+          <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
+          <Route path="/viewAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
+          <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
+          <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
+          <Route path="/add-activity" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddActivity /></ProtectedRoute>} />
+          <Route path="/edit-activity/:id" element={<ProtectedRoute allowedRoles={['Advertiser']}><EditActivity /></ProtectedRoute>} />
 
-                {/* Tour Guide Routes */}
-                <Route path="/tourGuideHome" element={<ProtectedRoute allowedRoles={['TourGuide']}><TourGuideHome /></ProtectedRoute>} />
-                <Route path="/guide-tourist-Itineraries" element={<ProtectedRoute allowedRoles={['TourGuide']}><GuideTouristItineraryList /></ProtectedRoute>} />
-                <Route path="/viewTourGuideInfo" element={<ProtectedRoute allowedRoles={['TourGuide']}><UpdateTourGuideInfo /></ProtectedRoute>} />
-                <Route path="/uploadTourGuideDocs" element={<ProtectedRoute allowedRoles={['TourGuide']}><UploadTourGuideDocs /></ProtectedRoute>} />
-                <Route path="/add-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddItinerary /></ProtectedRoute>} />
-                <Route path="/TourGuide-Itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><ItineraryList /></ProtectedRoute>} />
-                <Route path="/edit-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditItinerary /></ProtectedRoute>} />
-                <Route path="/add-tourist-itinerary" element={<ProtectedRoute allowedRoles={['TourGuide']}><AddTouristItinerary /></ProtectedRoute>} />
-                <Route path="/edit-tourist-itinerary/:id" element={<ProtectedRoute allowedRoles={['TourGuide']}><EditTouristItinerary /></ProtectedRoute>} />
+          {/* Tourism Governor Routes */}
+          <Route path="/TourismGovernorHome" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><TourismGovernorHome /></ProtectedRoute>} />
+          <Route path="/edit-category/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditActivityCategory /></ProtectedRoute>} />
+          <Route path="/add-activityCategory" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddActivityCategory /></ProtectedRoute>} />
+          <Route path="/add-preferenceTag" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddPreferenceTag /></ProtectedRoute>} />
+          <Route path="/activityCategories" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><ActivityCategoryList /></ProtectedRoute>} />
+          <Route path="/preferenceTags" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><PreferenceTagList /></ProtectedRoute>} />
+          <Route path="/edit-tag/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditPreferenceTag /></ProtectedRoute>} />
+          <Route path="/add-museum-tag" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseumTag /></ProtectedRoute>} />
+          <Route path="/add-museum" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseum /></ProtectedRoute>} />
+          <Route path="/manage-museums" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><ManageMuseums /></ProtectedRoute>} />
+          <Route path="/edit-museum/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><EditMuseum /></ProtectedRoute>} />
 
-                {/* Seller Routes */}
-                <Route path="/sellerHome" element={<ProtectedRoute allowedRoles={['Seller']}><SellerHome /></ProtectedRoute>} />
-                <Route path="/editSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
-                <Route path="/viewSellerInfo" element={<ProtectedRoute allowedRoles={['Seller']}><UpdateSellerInfo /></ProtectedRoute>} />
-                <Route path="/seller-delete/:id" element={<ProtectedRoute allowedRoles={['Seller']}><SellerDelete /></ProtectedRoute>} />
-                <Route path="/uploadSellerDocs" element={<ProtectedRoute allowedRoles={['Seller']}><UploadSellerDocs /></ProtectedRoute>} />
-                <Route path="/products" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><ProductList /></ProtectedRoute>} />
-                <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProduct /></ProtectedRoute>} />
-                <Route path="/edit-product/:id" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><EditProduct /></ProtectedRoute>} />
-                <Route path="/add-product" element={<ProtectedRoute allowedRoles={['Seller', 'Admin']}><AddProductPage /></ProtectedRoute>} />
+          {/* Shared Protected Routes (accessible by all authenticated users) */}
+          <Route path="/activities/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ActivityDetail /></ProtectedRoute>} />
+          <Route path="/itineraries/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ItineraryDetail /></ProtectedRoute>} />
+          <Route path="/museums/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MuseumDetail /></ProtectedRoute>} />
+          <Route path="/complaints" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><ComplaintForm /></ProtectedRoute>} />
+          <Route path="/changePassword" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ChangePassword /></ProtectedRoute>} />
+          <Route path="/delete-account" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><DeleteAccount /></ProtectedRoute>} />
+          <Route path="/map" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MapMarker /></ProtectedRoute>} />
 
+          {/* Transportation Routes (Tourist only) */}
+          <Route path="/transportation-booking" element={<ProtectedRoute allowedRoles={['Tourist']}><TransportationBooking /></ProtectedRoute>} />
+          <Route path="/book-flights" element={<ProtectedRoute allowedRoles={['Tourist']}><BookFlights /></ProtectedRoute>} />
+          <Route path="/book-hotels" element={<ProtectedRoute allowedRoles={['Tourist']}><BookHotels /></ProtectedRoute>} />
+          <Route path="/room-details/:hotelId" element={<ProtectedRoute allowedRoles={['Tourist']}><RoomDetails /></ProtectedRoute>} />
 
-                {/* Advertiser Routes */}
-                <Route path="/advertiserHome" element={<ProtectedRoute allowedRoles={['Advertiser']}><AdvertiserHome /></ProtectedRoute>} />
-                <Route path="/viewAdvertiserInfo" element={<ProtectedRoute allowedRoles={['Advertiser']}><UpdateAdvertiserInfo /></ProtectedRoute>} />
-                <Route path="/uploadAdvertiserDocs" element={<ProtectedRoute allowedRoles={['Advertiser']}><UploadAdvertiserDocs /></ProtectedRoute>} />
-                <Route path="/advertiserActivities" element={<ProtectedRoute allowedRoles={['Advertiser']}><ActivityList /></ProtectedRoute>} />
-                <Route path="/add-activity" element={<ProtectedRoute allowedRoles={['Advertiser']}><AddActivity /></ProtectedRoute>} />
-                <Route path="/edit-activity/:id" element={<ProtectedRoute allowedRoles={['Advertiser']}><EditActivity /></ProtectedRoute>} />
-
-                {/* Tourism Governor Routes */}
-                <Route path="/TourismGovernorHome" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><TourismGovernorHome /></ProtectedRoute>} />
-                <Route path="/edit-category/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditActivityCategory /></ProtectedRoute>} />
-                <Route path="/add-activityCategory" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddActivityCategory /></ProtectedRoute>} />
-                <Route path="/add-preferenceTag" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><AddPreferenceTag /></ProtectedRoute>} />
-                <Route path="/activityCategories" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><ActivityCategoryList /></ProtectedRoute>} />
-                <Route path="/preferenceTags" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><PreferenceTagList /></ProtectedRoute>} />
-                <Route path="/edit-tag/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor', 'Admin']}><EditPreferenceTag /></ProtectedRoute>} />
-                <Route path="/add-museum-tag" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseumTag /></ProtectedRoute>} />
-                <Route path="/add-museum" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><AddMuseum /></ProtectedRoute>} />
-                <Route path="/manage-museums" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><ManageMuseums /></ProtectedRoute>} />
-                <Route path="/edit-museum/:id" element={<ProtectedRoute allowedRoles={['TourismGovernor']}><EditMuseum /></ProtectedRoute>} />
-
-                {/* Shared Protected Routes (accessible by all authenticated users) */}
-                <Route path="/activities/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ActivityDetail /></ProtectedRoute>} />
-                <Route path="/itineraries/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ItineraryDetail /></ProtectedRoute>} />
-                <Route path="/museums/:id" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MuseumDetail /></ProtectedRoute>} />
-                <Route path="/complaints" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><ComplaintForm /></ProtectedRoute>} />
-                <Route path="/changePassword" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><ChangePassword /></ProtectedRoute>} />
-                <Route path="/delete-account" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller']}><DeleteAccount /></ProtectedRoute>} />
-                <Route path="/map" element={<ProtectedRoute allowedRoles={['Tourist', 'TourGuide', 'Advertiser', 'Seller', 'Admin', 'TourismGovernor']}><MapMarker /></ProtectedRoute>} />
-
-                {/* Transportation Routes (Tourist only) */}
-                <Route path="/transportation-booking" element={<ProtectedRoute allowedRoles={['Tourist']}><TransportationBooking /></ProtectedRoute>} />
-                <Route path="/book-flights" element={<ProtectedRoute allowedRoles={['Tourist']}><BookFlights /></ProtectedRoute>} />
-                <Route path="/book-hotels" element={<ProtectedRoute allowedRoles={['Tourist']}><BookHotels /></ProtectedRoute>} />
-                <Route path="/room-details/:hotelId" element={<ProtectedRoute allowedRoles={['Tourist']}><RoomDetails /></ProtectedRoute>} />
-
-                {/* Reports (Admin only) */}
-                <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin', 'TourGuide']}><ItineraryReport /></ProtectedRoute>} />
-                <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin', 'Advertiser']}><ActivityReport /></ProtectedRoute>} />
-              </Routes>
-            </Router>
-          </TooltipProvider>
-        </QueryClientProvider>
-      </CurrencyProvider>
+          {/* Reports (Admin only) */}
+          <Route path="/viewItinerariesReport" element={<ProtectedRoute allowedRoles={['Admin','TourGuide']}><ItineraryReport /></ProtectedRoute>} />
+          <Route path="/ActivityReport" element={<ProtectedRoute allowedRoles={['Admin','Advertiser']}><ActivityReport /></ProtectedRoute>} />
+        </Routes>
+      </Router>
+      </TooltipProvider>
+    </QueryClientProvider>
+    </CurrencyProvider>
     </AuthProvider>
-
-    <Analytics />
-    <SpeedInsights />
-    
-    </>
   );
 };
 
