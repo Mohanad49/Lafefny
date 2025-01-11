@@ -4,7 +4,7 @@ const cors = require("cors");
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const cron = require('node-cron');
-const { checkBirthdays } = require('./services/birthdayPromoService');
+const { checkBirthdays } = require('./Services/birthdayPromoService');
 
 // Import routes
 const productRoute = require("./Routes/productController");
