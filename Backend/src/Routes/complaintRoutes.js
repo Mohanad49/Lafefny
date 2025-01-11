@@ -1,5 +1,5 @@
 const express = require('express');
-const Complaint = require('../models/Complaint');
+const Complaint = require('../Models/Complaint');
 const router = express.Router();
 const mongoose = require('mongoose');
 

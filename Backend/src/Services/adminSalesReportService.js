@@ -1,5 +1,5 @@
 const Order = require('../Models/Order');
-const TouristItinerary = require('../Models/Tourist-itinerary');
+const TouristItinerary = require('../Models/Tourist-Itinerary');
 const Activity = require('../Models/Activity');
 
 const APP_RATE_PERCENTAGE = 0.10; // 10% app rate

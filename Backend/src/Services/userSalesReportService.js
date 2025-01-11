@@ -1,6 +1,6 @@
 const Order = require('../Models/Order');
 const Activity = require('../Models/Activity');
-const TouristItinerary = require('../Models/Tourist-itinerary');
+const TouristItinerary = require('../Models/Tourist-Itinerary');
 const Seller = require('../Models/sellerModel');
 const Advertiser = require('../Models/advertiserModel');
 const TourGuide = require('../Models/tourGuideModel');
