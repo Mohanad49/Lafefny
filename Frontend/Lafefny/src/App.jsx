@@ -122,6 +122,7 @@ import TouristAllPay from './components/TouristAllPay';
 import AddProductPage from './pages/AddProduct';
 import Bookmarks from './pages/Bookmarks'
 import ManageMuseums from './components/ManageMuseums';
+import { Analytics } from "@vercel/analytics/react"
 
 const queryClient = new QueryClient();
 
