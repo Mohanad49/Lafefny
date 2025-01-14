@@ -164,8 +164,8 @@ const Navigation = () => {
                 <Menu className="h-5 w-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="left" className="w-[300px] sm:w-[400px]">
-              <div className="flex flex-col gap-8">
+            <SheetContent side="left" className="w-[300px] sm:w-[400px] overflow-y-auto">
+              <div className="flex flex-col gap-8 pb-20">
                 <div className="flex items-center gap-2 pt-4">
                   <Plane className="h-6 w-6" />
                   <span className="text-xl font-semibold">Lafefny</span>
@@ -489,11 +489,6 @@ const Navigation = () => {
                   <div
                     key={index}
                     className="px-4 py-2 hover:bg-gray-100 cursor-pointer flex items-center gap-3"
-                    onClick={() => {
-                      navigate(`/destination/${destination.name.toLowerCase().replace(/\s+/g, '-')}`);
-                      setShowResults(false);
-                      setSearchTerm("");
-                    }}
                   >
                     <img 
                       src={destination.image} 
@@ -681,7 +676,7 @@ const Navigation = () => {
               )}
               <Button 
                 variant="default"
-                className="bg-black text-white hover:bg-gray-800 flex items-center gap-2"
+                className="hidden md:flex bg-black text-white hover:bg-gray-800 items-center gap-2"
                 onClick={handleLogout}
               >
                 <LogOut className="h-5 w-5 mr-2" />
