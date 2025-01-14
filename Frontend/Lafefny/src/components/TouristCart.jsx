@@ -101,7 +101,7 @@ const TouristCart = () => {
       <main className="container mx-auto px-4 pt-24 pb-16">
         {/* Back Button */}
         <button 
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/TouristHome')}
           className="flex items-center text-primary hover:text-primary/80 mb-6"
         >
           <ArrowLeft className="h-5 w-5 mr-2" />

@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { ArrowRight, Check, ChevronDown } from "lucide-react";
+import { ArrowRight, Check, ChevronDown, Map, Calendar, Compass, UserPlus } from "lucide-react";
 import { useState } from "react";
 import Navigation from "@/components/Navigation";
 import Footer from "@/components/Footer";
@@ -86,6 +86,62 @@ const Index = () => {
           </div>
         </section>
 
+        {/* How to Plan Your Trip Section */}
+        <section className="py-24 px-6 lg:px-8 bg-background">
+          <div className="mx-auto max-w-7xl">
+            <h2 className="text-3xl font-bold text-center mb-4">How to Plan Your Trip</h2>
+            <p className="text-gray-600 text-center mb-16 max-w-2xl mx-auto">
+              Follow these simple steps to create your perfect travel experience
+            </p>
+            <div className="grid md:grid-cols-4 gap-8">
+              {[
+                {
+                  title: "Choose Destination",
+                  description: "Browse our curated selection of stunning destinations worldwide",
+                  icon: Map,
+                  color: "bg-blue-100",
+                  iconColor: "text-blue-600",
+                },
+                {
+                  title: "Set Your Dates",
+                  description: "Pick your preferred travel dates and check availability",
+                  icon: Calendar,
+                  color: "bg-green-100",
+                  iconColor: "text-green-600",
+                },
+                {
+                  title: "Explore Activities",
+                  description: "Discover and select from exciting local experiences",
+                  icon: Compass,
+                  color: "bg-purple-100",
+                  iconColor: "text-purple-600",
+                },
+                {
+                  title: "Create Account",
+                  description: "Sign up to save your trip and get personalized recommendations",
+                  icon: UserPlus,
+                  color: "bg-orange-100",
+                  iconColor: "text-orange-600",
+                },
+              ].map((step, index) => (
+                <div
+                  key={index}
+                  className="relative p-6 rounded-2xl bg-white border border-border hover:border-accent transition-all hover:shadow-lg"
+                >
+                  <div className={`w-12 h-12 ${step.color} rounded-full flex items-center justify-center mb-4`}>
+                    <step.icon className={`w-6 h-6 ${step.iconColor}`} />
+                  </div>
+                  <div className="absolute -top-3 left-6 bg-primary text-white text-sm px-2 py-1 rounded-full">
+                    Step {index + 1}
+                  </div>
+                  <h3 className="text-xl font-semibold mb-2">{step.title}</h3>
+                  <p className="text-gray-600">{step.description}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+
         {/* FAQ Section */}
         <section className="py-24 px-6 lg:px-8">
           <div className="mx-auto max-w-3xl">
@@ -131,21 +187,6 @@ const Index = () => {
           </div>
         </section>
         
-        <section className="py-24 px-6 lg:px-8 bg-surface">
-  <div className="mx-auto max-w-3xl">
-    <h2 className="text-3xl font-bold text-center mb-16">How to Plan Your Trip</h2>
-    <div className="max-w-5xl mx-auto rounded-xl overflow-hidden shadow-lg">
-      <iframe 
-        src="https://scribehow.com/embed/How_To_Plan_Your_Trip_Online__eOAz1fPdSkGUmwW2d_6Feg?skipIntro=true&as=video" 
-        width="100%" 
-        height="640" 
-        allowFullScreen 
-        frameBorder="0"
-        className="w-full aspect-video"
-      />
-    </div>
-  </div>
-</section>
 
 
         {/* CTA Section */}
