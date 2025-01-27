@@ -81,35 +81,35 @@ The project uses Prettier with the following key settings:
 
 # ScreenShots
 Landing Page:
-![image](https://github.com/user-attachments/assets/88cb4081-dc96-465a-96c8-51cf0701f666)
+![Landing Page](https://github.com/user-attachments/assets/47b2a214-3fd2-482f-a46f-5d3e91354695)
 Activities Page:
-![image](https://github.com/user-attachments/assets/20d36ee4-3ba7-4b22-9c5e-85cb41c23ce4)
+![Activities](https://github.com/user-attachments/assets/46663744-6cf5-43b1-a2b5-1dbec43b56b4)
 Itineraries Page:
-![image](https://github.com/user-attachments/assets/ed4af6ed-e663-4759-9008-f1911e15d5b1)
+![Itineraries](https://github.com/user-attachments/assets/fe3c8487-7d5d-4e94-aeb5-dcc0e8ab2677)
 Museums Page:
-![Museums page](https://github.com/user-attachments/assets/495a8872-3384-4809-afac-22ff260f642f)
+![Museums page](https://github.com/user-attachments/assets/249db34b-76ef-4401-8bf2-0d3730ba6563)
 About Page:
-![About](https://github.com/user-attachments/assets/5816b899-3883-4660-9e1f-ff632a7db58f)
+![About](https://github.com/user-attachments/assets/a793409c-171b-4f14-933e-47c053f71a46)
 Activity Details Page:
-![Activity_details](https://github.com/user-attachments/assets/3ef06cf7-77c2-4eef-b0eb-5524c8c5bf11)
+![Activity_details](https://github.com/user-attachments/assets/3904cc4f-c4bd-4413-b544-c01d51264bcd)
 Itinerary Details Page:
-![Itinerary_Details](https://github.com/user-attachments/assets/9018c63b-0bcc-4e9d-838a-afb1b3366a30)
+![Itinerary_Details](https://github.com/user-attachments/assets/b912ff7c-43ff-467d-b969-a974c636c307)
 Museum Details Page:
-![Museum_details](https://github.com/user-attachments/assets/b6513997-f974-4484-bab5-66db83b19069)
+![Museum_details](https://github.com/user-attachments/assets/f61c8c58-2ee5-4a93-8697-f7e598865034)
 Sign In Page:
-![Sign_in](https://github.com/user-attachments/assets/9f3d68e9-eb7c-4fc6-95d6-72be103ae2af)
+![Sign_in](https://github.com/user-attachments/assets/44b07851-9791-4bc2-be2d-81c4d28d688c)
 Sign Up Page:
-![Sign_up](https://github.com/user-attachments/assets/88f51b1d-0f24-435f-9b70-69d96dee8b23)
+![Sign_up](https://github.com/user-attachments/assets/89138770-b4b0-4084-a1b9-18ed65339ea0)
 Tourist Profile:
-![Tourist_Profile](https://github.com/user-attachments/assets/c78cbc46-eeb4-4969-a8ca-60f51e67274d)
+![Tourist_Profile](https://github.com/user-attachments/assets/9044718e-6f6a-4eee-8592-d0472ab9e822)
 Complaint Form Page:
-![Complaint](https://github.com/user-attachments/assets/97bf004e-dea3-493f-8680-d1649beda32e)
+![Complaint](https://github.com/user-attachments/assets/77594bb4-314a-49d9-abf0-e71296f42c52)
 My Orders Page:
-![My_orders](https://github.com/user-attachments/assets/bfae2f3f-0886-4ab2-a50b-ceabe5ea1f4f)
+![My_orders](https://github.com/user-attachments/assets/486a27a1-67b9-40e7-8772-3c26a2dcedec)
 Password Change Page:
-![Password_Change](https://github.com/user-attachments/assets/d2fbf2c0-5939-4d2a-80ea-4a3016e22e2a)
+![Password_Change](https://github.com/user-attachments/assets/8e31511c-9239-4477-9dda-156541bf61a9)
 Select Preferences Page:
-![Preferences](https://github.com/user-attachments/assets/20112fab-98b1-4635-a89b-71c5bbadc483)
+![Preferences](https://github.com/user-attachments/assets/512717f3-a7a4-409b-b084-4c4a287778de)
 
 
 
